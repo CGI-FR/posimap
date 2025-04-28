@@ -24,10 +24,11 @@ func (b Buffer) Write(start, length int, value string) error {
 	}
 
 	done := length
+
 	for idx, r := range value {
 		b[start+idx] = r
 
-		if done -= 1; done == 0 {
+		if done--; done == 0 {
 			break
 		}
 	}
