@@ -1,12 +1,12 @@
 package data
 
-type FieldTemplate struct {
+type FieldSchema struct {
 	Name     string
 	Length   int
 	Occurs   int
 	Redefine string
 	When     ExportPredicate
-	Template RecordTemplate
+	Schema   RecordSchema
 }
 
-type RecordTemplate []FieldTemplate
+type RecordSchema []FieldSchema

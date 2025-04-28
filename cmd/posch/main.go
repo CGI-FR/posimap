@@ -48,9 +48,9 @@ func main() {
 	source := record.NewRecordSource(os.Stdin, unicode.UTF8)
 	sink := object.NewJSON(os.Stdout)
 
-	config, err := config.LoadTemplateFromFile("template.yaml")
+	config, err := config.LoadSchemaFromFile("schema.yaml")
 	if err != nil {
-		log.Error().Err(err).Msg("failed to load template")
+		log.Error().Err(err).Msg("failed to load schema")
 		return
 	}
 

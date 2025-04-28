@@ -7,28 +7,28 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func LoadTemplateFromYAML(data []byte) (Template, error) {
-	// Unmarshal the YAML data into a Template struct
-	var template Template
-	if err := yaml.Unmarshal(data, &template); err != nil {
+func LoadSchemaFromYAML(data []byte) (Schema, error) {
+	// Unmarshal the YAML data into a Schema struct
+	var schema Schema
+	if err := yaml.Unmarshal(data, &schema); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal YAML: %w", err)
 	}
 
-	// Validate the template
-	if err := template.Validate(); err != nil {
-		return nil, fmt.Errorf("template validation failed: %w", err)
+	// Validate the schema
+	if err := schema.Validate(); err != nil {
+		return nil, fmt.Errorf("schema validation failed: %w", err)
 	}
 
-	// Return the loaded template
-	return template, nil
+	// Return the loaded schema
+	return schema, nil
 }
 
-func LoadTemplateFromFile(filename string) (Template, error) {
+func LoadSchemaFromFile(filename string) (Schema, error) {
 	// Read the YAML file
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 
-	return LoadTemplateFromYAML(data)
+	return LoadSchemaFromYAML(data)
 }

@@ -7,15 +7,15 @@ import (
 	"github.com/cgi-fr/posimap/pkg/data"
 )
 
-type Template []Field
+type Schema []Field
 
 type Field struct {
-	Name     string   `yaml:"name"`
-	Length   int      `yaml:"length"`
-	Occurs   int      `yaml:"occurs,omitempty"`
-	Redefine string   `yaml:"redefine,omitempty"`
-	When     string   `yaml:"when,omitempty"`
-	Template Template `yaml:"schema,omitempty"`
+	Name     string `yaml:"name"`
+	Length   int    `yaml:"length"`
+	Occurs   int    `yaml:"occurs,omitempty"`
+	Redefine string `yaml:"redefine,omitempty"`
+	When     string `yaml:"when,omitempty"`
+	Schema   Schema `yaml:"schema,omitempty"`
 }
 
 var (
@@ -32,25 +32,25 @@ func (f Field) Validate() error {
 	return nil
 }
 
-func (f Field) Build() data.FieldTemplate {
-	return data.FieldTemplate{
+func (f Field) Build() data.FieldSchema {
+	return data.FieldSchema{
 		Name:     f.Name,
 		Length:   f.Length,
 		Occurs:   f.Occurs,
 		Redefine: f.Redefine,
 		When:     data.When(f.When),
-		Template: f.Template.Build(),
+		Schema:   f.Schema.Build(),
 	}
 }
 
-func (t Template) Validate() error {
+func (t Schema) Validate() error {
 	for idx, field := range t {
 		if err := field.Validate(); err != nil {
 			return fmt.Errorf("%v.%w", idx, err)
 		}
 
-		if field.Template != nil {
-			if err := field.Template.Validate(); err != nil {
+		if field.Schema != nil {
+			if err := field.Schema.Validate(); err != nil {
 				return fmt.Errorf("%v.%w", idx, err)
 			}
 		}
@@ -59,12 +59,12 @@ func (t Template) Validate() error {
 	return nil
 }
 
-func (t Template) Build() data.RecordTemplate {
+func (t Schema) Build() data.RecordSchema {
 	if len(t) == 0 {
 		return nil
 	}
 
-	result := make(data.RecordTemplate, len(t))
+	result := make(data.RecordSchema, len(t))
 	for i, field := range t {
 		result[i] = field.Build()
 	}
