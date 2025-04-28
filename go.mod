@@ -1,4 +1,4 @@
-module github.com/cgi-fr/posch
+module github.com/cgi-fr/posimap
 
 go 1.24
 

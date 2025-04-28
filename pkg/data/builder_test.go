@@ -3,7 +3,7 @@ package data_test
 import (
 	"testing"
 
-	"github.com/cgi-fr/posch/pkg/data"
+	"github.com/cgi-fr/posimap/pkg/data"
 )
 
 type MockRecordSink struct{}

@@ -4,6 +4,6 @@ name: run cli
 testcases:
   - name: no arguments
     steps:
-      - script: posch
+      - script: posimap
         assertions:
           - result.code ShouldEqual 0

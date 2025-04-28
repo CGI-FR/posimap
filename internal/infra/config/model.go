@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cgi-fr/posch/pkg/data"
+	"github.com/cgi-fr/posimap/pkg/data"
 )
 
 type Template []Field

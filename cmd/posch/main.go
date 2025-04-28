@@ -1,19 +1,19 @@
 // Copyright (C) 2025 CGI France
 //
-// This file is part of posch.
+// This file is part of posimap.
 //
-// posch is free software: you can redistribute it and/or modify
+// posimap is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// posch is distributed in the hope that it will be useful,
+// posimap is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with posch.  If not, see <http://www.gnu.org/licenses/>.
+// along with posimap.  If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cgi-fr/posch/internal/infra/config"
-	"github.com/cgi-fr/posch/internal/infra/object"
-	"github.com/cgi-fr/posch/internal/infra/record"
-	"github.com/cgi-fr/posch/pkg/data"
+	"github.com/cgi-fr/posimap/internal/infra/config"
+	"github.com/cgi-fr/posimap/internal/infra/object"
+	"github.com/cgi-fr/posimap/internal/infra/record"
+	"github.com/cgi-fr/posimap/pkg/data"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/encoding/unicode"

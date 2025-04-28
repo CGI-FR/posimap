@@ -1,5 +1,5 @@
 {
-    "name": "posch",
+    "name": "posimap",
     "dockerComposeFile": [
         "../docker-compose.yml"
     ],

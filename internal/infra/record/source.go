@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/cgi-fr/posch/pkg/data"
+	"github.com/cgi-fr/posimap/pkg/data"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/transform"
 )
