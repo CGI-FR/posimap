@@ -1,10 +1,52 @@
 # POSCH
 
-POsitional SCHEma.
+Transform positional text into structured data — and back again.
+
+*POSCH* is a blend of "POsitional" and "SCHema".
+
+## Features
+
+- Parse fixed-width text files based on a declarative positional schema.
+- Convert structured data back into fixed-width text files.
+- Easy configuration via YAML.
+- Minimal dependencies, fast and lightweight.
+- Supports validation and field trimming (optional).
+- Supports encoding conversion (EBCDIC, Unicode, ...)
+
+## Why ?
+
+While CSV and JSON handle separated or structured data easily, fixed-width files are still widely used in legacy systems, financial data exchanges, and large-scale batch processing. POSCH helps bridge the gap between positional text formats and structured modern data workflows.
 
 ## Usage
 
-TODO
+### Example schema (`schema.yaml`)
+
+```yaml
+- name: FIRSTNAME
+  length: 8
+- name: LASTNAME
+  length: 8
+- name: ADDRESS
+  schema:
+    - name: LINE-1
+      length: 25
+    - name: LINE-2
+      length: 25
+```
+
+### Transform from fixed-width file to JSON format
+
+```bash
+$ posch fold < person.fixed-width
+{ "FIRSTNAME": "JOHN    ", "LASTNAME": "DOE     ", "ADDRESS": { "LINE-1": "1234 ELM STREET          ", "LINE-2": "SPRINGFIELD, IL 62704    " } }
+```
+
+### Transform from JSON file to fixed-width format
+
+```bash
+$ posch unfold < person.json
+JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704
+```
 
 ## Contributing
 
