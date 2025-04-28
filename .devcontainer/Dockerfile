@@ -2,6 +2,9 @@ FROM adrienaury/go-devcontainer:v6.0
 
 USER root
 
+ADD certs/.gitkeep certs/*.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
 RUN apk add --update --progress --no-cache make gomplate
 
 ARG VERSION_GOLICENSE=0.2.0
