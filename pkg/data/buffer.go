@@ -18,14 +18,25 @@ func (b Buffer) Read(start, length int) Buffer {
 	return b[start : start+length]
 }
 
-func (b Buffer) Write(start int, value string) {
+func (b Buffer) Write(start, length int, value string) error {
 	if start >= len(b) || start < 0 {
-		return
+		return nil
 	}
 
+	done := length
 	for idx, r := range value {
 		b[start+idx] = r
+
+		if done -= 1; done == 0 {
+			break
+		}
 	}
+
+	for idx := range done {
+		b[start+done+idx] = ' '
+	}
+
+	return nil
 }
 
 func (b Buffer) String() string {

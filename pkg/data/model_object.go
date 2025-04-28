@@ -73,3 +73,18 @@ func (o *Object) Add(name string, value View) {
 	o.keys = append(o.keys, name)
 	o.items[name] = value
 }
+
+func (o *Object) Import(value any, buffer Buffer) error {
+	switch typed := value.(type) {
+	case map[string]any:
+		for key, val := range typed {
+			if err := o.items[key].Import(val, buffer); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+		}
+	default:
+		return nil
+	}
+
+	return nil
+}

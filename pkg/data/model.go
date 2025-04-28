@@ -9,6 +9,8 @@ type View interface {
 	Export(root View, buffer Buffer, sink ObjectSink) error
 	// ShouldExport returns true if the view will export data with the given context.
 	ShouldExport(root View, buffer Buffer) bool
+
+	Import(value any, buffer Buffer) error
 }
 
 type Record struct {

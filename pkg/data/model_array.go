@@ -62,3 +62,18 @@ func (a *Array) SetExport(predicate ExportPredicate) {
 func (a *Array) Add(item View) {
 	a.items = append(a.items, item)
 }
+
+func (a *Array) Import(value any, buffer Buffer) error {
+	switch typed := value.(type) {
+	case []any:
+		for idx, val := range typed {
+			if err := a.items[idx].Import(val, buffer); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+		}
+	default:
+		return nil
+	}
+
+	return nil
+}

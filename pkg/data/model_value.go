@@ -35,3 +35,16 @@ func (v Value) Export(_ View, buffer Buffer, sink ObjectSink) error {
 func (v Value) ShouldExport(root View, buffer Buffer) bool {
 	return v.exported == nil || v.exported(root, buffer)
 }
+
+func (v Value) Import(value any, buffer Buffer) error {
+	switch typed := value.(type) {
+	case string:
+		if err := buffer.Write(v.start, v.length, typed); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	default:
+		return nil
+	}
+
+	return nil
+}

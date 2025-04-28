@@ -5,6 +5,16 @@ type RecordSource interface {
 	Close() error
 }
 
+type RecordSink interface {
+	Write(b Buffer) error
+	Close() error
+}
+
+type ObjectSource interface {
+	Read() (any, error)
+	Close() error
+}
+
 type ObjectSink interface {
 	OpenRecord() error
 	CloseRecord() error
