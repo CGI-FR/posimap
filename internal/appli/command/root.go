@@ -43,7 +43,7 @@ func NewRoot(name, version, commit, buildDate, builtBy string) *Root {
 		commit:    commit,
 		buildDate: buildDate,
 		builtBy:   builtBy,
-		loglevel:  "info",
+		loglevel:  "warn",
 		jsonlog:   false,
 		debug:     false,
 		colormode: "auto",
