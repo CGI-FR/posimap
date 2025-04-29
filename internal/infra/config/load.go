@@ -7,28 +7,28 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func LoadSchemaFromYAML(data []byte) (Schema, error) {
-	// Unmarshal the YAML data into a Schema struct
-	var schema Schema
-	if err := yaml.Unmarshal(data, &schema); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal YAML: %w", err)
+func LoadConfigFromYAML(data []byte) (Config, error) {
+	// Unmarshal the YAML data into a Config struct
+	var config Config
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return Config{}, fmt.Errorf("failed to unmarshal YAML: %w", err)
 	}
 
 	// Validate the schema
-	if err := schema.Validate(); err != nil {
-		return nil, fmt.Errorf("schema validation failed: %w", err)
+	if err := config.Validate(); err != nil {
+		return Config{}, fmt.Errorf("schema validation failed: %w", err)
 	}
 
 	// Return the loaded schema
-	return schema, nil
+	return config, nil
 }
 
-func LoadSchemaFromFile(filename string) (Schema, error) {
+func LoadConfigFromFile(filename string) (Config, error) {
 	// Read the YAML file
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
+		return Config{}, fmt.Errorf("failed to read file: %w", err)
 	}
 
-	return LoadSchemaFromYAML(data)
+	return LoadConfigFromYAML(data)
 }

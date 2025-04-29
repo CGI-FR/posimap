@@ -7,6 +7,10 @@ import (
 	"github.com/cgi-fr/posimap/pkg/data"
 )
 
+type Config struct {
+	Schema Schema `yaml:"schema"`
+}
+
 type Schema []Field
 
 type Field struct {
@@ -39,7 +43,7 @@ func (f Field) Build() data.FieldSchema {
 		Occurs:   f.Occurs,
 		Redefine: f.Redefine,
 		When:     data.When(f.When),
-		Schema:   f.Schema.Build(),
+		Schema:   f.Schema.Compile(),
 	}
 }
 
@@ -59,7 +63,7 @@ func (t Schema) Validate() error {
 	return nil
 }
 
-func (t Schema) Build() data.RecordSchema {
+func (t Schema) Compile() data.RecordSchema {
 	if len(t) == 0 {
 		return nil
 	}
@@ -70,4 +74,12 @@ func (t Schema) Build() data.RecordSchema {
 	}
 
 	return result
+}
+
+func (c Config) Validate() error {
+	if err := c.Schema.Validate(); err != nil {
+		return fmt.Errorf("schema validation failed: %w", err)
+	}
+
+	return nil
 }

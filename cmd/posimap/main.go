@@ -48,14 +48,14 @@ func main() {
 	source := record.NewRecordSource(os.Stdin, unicode.UTF8)
 	sink := object.NewJSON(os.Stdout)
 
-	config, err := config.LoadSchemaFromFile("schema.yaml")
+	config, err := config.LoadConfigFromFile("schema.yaml")
 	if err != nil {
 		log.Error().Err(err).Msg("failed to load schema")
 
 		return
 	}
 
-	root := data.NewBuilder().Build(config.Build())
+	root := data.NewBuilder().Build(config.Schema.Compile())
 
 	if err := data.TransformRecordsToObjects(root, source, sink); err != nil {
 		log.Error().Err(err).Msg("failed to process records")
