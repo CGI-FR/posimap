@@ -55,6 +55,7 @@ func NewRoot(name, version, commit, buildDate, builtBy string) *Root {
 	root.cmd.PersistentFlags().StringVar(&root.colormode, "colormode", root.colormode, "set the color mode (auto, yes, no)")
 
 	root.cmd.AddCommand(NewFoldCommand())
+	root.cmd.AddCommand(NewUnfoldCommand())
 
 	root.cmd.PersistentPreRun = root.execute
 
