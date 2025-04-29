@@ -48,7 +48,7 @@ func (b *Buffer) Write(start, length int, value string) error {
 	}
 
 	for idx := range done {
-		b.data[start+done+idx] = ' '
+		b.data[start+idx] = ' '
 	}
 
 	return nil
