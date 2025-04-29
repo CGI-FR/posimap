@@ -3,13 +3,16 @@ module github.com/cgi-fr/posimap
 go 1.24
 
 require (
+	github.com/mattn/go-isatty v0.0.14
 	github.com/rs/zerolog v1.28.0
+	github.com/spf13/cobra v1.9.1
 	golang.org/x/text v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/spf13/pflag v1.0.6 // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 )
