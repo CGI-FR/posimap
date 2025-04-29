@@ -20,7 +20,7 @@ type Fold struct {
 
 func NewFoldCommand() *cobra.Command {
 	fold := &Fold{
-		cmd: &cobra.Command{
+		cmd: &cobra.Command{ //nolint:exhaustruct
 			Use:   "fold",
 			Short: "Transform fixed-length records into JSON objects",
 			Long:  "Transform fixed-length records into JSON objects",
