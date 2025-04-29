@@ -24,7 +24,7 @@ func NewRecordSource(reader io.Reader, encoding encoding.Encoding) Source {
 	}
 }
 
-func (s Source) Read() (data.Buffer, error) {
+func (s Source) Read() (*data.Buffer, error) {
 	if !s.scanner.Scan() {
 		if err := s.scanner.Err(); err != nil {
 			return nil, fmt.Errorf("%w", err)
@@ -33,7 +33,7 @@ func (s Source) Read() (data.Buffer, error) {
 		return nil, io.EOF
 	}
 
-	return data.Buffer(s.scanner.Text()), nil
+	return data.NewBufferFrom(s.scanner.Text()), nil
 }
 
 func (s Source) Close() error {

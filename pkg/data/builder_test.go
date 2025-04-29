@@ -89,7 +89,7 @@ func TestBuilder(t *testing.T) {
 	builder := data.NewBuilder()
 	view := builder.Build(schema)
 
-	buffer := data.Buffer("JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704    56 MAPLE AVENUE          RIVERSIDE, CA 92501      0DRPR    ") //nolint:lll
+	buffer := data.NewBufferFrom("JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704    56 MAPLE AVENUE          RIVERSIDE, CA 92501      0DRPR    ") //nolint:lll
 	record := data.NewRecord(buffer, view)
 
 	record.Export(&MockRecordSink{}) //nolint:errcheck

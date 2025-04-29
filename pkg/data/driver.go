@@ -6,8 +6,6 @@ import (
 	"io"
 )
 
-const DefaultBufferSize = 16 * 1024
-
 func TransformRecordsToObjects(root View, source RecordSource, sink ObjectSink) error {
 	for {
 		buffer, err := source.Read()
@@ -62,7 +60,7 @@ func TransformObjectsToRecords(root View, source ObjectSource, sink RecordSink) 
 			continue
 		}
 
-		buffer := make(Buffer, DefaultBufferSize)
+		buffer := NewBuffer()
 
 		if err := root.Import(obj, buffer); err != nil {
 			return fmt.Errorf("failed to import record: %w", err)

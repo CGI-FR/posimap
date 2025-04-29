@@ -1,12 +1,12 @@
 package data
 
 type RecordSource interface {
-	Read() (Buffer, error)
+	Read() (*Buffer, error)
 	Close() error
 }
 
 type RecordSink interface {
-	Write(b Buffer) error
+	Write(b *Buffer) error
 	Close() error
 }
 
@@ -28,4 +28,4 @@ type ObjectSink interface {
 	Close() error
 }
 
-type ExportPredicate func(root View, context Buffer) bool
+type ExportPredicate func(root View, context *Buffer) bool

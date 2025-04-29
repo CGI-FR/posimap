@@ -14,7 +14,7 @@ func NewArray(predicate ExportPredicate) *Array {
 	}
 }
 
-func (a *Array) Materialize(buffer Buffer) any {
+func (a *Array) Materialize(buffer *Buffer) any {
 	result := make([]any, 0, len(a.items))
 	for _, item := range a.items {
 		result = append(result, item.Materialize(buffer))
@@ -23,7 +23,7 @@ func (a *Array) Materialize(buffer Buffer) any {
 	return result
 }
 
-func (a *Array) Export(root View, buffer Buffer, sink ObjectSink) error {
+func (a *Array) Export(root View, buffer *Buffer, sink ObjectSink) error {
 	if err := sink.OpenArray(); err != nil {
 		return fmt.Errorf("%w", err)
 	}
@@ -51,7 +51,7 @@ func (a *Array) Export(root View, buffer Buffer, sink ObjectSink) error {
 	return nil
 }
 
-func (a *Array) ShouldExport(root View, buffer Buffer) bool {
+func (a *Array) ShouldExport(root View, buffer *Buffer) bool {
 	return a.exported == nil || a.exported(root, buffer)
 }
 
@@ -63,7 +63,7 @@ func (a *Array) Add(item View) {
 	a.items = append(a.items, item)
 }
 
-func (a *Array) Import(value any, buffer Buffer) error {
+func (a *Array) Import(value any, buffer *Buffer) error {
 	switch typed := value.(type) {
 	case []any:
 		for idx, val := range typed {

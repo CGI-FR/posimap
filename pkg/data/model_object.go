@@ -16,7 +16,7 @@ func NewObject(predicate ExportPredicate) *Object {
 	}
 }
 
-func (o *Object) Materialize(buffer Buffer) any {
+func (o *Object) Materialize(buffer *Buffer) any {
 	result := make(map[string]any)
 	for _, name := range o.keys {
 		result[name] = o.items[name].Materialize(buffer)
@@ -25,7 +25,7 @@ func (o *Object) Materialize(buffer Buffer) any {
 	return result
 }
 
-func (o *Object) Export(root View, buffer Buffer, sink ObjectSink) error {
+func (o *Object) Export(root View, buffer *Buffer, sink ObjectSink) error {
 	if err := sink.OpenObject(); err != nil {
 		return fmt.Errorf("%w", err)
 	}
@@ -61,7 +61,7 @@ func (o *Object) Export(root View, buffer Buffer, sink ObjectSink) error {
 	return nil
 }
 
-func (o *Object) ShouldExport(root View, buffer Buffer) bool {
+func (o *Object) ShouldExport(root View, buffer *Buffer) bool {
 	return o.exported == nil || o.exported(root, buffer)
 }
 
@@ -74,7 +74,7 @@ func (o *Object) Add(name string, value View) {
 	o.items[name] = value
 }
 
-func (o *Object) Import(value any, buffer Buffer) error {
+func (o *Object) Import(value any, buffer *Buffer) error {
 	switch typed := value.(type) {
 	case map[string]any:
 		for key, val := range typed {

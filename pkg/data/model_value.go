@@ -20,23 +20,23 @@ func NewValue(start, length int, predicate ExportPredicate) Value {
 	}
 }
 
-func (v Value) Materialize(buffer Buffer) any {
-	return buffer.Read(v.start, v.length).String()
+func (v Value) Materialize(buffer *Buffer) any {
+	return buffer.Read(v.start, v.length)
 }
 
-func (v Value) Export(_ View, buffer Buffer, sink ObjectSink) error {
-	if err := sink.WriteString(buffer.Read(v.start, v.length).String()); err != nil {
+func (v Value) Export(_ View, buffer *Buffer, sink ObjectSink) error {
+	if err := sink.WriteString(buffer.Read(v.start, v.length)); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	return nil
 }
 
-func (v Value) ShouldExport(root View, buffer Buffer) bool {
+func (v Value) ShouldExport(root View, buffer *Buffer) bool {
 	return v.exported == nil || v.exported(root, buffer)
 }
 
-func (v Value) Import(value any, buffer Buffer) error {
+func (v Value) Import(value any, buffer *Buffer) error {
 	switch typed := value.(type) {
 	case string:
 		if err := buffer.Write(v.start, v.length, typed); err != nil {

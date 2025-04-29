@@ -6,15 +6,15 @@ import (
 )
 
 func If(value bool) ExportPredicate {
-	return func(_ View, _ Buffer) bool { return value }
+	return func(_ View, _ *Buffer) bool { return value }
 }
 
 func Always() ExportPredicate {
-	return func(_ View, _ Buffer) bool { return true }
+	return func(_ View, _ *Buffer) bool { return true }
 }
 
 func Never() ExportPredicate {
-	return func(_ View, _ Buffer) bool { return false }
+	return func(_ View, _ *Buffer) bool { return false }
 }
 
 func When(tmpl string) ExportPredicate {
@@ -23,7 +23,7 @@ func When(tmpl string) ExportPredicate {
 		panic(err)
 	}
 
-	return func(root View, buffer Buffer) bool {
+	return func(root View, buffer *Buffer) bool {
 		var result bytes.Buffer
 		_ = template.Execute(&result, root.Materialize(buffer))
 
