@@ -35,5 +35,9 @@ func (s Sink) Write(b *data.Buffer) error {
 }
 
 func (s Sink) Close() error {
+	if err := s.writer.Flush(); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
 	return nil
 }

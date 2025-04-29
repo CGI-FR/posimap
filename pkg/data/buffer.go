@@ -31,7 +31,7 @@ func (b *Buffer) Read(start, length int) string {
 }
 
 func (b *Buffer) Write(start, length int, value string) error {
-	if start >= len(b.data) || start < 0 {
+	if start < 0 {
 		return nil
 	}
 
