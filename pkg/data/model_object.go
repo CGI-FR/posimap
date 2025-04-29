@@ -83,7 +83,7 @@ func (o *Object) Import(value any, buffer *Buffer) error {
 			}
 		}
 	default:
-		return nil
+		return fmt.Errorf("%w: expected object, got %T", ErrInvalidType, typed)
 	}
 
 	return nil

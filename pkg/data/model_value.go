@@ -43,7 +43,7 @@ func (v Value) Import(value any, buffer *Buffer) error {
 			return fmt.Errorf("%w", err)
 		}
 	default:
-		return nil
+		return fmt.Errorf("%w: expected string, got %T", ErrInvalidType, typed)
 	}
 
 	return nil

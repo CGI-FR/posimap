@@ -37,18 +37,20 @@ func (b *Buffer) Write(start, length int, value string) error {
 
 	b.Grow(start + length)
 
-	done := length
+	leftover := length
+	done := 0
 
 	for idx, r := range value {
 		b.data[start+idx] = r
+		done++
 
-		if done--; done == 0 {
+		if leftover--; leftover == 0 {
 			break
 		}
 	}
 
-	for idx := range done {
-		b.data[start+idx] = ' '
+	for idx := range leftover {
+		b.data[start+done+idx] = ' '
 	}
 
 	return nil
