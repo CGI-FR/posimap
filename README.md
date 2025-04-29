@@ -19,19 +19,20 @@ While CSV and JSON handle separated or structured data easily, fixed-width files
 
 ## Usage
 
-### Example schema (`schema.yaml`)
+### Example config (`config.yaml`)
 
 ```yaml
-- name: FIRSTNAME
-  length: 8
-- name: LASTNAME
-  length: 8
-- name: ADDRESS
-  schema:
-    - name: LINE-1
-      length: 25
-    - name: LINE-2
-      length: 25
+schema:
+  - name: FIRSTNAME
+    length: 8
+  - name: LASTNAME
+    length: 8
+  - name: ADDRESS
+    schema:
+      - name: LINE-1
+        length: 25
+      - name: LINE-2
+        length: 25
 ```
 
 ### Transform from fixed-width file to JSON format
