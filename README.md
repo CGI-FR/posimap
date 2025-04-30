@@ -27,7 +27,7 @@ JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704
 JANE    SMITH   56 MAPLE AVENUE          RIVERSIDE, CA 92501
 ```
 
-### Example config (`config.yaml`)
+### Example config (`schema.yaml`)
 
 ```yaml
 schema:

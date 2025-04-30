@@ -34,8 +34,8 @@ func NewRoot(name, version, commit, buildDate, builtBy string) *Root {
 			Use:   name,
 			Short: "Transform fixed-length records into JSON objects",
 			Long:  "Transform fixed-length records into JSON objects",
-			Example: "  " + name + " fold -c config.yaml < input.txt > output.json" + "\n" +
-				"  " + name + " unfold -c config.yaml < input.json > output.txt",
+			Example: "  " + name + " fold   -c schema.yaml < input.txt  > output.json" + "\n" +
+				"  " + name + " unfold -c schema.yaml < input.json > output.txt",
 			Args: cobra.NoArgs,
 		},
 		name:      name,
@@ -54,8 +54,9 @@ func NewRoot(name, version, commit, buildDate, builtBy string) *Root {
 	root.cmd.PersistentFlags().BoolVar(&root.debug, "debug", root.debug, "add debug information to logs (very slow)")
 	root.cmd.PersistentFlags().StringVar(&root.colormode, "colormode", root.colormode, "set the color mode (auto, yes, no)")
 
-	root.cmd.AddCommand(NewFoldCommand())
-	root.cmd.AddCommand(NewUnfoldCommand())
+	root.cmd.AddGroup(&cobra.Group{ID: "transform", Title: "Transform commands:"})
+	root.cmd.AddCommand(NewFoldCommand(root.name, "transform"))
+	root.cmd.AddCommand(NewUnfoldCommand(root.name, "transform"))
 
 	root.cmd.PersistentPreRun = root.execute
 

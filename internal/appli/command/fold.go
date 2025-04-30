@@ -19,17 +19,17 @@ type Fold struct {
 	configfile string
 }
 
-func NewFoldCommand() *cobra.Command {
+func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 	fold := &Fold{
 		cmd: &cobra.Command{ //nolint:exhaustruct
-			Use:   "fold",
-			Short: "Transform fixed-length records into JSON objects",
-			Long:  "Transform fixed-length records into JSON objects",
-			Example: "  fold -c config.yaml < input.fixed-width > output.json" + "\n" +
-				"  unfold -c config.yaml < input.json > output.fixed-width",
-			Args: cobra.NoArgs,
+			Use:     "fold",
+			Short:   "Transform fixed-length records into JSON objects",
+			Long:    "Transform fixed-length records into JSON objects",
+			Example: "  " + rootname + " fold -c schema.yaml < input.fixed-width > output.json",
+			Args:    cobra.NoArgs,
+			GroupID: groupid,
 		},
-		configfile: "config.yaml",
+		configfile: "schema.yaml",
 	}
 
 	fold.cmd.Flags().StringVarP(&fold.configfile, "config", "c", fold.configfile, "set the config file")
@@ -48,7 +48,7 @@ func (f *Fold) execute(_ *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to load schema")
 	}
 
-	root := data.NewBuilder().Build(config.Schema.Compile())
+	root := data.NewBuilder().Build(config.Compile())
 
 	if err := data.TransformRecordsToObjects(root, source, sink); err != nil {
 		log.Fatal().Err(err).Msg("Failed to process records")

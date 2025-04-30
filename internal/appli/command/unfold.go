@@ -19,17 +19,17 @@ type Unfold struct {
 	configfile string
 }
 
-func NewUnfoldCommand() *cobra.Command {
+func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 	unfold := &Unfold{
 		cmd: &cobra.Command{ //nolint:exhaustruct
-			Use:   "unfold",
-			Short: "Transform JSON objects into fixed-length records",
-			Long:  "Transform JSON objects into fixed-length records",
-			Example: "  fold -c config.yaml < input.fixed-width > output.json" + "\n" +
-				"  unfold -c config.yaml < input.json > output.fixed-width",
-			Args: cobra.NoArgs,
+			Use:     "unfold",
+			Short:   "Transform JSON objects into fixed-length records",
+			Long:    "Transform JSON objects into fixed-length records",
+			Example: "  " + rootname + "unfold -c schema.yaml < input.json > output.fixed-width",
+			Args:    cobra.NoArgs,
+			GroupID: groupid,
 		},
-		configfile: "config.yaml",
+		configfile: "schema.yaml",
 	}
 
 	unfold.cmd.Flags().StringVarP(&unfold.configfile, "config", "c", unfold.configfile, "set the config file")

@@ -83,3 +83,7 @@ func (c Config) Validate() error {
 
 	return nil
 }
+
+func (c Config) Compile() data.RecordSchema {
+	return c.Schema.Compile()
+}
