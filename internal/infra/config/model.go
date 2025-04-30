@@ -5,22 +5,22 @@ import (
 	"fmt"
 
 	"github.com/cgi-fr/posimap/pkg/data"
-	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Schema *Schema `yaml:"schema"`
+	Schema Schema `yaml:"schema"`
 }
 
 type Schema []Field
 
 type Field struct {
-	Name     string  `yaml:"name"`
-	Length   int     `yaml:"length"`
-	Occurs   int     `yaml:"occurs,omitempty"`
-	Redefine string  `yaml:"redefine,omitempty"`
-	When     string  `yaml:"when,omitempty"`
-	Schema   *Schema `yaml:"schema,omitempty"`
+	Name     string `yaml:"name"`
+	Length   int    `yaml:"length"`
+	Occurs   int    `yaml:"occurs,omitempty"`
+	Redefine string `yaml:"redefine,omitempty"`
+	When     string `yaml:"when,omitempty"`
+	Schema   any    `yaml:"schema,omitempty"` // either Schema or string
+	schema   Schema
 }
 
 var (
@@ -44,18 +44,18 @@ func (f Field) Build() data.FieldSchema {
 		Occurs:   f.Occurs,
 		Redefine: f.Redefine,
 		When:     data.When(f.When),
-		Schema:   f.Schema.Compile(),
+		Schema:   f.schema.Compile(),
 	}
 }
 
-func (s *Schema) Validate() error {
-	for idx, field := range *s {
+func (s Schema) Validate() error {
+	for idx, field := range s {
 		if err := field.Validate(); err != nil {
 			return fmt.Errorf("%v.%w", idx, err)
 		}
 
-		if field.Schema != nil {
-			if err := field.Schema.Validate(); err != nil {
+		if field.schema != nil {
+			if err := field.schema.Validate(); err != nil {
 				return fmt.Errorf("%v.%w", idx, err)
 			}
 		}
@@ -64,38 +64,17 @@ func (s *Schema) Validate() error {
 	return nil
 }
 
-func (s *Schema) Compile() data.RecordSchema {
-	if s == nil || len(*s) == 0 {
+func (s Schema) Compile() data.RecordSchema {
+	if len(s) == 0 {
 		return nil
 	}
 
-	result := make(data.RecordSchema, len(*s))
-	for i, field := range *s {
+	result := make(data.RecordSchema, len(s))
+	for i, field := range s {
 		result[i] = field.Build()
 	}
 
 	return result
-}
-
-func (s *Schema) UnmarshalYAML(value *yaml.Node) error {
-	var fields []Field
-	if err := value.Decode(&fields); err != nil {
-		var schemafile string
-		if err := value.Decode(&schemafile); err != nil {
-			return fmt.Errorf("failed to decode schema: %w", err)
-		}
-
-		config, err := LoadConfigFromFile(schemafile)
-		if err != nil {
-			return fmt.Errorf("failed to load schema from %s: %w", schemafile, err)
-		}
-
-		fields = *config.Schema
-	}
-
-	*s = fields
-
-	return nil
 }
 
 func (c Config) Validate() error {

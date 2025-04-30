@@ -1,0 +1,13 @@
+schema:
+  - name: LINE-1
+    length: 25
+  - name: LINE-2
+    length: 25
+  - name: CITY
+    length: 8
+  - name: STATE
+    length: 2
+  - name: ZIP
+    length: 5
+  - name: COUNTRY
+    length: 8

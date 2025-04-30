@@ -4,8 +4,4 @@ schema:
   - name: LASTNAME
     length: 8
   - name: ADDRESS
-    schema:
-      - name: LINE-1
-        length: 25
-      - name: LINE-2
-        length: 25
+    schema: "schema-address.yaml"
