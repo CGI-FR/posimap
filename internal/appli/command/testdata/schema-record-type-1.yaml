@@ -1,0 +1,27 @@
+schema:
+  - name: ID
+    length: 3
+  - name: NAME
+    length: 35
+  - name: ADDRESS-LINE1
+    length: 30
+  - name: ADDRESS-LINE2
+    length: 30
+  - name: ZIPCODE
+    length: 6
+    schema:
+      - name: ZIPCODE1
+        length: 3
+      - name: ZIPCODE2
+        length: 3
+  - name: TABLE
+    occurs: 5
+    schema:
+      - name: INDEX
+        length: 2
+      - name: VERSION
+        length: 2
+      - name: VALUE
+        length: 11
+      - name: FILLER
+        length: 5

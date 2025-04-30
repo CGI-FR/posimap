@@ -1,0 +1,14 @@
+trim: true
+schema:
+  - name: RECORD-TYPE
+    length: 16
+  - name: RECORD-BUFFER
+    when: !!str false
+  - name: RECORD-TYPE-1
+    redefine: RECORD-BUFFER
+    when: '{{ index . "RECORD-TYPE" | eq "RECORD-TYPE-1" }}'
+    schema: schema-record-type-1.yaml
+  - name: RECORD-TYPE-2
+    redefine: RECORD-BUFFER
+    when: '{{ index . "RECORD-TYPE" | eq "RECORD-TYPE-2" }}'
+    schema: schema-record-type-2.yaml
