@@ -3,6 +3,8 @@ package data
 import (
 	"bytes"
 	"text/template"
+
+	"github.com/Masterminds/sprig/v3"
 )
 
 func If(value bool) ExportPredicate {
@@ -18,7 +20,7 @@ func Never() ExportPredicate {
 }
 
 func When(tmpl string) ExportPredicate {
-	template, err := template.New("predicate").Parse(tmpl)
+	template, err := template.New("predicate").Funcs(sprig.TxtFuncMap()).Parse(tmpl)
 	if err != nil {
 		panic(err)
 	}
