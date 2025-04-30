@@ -55,9 +55,9 @@ func resolveIncludes(schema Schema, rootpath string) error {
 			field.Schema.T2 = nil
 		}
 
-		if field.schema != nil {
+		if schema[idx].schema != nil {
 			// Recursively resolve includes in the nested schema
-			if err := resolveIncludes(field.schema, rootpath); err != nil {
+			if err := resolveIncludes(schema[idx].schema, rootpath); err != nil {
 				return fmt.Errorf("failed to resolve includes in nested schema: %w", err)
 			}
 		}
