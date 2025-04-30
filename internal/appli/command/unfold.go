@@ -47,7 +47,7 @@ func (u *Unfold) execute(_ *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to load schema")
 	}
 
-	root := data.NewBuilder().Build(config.Schema.Compile())
+	root := data.NewBuilder().Build(config.Compile())
 
 	if err := data.TransformObjectsToRecords(root, source, sink); err != nil {
 		log.Fatal().Err(err).Msg("Failed to process records")

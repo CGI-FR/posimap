@@ -5,10 +5,11 @@ import "fmt"
 type Value struct {
 	start    int
 	length   int
+	trim     bool
 	exported ExportPredicate
 }
 
-func NewValue(start, length int, predicate ExportPredicate) Value {
+func NewValue(start, length int, predicate ExportPredicate, trim bool) Value {
 	if predicate == nil {
 		predicate = If(length > 0)
 	}
@@ -16,6 +17,7 @@ func NewValue(start, length int, predicate ExportPredicate) Value {
 	return Value{
 		start:    start,
 		length:   length,
+		trim:     trim,
 		exported: predicate,
 	}
 }
@@ -25,8 +27,14 @@ func (v Value) Materialize(buffer *Buffer) any {
 }
 
 func (v Value) Export(_ View, buffer *Buffer, sink ObjectSink) error {
-	if err := sink.WriteString(buffer.Read(v.start, v.length)); err != nil {
-		return fmt.Errorf("%w", err)
+	if v.trim {
+		if err := sink.WriteString(buffer.ReadTrimmed(v.start, v.length, BlankRunes)); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	} else {
+		if err := sink.WriteString(buffer.Read(v.start, v.length)); err != nil {
+			return fmt.Errorf("%w", err)
+		}
 	}
 
 	return nil

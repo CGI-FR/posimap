@@ -25,10 +25,10 @@ func (b *Builder) buildArray(schema RecordSchema, occurs int, when ExportPredica
 	return array
 }
 
-func (b *Builder) buildArrayScalar(length, occurs int, when ExportPredicate) *Array {
+func (b *Builder) buildArrayScalar(length, occurs int, when ExportPredicate, trim bool) *Array {
 	array := NewArray(when)
 	for range occurs {
-		array.Add(NewValue(b.pos, length, nil))
+		array.Add(NewValue(b.pos, length, nil, trim))
 		b.pos += length
 	}
 
@@ -53,10 +53,10 @@ func (b *Builder) build(schema RecordSchema, when ExportPredicate) *Object {
 		case field.Occurs > 0 && field.Schema != nil:
 			object.Add(field.Name, b.buildArray(field.Schema, field.Occurs, field.When))
 		case field.Occurs == 0:
-			object.Add(field.Name, NewValue(b.pos, field.Length, field.When))
+			object.Add(field.Name, NewValue(b.pos, field.Length, field.When, field.Trim))
 			b.pos += field.Length
 		case field.Occurs > 0:
-			object.Add(field.Name, b.buildArrayScalar(field.Length, field.Occurs, field.When))
+			object.Add(field.Name, b.buildArrayScalar(field.Length, field.Occurs, field.When, field.Trim))
 		}
 	}
 

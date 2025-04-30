@@ -16,6 +16,7 @@ type Fold struct {
 	cmd *cobra.Command
 
 	configfile string
+	trim       bool
 }
 
 func NewFoldCommand(rootname string, groupid string) *cobra.Command {
@@ -29,9 +30,11 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 			GroupID: groupid,
 		},
 		configfile: "schema.yaml",
+		trim:       false,
 	}
 
 	fold.cmd.Flags().StringVarP(&fold.configfile, "config", "c", fold.configfile, "set the config file")
+	fold.cmd.Flags().BoolVarP(&fold.trim, "trim", "t", fold.trim, "trim the input records")
 
 	fold.cmd.Run = fold.execute
 
@@ -45,6 +48,10 @@ func (f *Fold) execute(_ *cobra.Command, _ []string) {
 	config, err := config.LoadConfigFromFile(f.configfile)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load schema")
+	}
+
+	if f.trim {
+		config.Trim = true
 	}
 
 	root := data.NewBuilder().Build(config.Compile())

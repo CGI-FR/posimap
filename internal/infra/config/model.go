@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	Schema Schema `yaml:"schema"`
+	Trim   bool   `yaml:"trim,omitempty"`
 }
 
 type Schema []Field
@@ -18,6 +19,7 @@ type Field struct {
 	Length   int    `yaml:"length"`
 	Occurs   int    `yaml:"occurs,omitempty"`
 	Redefine string `yaml:"redefine,omitempty"`
+	Trim     bool   `yaml:"trim,omitempty"`
 	When     string `yaml:"when,omitempty"`
 	Schema   any    `yaml:"schema,omitempty"` // either Schema or string
 	schema   Schema
@@ -37,14 +39,15 @@ func (f Field) Validate() error {
 	return nil
 }
 
-func (f Field) Build() data.FieldSchema {
+func (f Field) Build(trim bool) data.FieldSchema {
 	return data.FieldSchema{
 		Name:     f.Name,
 		Length:   f.Length,
 		Occurs:   f.Occurs,
 		Redefine: f.Redefine,
+		Trim:     f.Trim || trim,
 		When:     data.When(f.When),
-		Schema:   f.schema.Compile(),
+		Schema:   f.schema.Compile(trim),
 	}
 }
 
@@ -64,14 +67,14 @@ func (s Schema) Validate() error {
 	return nil
 }
 
-func (s Schema) Compile() data.RecordSchema {
+func (s Schema) Compile(trim bool) data.RecordSchema {
 	if len(s) == 0 {
 		return nil
 	}
 
 	result := make(data.RecordSchema, len(s))
 	for i, field := range s {
-		result[i] = field.Build()
+		result[i] = field.Build(trim)
 	}
 
 	return result
@@ -86,5 +89,5 @@ func (c Config) Validate() error {
 }
 
 func (c Config) Compile() data.RecordSchema {
-	return c.Schema.Compile()
+	return c.Schema.Compile(c.Trim)
 }

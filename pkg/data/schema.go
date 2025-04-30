@@ -5,6 +5,7 @@ type FieldSchema struct {
 	Length   int
 	Occurs   int
 	Redefine string
+	Trim     bool
 	When     ExportPredicate
 	Schema   RecordSchema
 }
