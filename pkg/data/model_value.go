@@ -23,6 +23,10 @@ func NewValue(start, length int, predicate ExportPredicate, trim bool) Value {
 }
 
 func (v Value) Materialize(buffer *Buffer) any {
+	if v.trim {
+		return buffer.ReadTrimmed(v.start, v.length, BlankRunes)
+	}
+
 	return buffer.Read(v.start, v.length)
 }
 
