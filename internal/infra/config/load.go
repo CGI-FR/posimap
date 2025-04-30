@@ -42,15 +42,17 @@ func LoadConfigFromFile(filename string) (Config, error) {
 // par le contenu de file.yaml (parsé dans le champ schema privé).
 func resolveIncludes(schema Schema, rootpath string) error {
 	for idx, field := range schema {
-		if filename, ok := field.Schema.(string); ok && filename != "" {
-			// Load the included schema
-			includedSchema, err := LoadConfigFromFile(filepath.Join(rootpath, filename))
+		if field.Schema.T1 != "" {
+			includedSchema, err := LoadConfigFromFile(filepath.Join(rootpath, field.Schema.T1))
 			if err != nil {
-				return fmt.Errorf("failed to load included schema %s: %w", filename, err)
+				return fmt.Errorf("failed to load included schema %s: %w", field.Schema.T1, err)
 			}
 			// Replace the field schema with the included schema
 			schema[idx].schema = includedSchema.Schema
-			schema[idx].Schema = ""
+			schema[idx].Schema.T1 = ""
+		} else if field.Schema.T2 != nil {
+			schema[idx].schema = field.Schema.T2
+			field.Schema.T2 = nil
 		}
 
 		if field.schema != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cgi-fr/posimap/pkg/data"
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
@@ -14,14 +15,36 @@ type Config struct {
 
 type Schema []Field
 
+type Either[T1 any, T2 any] struct {
+	T1 T1
+	T2 T2
+}
+
+func (e *Either[T1, T2]) UnmarshalYAML(value *yaml.Node) error {
+	out, err := yaml.Marshal(value)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	if err := yaml.Unmarshal(out, &e.T1); err == nil {
+		return nil
+	}
+
+	if err := yaml.Unmarshal(out, &e.T2); err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("%w", err)
+}
+
 type Field struct {
-	Name     string `yaml:"name"`
-	Length   int    `yaml:"length"`
-	Occurs   int    `yaml:"occurs,omitempty"`
-	Redefine string `yaml:"redefine,omitempty"`
-	Trim     bool   `yaml:"trim,omitempty"`
-	When     string `yaml:"when,omitempty"`
-	Schema   any    `yaml:"schema,omitempty"` // either Schema or string
+	Name     string                 `yaml:"name"`
+	Length   int                    `yaml:"length"`
+	Occurs   int                    `yaml:"occurs,omitempty"`
+	Redefine string                 `yaml:"redefine,omitempty"`
+	Trim     bool                   `yaml:"trim,omitempty"`
+	When     string                 `yaml:"when,omitempty"`
+	Schema   Either[string, Schema] `yaml:"schema,omitempty"` // either filename for external schema or inlined schema
 	schema   Schema
 }
 
