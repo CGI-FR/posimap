@@ -16,4 +16,10 @@ Types of changes
 
 ## [0.1.0]
 
-- `Added` First public version of posimap.
+- `Added` fold and unfold commands.
+- `Added` schema definition file in YAML format.
+- `Added` ability to reference external schema file.
+- `Added` support for nested records, occurs and redefines.
+- `Added` auto-trim option to fold command.
+- `Added` unfold command automatically cut overflow runes.
+- `Added` trim option as a flag to fold command and as a parameter in schema definition.
