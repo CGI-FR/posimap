@@ -49,6 +49,38 @@ func (s *SourceFixedWidth) ReadRunes(length int) ([]rune, error) {
 	return runes, nil
 }
 
+func (s *SourceFixedWidth) ReadRunesUntil(sep []byte) ([]rune, error) {
+	runes := make([]rune, 0, len(sep))
+
+search:
+	for {
+		raw, err := s.reader.Peek(len(sep))
+		if err != nil {
+			return runes, fmt.Errorf("%w", err)
+		}
+
+		if len(raw) < len(sep) {
+			return runes, io.EOF
+		}
+
+		for idx := range len(sep) {
+			if raw[idx] != sep[idx] {
+				r := s.charmap.DecodeByte(raw[0])
+				runes = append(runes, r)
+				_, _ = s.reader.Discard(1)
+				continue search
+			}
+		}
+
+		// If we reach here, it means we found the separator.
+		// Discard the bytes that were read from the source.
+		_, _ = s.reader.Discard(len(sep))
+		break
+	}
+
+	return runes, nil
+}
+
 func (s *SourceFixedWidth) ReadBytes(length int) ([]byte, error) {
 	result := make([]byte, length)
 

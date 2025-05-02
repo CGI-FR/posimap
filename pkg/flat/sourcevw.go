@@ -62,6 +62,48 @@ func (s *SourceVariableWidth) ReadRunes(length int) ([]rune, error) {
 	return runes, nil
 }
 
+func (s *SourceVariableWidth) ReadRunesUntil(sep []byte) ([]rune, error) {
+	runes := make([]rune, 0, len(sep))
+
+search:
+	for {
+		raw, err := s.reader.Peek(utf8.UTFMax)
+		if err != nil && !errors.Is(err, io.EOF) {
+			return runes, fmt.Errorf("%w", err)
+		}
+
+		if len(raw) < len(sep) {
+			return runes, io.EOF
+		}
+
+		for idx := range len(sep) {
+			if raw[idx] != sep[idx] {
+				nDst, _, _ := s.decoder.Transform(s.working, raw, false)
+
+				// Decode the bytes into 1 rune.
+				r, _ := utf8.DecodeRune(s.working[:nDst])
+				runes = append(runes, r)
+
+				// Reencode the rune back to bytes to compute len to discard.
+				size, _, _ := s.encoder.Transform(s.working, []byte(string(r)), true)
+
+				// Discard the bytes that were read from the source.
+				_, _ = s.reader.Discard(size)
+
+				// Continue searching for the separator.
+				continue search
+			}
+		}
+
+		// If we reach here, it means we found the separator.
+		// Discard the bytes that were read from the source.
+		_, _ = s.reader.Discard(len(sep))
+		break
+	}
+
+	return runes, nil
+}
+
 func (s *SourceVariableWidth) ReadBytes(length int) ([]byte, error) {
 	result := make([]byte, length)
 

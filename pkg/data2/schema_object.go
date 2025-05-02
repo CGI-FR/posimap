@@ -11,6 +11,7 @@ type SchemaObject struct {
 	keys      []string
 	values    map[string]Schema
 	redefines map[string]string
+	separator []byte
 	export    Predicate
 }
 
@@ -19,6 +20,7 @@ func NewSchemaObject(export Predicate) *SchemaObject {
 		keys:      make([]string, 0),
 		values:    make(map[string]Schema),
 		redefines: make(map[string]string),
+		separator: []byte{'\n'},
 		export:    export,
 	}
 }
@@ -54,14 +56,22 @@ func (o *SchemaObject) RuneCount() int {
 }
 
 func (o *SchemaObject) ReadBuffer(source flat.Source, buffer *Buffer) error {
-	if source.IsFixedWidth() {
+	switch {
+	case source.IsFixedWidth():
 		runes, err := source.ReadRunes(o.RuneCount())
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
 		*buffer = append(*buffer, runes...)
-	} else {
+	case len(o.separator) > 0:
+		runes, err := source.ReadRunesUntil(o.separator)
+		if err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		*buffer = append(*buffer, runes...)
+	default:
 		for key := range o.MainKeys() {
 			if err := o.values[key].ReadBuffer(source, buffer); err != nil {
 				return fmt.Errorf("%w", err)
