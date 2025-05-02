@@ -18,10 +18,13 @@
 package copybook_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/cgi-fr/posimap/pkg/copybook"
 	"github.com/cgi-fr/posimap/pkg/data2"
+	"github.com/cgi-fr/posimap/pkg/flat"
+	"github.com/stretchr/testify/require"
 )
 
 type MockRecordSink struct{}
@@ -107,12 +110,9 @@ func TestBuilder(t *testing.T) {
 	builder := copybook.NewBuilder()
 	schema := builder.Build(copyb)
 
-	buffer := data2.NewBufferFrom("JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704    56 MAPLE AVENUE          RIVERSIDE, CA 92501      0DRPR    ") //nolint:lll
+	reader := strings.NewReader("JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704    56 MAPLE AVENUE          RIVERSIDE, CA 92501      1DRPR    ") //nolint:lll
+	source := flat.NewSourceVariableWidth(reader, nil)
 
-	record, err := schema.CreateRecord(buffer, 0)
-	if err != nil {
-		t.Fatalf("failed to create record: %v", err)
-	}
-
-	data2.Export(record, &MockRecordSink{}) //nolint:errcheck
+	err := data2.TransformRecordsToObjects(schema, source, &MockRecordSink{})
+	require.NoError(t, err)
 }
