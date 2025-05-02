@@ -18,6 +18,10 @@ func NewBuffer() Buffer {
 	return make([]rune, 0, defaultBufferSize)
 }
 
+func NewBufferFrom(data string) Buffer {
+	return []rune(data)
+}
+
 func (b Buffer) String(start, length int, trim bool) string {
 	if trim {
 		return strings.TrimRight(b.Read(start, length), blankRunes)

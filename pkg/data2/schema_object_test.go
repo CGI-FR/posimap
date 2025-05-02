@@ -15,7 +15,7 @@ func ExampleSchemaObject() {
 
 	// Create a new SchemaObject with the schemaValue indexed by "key1"
 	schemaObject := data2.NewSchemaObject(nil)
-	schemaObject.Add("key1", schemaValue)
+	schemaObject.Add("key1", schemaValue, "")
 
 	// Print the rune length
 	fmt.Println("Rune Count:", schemaObject.RuneCount())
