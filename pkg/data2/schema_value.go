@@ -8,11 +8,15 @@ import (
 
 type SchemaValue struct {
 	length int
+	trim   bool
+	export Predicate
 }
 
-func NewSchemaValue(length int) SchemaValue {
+func NewSchemaValue(length int, trim bool, export Predicate) SchemaValue {
 	return SchemaValue{
 		length: length,
+		trim:   trim,
+		export: export,
 	}
 }
 
@@ -36,6 +40,7 @@ func (v SchemaValue) CreateRecord(buffer Buffer, start int) (Record, error) { //
 		schema: v,
 		buffer: buffer,
 		start:  start,
-		trim:   false,
+		trim:   v.trim,
+		export: v.export,
 	}, nil
 }

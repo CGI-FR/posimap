@@ -11,7 +11,7 @@ import (
 
 func ExampleSchemaValue() {
 	// Create a new SchemaValue with a length of 5
-	schemaValue := data2.NewSchemaValue(5)
+	schemaValue := data2.NewSchemaValue(5, true, nil)
 
 	// Print the rune count
 	fmt.Println("Rune Count:", schemaValue.RuneCount())

@@ -9,12 +9,14 @@ import (
 type SchemaObject struct {
 	keys   []string
 	values map[string]Schema
+	export Predicate
 }
 
-func NewSchemaObject() *SchemaObject {
+func NewSchemaObject(export Predicate) *SchemaObject {
 	return &SchemaObject{
 		keys:   make([]string, 0),
 		values: make(map[string]Schema),
+		export: export,
 	}
 }
 
@@ -71,5 +73,6 @@ func (o *SchemaObject) CreateRecord(buffer Buffer, start int) (Record, error) { 
 	return RecordObject{
 		schema:  o,
 		records: records,
+		export:  o.export,
 	}, nil
 }

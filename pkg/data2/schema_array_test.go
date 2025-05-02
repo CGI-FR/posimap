@@ -11,10 +11,10 @@ import (
 
 func ExampleSchemaArray() {
 	// Create a new SchemaValue with a length of 5
-	schemaValue := data2.NewSchemaValue(5)
+	schemaValue := data2.NewSchemaValue(5, true, nil)
 
 	// Create a new SchemaArray with the schemaValue and occurs set to 3
-	schemaArray := data2.NewSchemaArray(schemaValue, 3)
+	schemaArray := data2.NewSchemaArray(schemaValue, 3, nil)
 
 	// Print the rune length
 	fmt.Println("Rune Count:", schemaArray.RuneCount())

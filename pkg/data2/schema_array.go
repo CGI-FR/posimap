@@ -9,12 +9,14 @@ import (
 type SchemaArray struct {
 	schema Schema
 	occurs int
+	export Predicate
 }
 
-func NewSchemaArray(schema Schema, occurs int) *SchemaArray {
+func NewSchemaArray(schema Schema, occurs int, export Predicate) *SchemaArray {
 	return &SchemaArray{
 		schema: schema,
 		occurs: occurs,
+		export: export,
 	}
 }
 
@@ -62,5 +64,6 @@ func (a *SchemaArray) CreateRecord(buffer Buffer, start int) (Record, error) { /
 	return RecordArray{
 		schema:  a,
 		records: records,
+		export:  a.export,
 	}, nil
 }

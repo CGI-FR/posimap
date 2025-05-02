@@ -11,10 +11,10 @@ import (
 
 func ExampleSchemaObject() {
 	// Create a new SchemaValue with a length of 5
-	schemaValue := data2.NewSchemaValue(5)
+	schemaValue := data2.NewSchemaValue(5, true, nil)
 
 	// Create a new SchemaObject with the schemaValue indexed by "key1"
-	schemaObject := data2.NewSchemaObject()
+	schemaObject := data2.NewSchemaObject(nil)
 	schemaObject.Add("key1", schemaValue)
 
 	// Print the rune length
