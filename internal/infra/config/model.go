@@ -21,7 +21,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cgi-fr/posimap/pkg/data"
+	"github.com/cgi-fr/posimap/pkg/copybook"
+	"github.com/cgi-fr/posimap/pkg/data2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -79,14 +80,14 @@ func (f Field) Validate() error {
 	return nil
 }
 
-func (f Field) Build(trim bool) data.FieldSchema {
-	return data.FieldSchema{
+func (f Field) Build(trim bool) copybook.FieldSchema {
+	return copybook.FieldSchema{
 		Name:     f.Name,
 		Length:   f.Length,
 		Occurs:   f.Occurs,
 		Redefine: f.Redefine,
 		Trim:     f.Trim || trim,
-		When:     data.When(f.When),
+		When:     data2.When(f.When),
 		Schema:   f.schema.Compile(trim),
 	}
 }
@@ -107,12 +108,12 @@ func (s Schema) Validate() error {
 	return nil
 }
 
-func (s Schema) Compile(trim bool) data.RecordSchema {
+func (s Schema) Compile(trim bool) copybook.RecordSchema {
 	if len(s) == 0 {
 		return nil
 	}
 
-	result := make(data.RecordSchema, len(s))
+	result := make(copybook.RecordSchema, len(s))
 	for i, field := range s {
 		result[i] = field.Build(trim)
 	}
@@ -128,6 +129,6 @@ func (c Config) Validate() error {
 	return nil
 }
 
-func (c Config) Compile() data.RecordSchema {
+func (c Config) Compile() copybook.RecordSchema {
 	return c.Schema.Compile(c.Trim)
 }

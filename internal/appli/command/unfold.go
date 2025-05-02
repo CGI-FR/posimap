@@ -18,15 +18,8 @@
 package command
 
 import (
-	"os"
-
-	"github.com/cgi-fr/posimap/internal/infra/config"
-	"github.com/cgi-fr/posimap/internal/infra/object"
-	"github.com/cgi-fr/posimap/internal/infra/record"
-	"github.com/cgi-fr/posimap/pkg/data"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/unicode"
 )
 
 type Unfold struct {
@@ -56,19 +49,19 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 }
 
 func (u *Unfold) execute(_ *cobra.Command, _ []string) {
-	source := object.NewJSONLineSource(os.Stdin, unicode.UTF8)
-	sink := record.NewRecordSink(os.Stdout)
+	// source := object.NewJSONLineSource(os.Stdin, unicode.UTF8)
+	// sink := record.NewRecordSink(os.Stdout)
 
-	config, err := config.LoadConfigFromFile(u.configfile)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load schema")
-	}
+	// config, err := config.LoadConfigFromFile(u.configfile)
+	// if err != nil {
+	// 	log.Fatal().Err(err).Msg("Failed to load schema")
+	// }
 
-	root := data.NewBuilder().Build(config.Compile())
+	// root := copybook.NewBuilder().Build(config.Compile())
 
-	if err := data.TransformObjectsToRecords(root, source, sink); err != nil {
-		log.Fatal().Err(err).Msg("Failed to process records")
-	}
+	// if err := data.TransformObjectsToRecords(root, source, sink); err != nil {
+	// 	log.Fatal().Err(err).Msg("Failed to process records")
+	// }
 
 	log.Info().Msg("Unfold command completed successfully")
 }

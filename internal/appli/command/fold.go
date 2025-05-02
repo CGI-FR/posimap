@@ -21,9 +21,10 @@ import (
 	"os"
 
 	"github.com/cgi-fr/posimap/internal/infra/config"
-	"github.com/cgi-fr/posimap/internal/infra/object"
-	"github.com/cgi-fr/posimap/internal/infra/record"
-	"github.com/cgi-fr/posimap/pkg/data"
+	"github.com/cgi-fr/posimap/pkg/copybook"
+	"github.com/cgi-fr/posimap/pkg/data2"
+	"github.com/cgi-fr/posimap/pkg/deep"
+	"github.com/cgi-fr/posimap/pkg/flat"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding/unicode"
@@ -59,8 +60,8 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 }
 
 func (f *Fold) execute(_ *cobra.Command, _ []string) {
-	source := record.NewRecordSource(os.Stdin, unicode.UTF8)
-	sink := object.NewJSON(os.Stdout)
+	source := flat.NewSourceVariableWidth(os.Stdin, unicode.UTF8)
+	sink := deep.NewSinkJSONLine(os.Stdout)
 
 	config, err := config.LoadConfigFromFile(f.configfile)
 	if err != nil {
@@ -71,9 +72,9 @@ func (f *Fold) execute(_ *cobra.Command, _ []string) {
 		config.Trim = true
 	}
 
-	root := data.NewBuilder().Build(config.Compile())
+	root := copybook.NewBuilder().Build(config.Compile())
 
-	if err := data.TransformRecordsToObjects(root, source, sink); err != nil {
+	if err := data2.TransformRecordsToObjects(root, source, sink); err != nil {
 		log.Fatal().Err(err).Msg("Failed to process records")
 	}
 
