@@ -1,4 +1,4 @@
-package data2
+package flat
 
 import (
 	"bufio"
@@ -75,4 +75,8 @@ func (s *SourceVariableWidth) ReadBytes(length int) ([]byte, error) {
 	}
 
 	return result, nil
+}
+
+func (s *SourceVariableWidth) IsFixedWidth() bool {
+	return false
 }

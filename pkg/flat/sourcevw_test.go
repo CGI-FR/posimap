@@ -1,4 +1,4 @@
-package data2_test
+package flat_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/cgi-fr/posimap/pkg/data2"
+	"github.com/cgi-fr/posimap/pkg/flat"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/encoding"
@@ -18,7 +18,7 @@ func ExampleSourceVariableWidth() {
 	data := []byte("Hello, café!")
 	reader := bytes.NewReader(data)
 
-	source := data2.NewSourceVariableWidth(reader, unicode.UTF8)
+	source := flat.NewSourceVariableWidth(reader, unicode.UTF8)
 
 	runes, err := source.ReadRunes(5)
 	if err != nil {
@@ -92,7 +92,7 @@ func TestReadRunes_CommonEncodings(t *testing.T) {
 			t.Parallel()
 
 			reader := bytes.NewReader(test.input)
-			source := data2.NewSourceVariableWidth(reader, test.encoding)
+			source := flat.NewSourceVariableWidth(reader, test.encoding)
 
 			runes, err := source.ReadRunes(len(test.expected))
 			require.NoError(t, err)

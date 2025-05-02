@@ -1,11 +1,11 @@
-package data2_test
+package flat_test
 
 import (
 	"bytes"
 	"fmt"
 	"testing"
 
-	"github.com/cgi-fr/posimap/pkg/data2"
+	"github.com/cgi-fr/posimap/pkg/flat"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/encoding/charmap"
@@ -15,7 +15,7 @@ func ExampleSourceFixedWidth() {
 	data := []byte{0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x63, 0x61, 0x66, 0xE9, 0x21} // "Hello, café!" in ISO-8859-15
 	reader := bytes.NewReader(data)
 
-	source := data2.NewSourceFixedWidth(reader, charmap.ISO8859_15)
+	source := flat.NewSourceFixedWidth(reader, charmap.ISO8859_15)
 
 	runes, err := source.ReadRunes(5)
 	if err != nil {
@@ -71,7 +71,7 @@ func TestReadRunes_CommonCharmaps(t *testing.T) {
 			t.Parallel()
 
 			reader := bytes.NewReader(test.input)
-			source := data2.NewSourceFixedWidth(reader, test.charmap)
+			source := flat.NewSourceFixedWidth(reader, test.charmap)
 
 			runes, err := source.ReadRunes(len(test.expected))
 			require.NoError(t, err)
