@@ -35,6 +35,17 @@ func (v SchemaValue) ReadBuffer(source flat.Source, buffer *Buffer) error {
 	return nil
 }
 
+func (v SchemaValue) Marshal(obj any, buffer *Buffer) error {
+	switch typed := obj.(type) {
+	case string:
+		*buffer = append(*buffer, []rune(typed)...)
+	default:
+		return fmt.Errorf("%w: expected string, got %T", ErrInvalidType, typed)
+	}
+
+	return nil
+}
+
 func (v SchemaValue) CreateRecord(buffer Buffer, start int) (Record, error) { //nolint:ireturn
 	return RecordValue{
 		schema: v,

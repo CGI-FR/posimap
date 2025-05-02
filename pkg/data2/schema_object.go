@@ -82,6 +82,21 @@ func (o *SchemaObject) ReadBuffer(source flat.Source, buffer *Buffer) error {
 	return nil
 }
 
+func (o *SchemaObject) Marshal(obj any, buffer *Buffer) error {
+	switch typed := obj.(type) {
+	case map[string]any:
+		for key, val := range typed {
+			if err := o.values[key].Marshal(val, buffer); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+		}
+	default:
+		return fmt.Errorf("%w: expected object, got %T", ErrInvalidType, typed)
+	}
+
+	return nil
+}
+
 func (o *SchemaObject) CreateRecord(buffer Buffer, start int) (Record, error) { //nolint:ireturn
 	records := make(map[string]Record, len(o.keys))
 

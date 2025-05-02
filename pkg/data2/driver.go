@@ -47,3 +47,40 @@ func TransformRecordsToObjects(root Schema, source flat.Source, sink deep.Sink) 
 
 	return nil
 }
+
+func TransformObjectsToRecords(root Schema, source deep.Source, sink flat.Sink) error {
+	for {
+		obj, err := source.Read()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			return fmt.Errorf("failed to read object: %w", err)
+		}
+
+		if obj == nil {
+			continue
+		}
+
+		buffer := NewBuffer()
+
+		if err := root.Marshal(obj, &buffer); err != nil {
+			return fmt.Errorf("failed to import record: %w", err)
+		}
+
+		if err := sink.Write(buffer); err != nil {
+			return fmt.Errorf("failed to write record: %w", err)
+		}
+	}
+
+	if err := sink.Close(); err != nil {
+		return fmt.Errorf("failed to close sink: %w", err)
+	}
+
+	if err := source.Close(); err != nil {
+		return fmt.Errorf("failed to close source: %w", err)
+	}
+
+	return nil
+}

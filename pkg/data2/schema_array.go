@@ -45,6 +45,21 @@ func (a *SchemaArray) ReadBuffer(source flat.Source, buffer *Buffer) error {
 	return nil
 }
 
+func (a *SchemaArray) Marshal(obj any, buffer *Buffer) error {
+	switch typed := obj.(type) {
+	case []any:
+		for _, val := range typed {
+			if err := a.schema.Marshal(val, buffer); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+		}
+	default:
+		return fmt.Errorf("%w: expected array, got %T", ErrInvalidType, typed)
+	}
+
+	return nil
+}
+
 func (a *SchemaArray) CreateRecord(buffer Buffer, start int) (Record, error) { //nolint:ireturn
 	records := make([]Record, a.occurs)
 
