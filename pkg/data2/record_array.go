@@ -9,6 +9,7 @@ import (
 type RecordArray struct {
 	schema  *SchemaArray
 	records []Record
+	export  Predicate
 }
 
 func (ra RecordArray) Materialize() any {
@@ -20,19 +21,23 @@ func (ra RecordArray) Materialize() any {
 	return result
 }
 
-func (ra RecordArray) Export(sink deep.Sink) error {
+func (ra RecordArray) Export(root Record, sink deep.Sink) error {
 	if err := sink.OpenArray(); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	for idx, record := range ra.records {
+		if !ra.records[idx].VisibleFrom(root) {
+			continue
+		}
+
 		if idx != 0 {
 			if err := sink.Next(); err != nil {
 				return fmt.Errorf("%w", err)
 			}
 		}
 
-		if err := record.Export(sink); err != nil {
+		if err := record.Export(root, sink); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}
@@ -42,4 +47,8 @@ func (ra RecordArray) Export(sink deep.Sink) error {
 	}
 
 	return nil
+}
+
+func (ra RecordArray) VisibleFrom(root Record) bool {
+	return ra.export == nil || ra.export(root)
 }

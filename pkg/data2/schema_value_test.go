@@ -38,7 +38,7 @@ func ExampleSchemaValue() {
 	sink := deep.NewSinkJSONLine(output)
 
 	// Export the record to stdout
-	if err := record.Export(sink); err != nil {
+	if err := record.Export(record, sink); err != nil {
 		panic(err)
 	}
 

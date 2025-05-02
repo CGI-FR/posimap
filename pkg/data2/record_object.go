@@ -9,6 +9,7 @@ import (
 type RecordObject struct {
 	schema  *SchemaObject
 	records map[string]Record
+	export  Predicate
 }
 
 func (ro RecordObject) Materialize() any {
@@ -20,7 +21,7 @@ func (ro RecordObject) Materialize() any {
 	return result
 }
 
-func (ro RecordObject) Export(sink deep.Sink) error {
+func (ro RecordObject) Export(root Record, sink deep.Sink) error {
 	if err := sink.OpenObject(); err != nil {
 		return fmt.Errorf("%w", err)
 	}
@@ -28,6 +29,10 @@ func (ro RecordObject) Export(sink deep.Sink) error {
 	first := true
 
 	for _, name := range ro.schema.keys {
+		if !ro.records[name].VisibleFrom(root) {
+			continue
+		}
+
 		if !first {
 			if err := sink.Next(); err != nil {
 				return fmt.Errorf("%w", err)
@@ -40,7 +45,7 @@ func (ro RecordObject) Export(sink deep.Sink) error {
 			return fmt.Errorf("%w", err)
 		}
 
-		if err := ro.records[name].Export(sink); err != nil {
+		if err := ro.records[name].Export(root, sink); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}
@@ -50,4 +55,8 @@ func (ro RecordObject) Export(sink deep.Sink) error {
 	}
 
 	return nil
+}
+
+func (ro RecordObject) VisibleFrom(root Record) bool {
+	return ro.export == nil || ro.export(root)
 }
