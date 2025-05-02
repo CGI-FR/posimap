@@ -14,11 +14,11 @@ import (
 	"golang.org/x/text/encoding/unicode"
 )
 
-func Example() {
+func ExampleSourceVariableWidth() {
 	data := []byte("Hello, café!")
 	reader := bytes.NewReader(data)
 
-	source := data2.NewSource(reader, unicode.UTF8)
+	source := data2.NewSourceVariableWidth(reader, unicode.UTF8)
 
 	runes, err := source.ReadRunes(5)
 	if err != nil {
@@ -92,7 +92,7 @@ func TestReadRunes_CommonEncodings(t *testing.T) {
 			t.Parallel()
 
 			reader := bytes.NewReader(test.input)
-			source := data2.NewSource(reader, test.encoding)
+			source := data2.NewSourceVariableWidth(reader, test.encoding)
 
 			runes, err := source.ReadRunes(len(test.expected))
 			require.NoError(t, err)
