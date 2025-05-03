@@ -18,7 +18,7 @@ type NodeKeyed struct {
 	element map[string]any
 }
 
-func NewNodeKeyed(name string) *NodeKeyed {
+func NewNodeKeyed() *NodeKeyed {
 	return &NodeKeyed{
 		prev:    nil,
 		next:    nil,

@@ -17,7 +17,7 @@ type NodeValue struct {
 	element any
 }
 
-func NewNode(name string, decoder Decoder) *NodeValue {
+func NewNode(decoder Decoder) *NodeValue {
 	return &NodeValue{
 		prev:    nil,
 		next:    nil,

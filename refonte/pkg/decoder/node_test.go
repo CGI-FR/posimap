@@ -16,7 +16,7 @@ func Example() {
 	secondWord := decoder.NewDecoderString(unicode.UTF8, 5)
 	exclamation := decoder.NewDecoderString(unicode.UTF8, 1)
 
-	record := decoder.NewNodeKeyed("record")
+	record := decoder.NewNodeKeyed()
 	record.Add("firstWord", firstWord)
 	record.Add("comma", comma)
 	record.Add("secondWord", secondWord)
