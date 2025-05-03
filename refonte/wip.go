@@ -29,7 +29,7 @@ func NewString(encoding encoding.Encoding, length int) *String {
 		start:   0,
 		end:     0,
 		length:  length,
-		value:   nil,
+		value:   make([]rune, length),
 	}
 }
 
@@ -47,24 +47,36 @@ func (d *String) Unmarshal(data Buffer) {
 		d.end = d.start
 	}
 
-	d.value = nil
-
 	working := make([]byte, utf8.UTFMax)
 
-	for range d.length {
+	for idx := range d.length {
 		raw := data[d.end : d.end+utf8.UTFMax]
 
 		nDst, _, _ := d.decoder.Transform(working, raw, false)
 
 		r, size := utf8.DecodeRune(working[:nDst])
-		d.value = append(d.value, r)
+		d.value[idx] = r
 
 		d.end += size
 	}
 }
 
-func (d *String) Get() any {
-	return d.value
+func (d *String) Get() string {
+	return string(d.value)
+}
+
+func (d *String) Set(value string) {
+	for idx, r := range value {
+		d.value[idx] = r
+
+		if len(d.value) == d.length {
+			break
+		}
+	}
+
+	for range len(value) - len(d.value) {
+		d.value = append(d.value, ' ')
+	}
 }
 
 func (d *String) String() string {

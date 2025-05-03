@@ -20,6 +20,11 @@ func Example() {
 	str.Unmarshal(data)
 
 	// Print the value
-	fmt.Print(str)
-	// Output: Héllo/, /World/!
+	fmt.Println(str)
+
+	str.Set("?")
+	fmt.Println(str)
+	// Output:
+	// Héllo/, /World/!
+	// Héllo/, /World/?
 }
