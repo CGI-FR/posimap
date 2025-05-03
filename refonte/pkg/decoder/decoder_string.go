@@ -33,5 +33,5 @@ func (s *String) Unmarshal(data Buffer, offset int) (any, int) {
 		nread += size
 	}
 
-	return value, nread
+	return string(value), nread
 }

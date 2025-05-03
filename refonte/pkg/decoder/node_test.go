@@ -23,7 +23,20 @@ func Example() {
 	record.Add("exclamation", exclamation)
 	record.Unmarshal(data)
 
-	fmt.Println(record)
+	fmt.Println("{")
+
+	for key, value := range record.KeyValuePairs() {
+		fmt.Printf(`    "%s": "%v"`, key, value)
+		fmt.Println()
+	}
+
+	fmt.Println("}")
+
 	// Output:
-	// {"firstWord":[72 233 108 108 111],"comma":[44 32],"secondWord":[87 111 114 108 100],"exclamation":[33]}
+	// {
+	//     "firstWord": "Héllo"
+	//     "comma": ", "
+	//     "secondWord": "World"
+	//     "exclamation": "!"
+	// }
 }

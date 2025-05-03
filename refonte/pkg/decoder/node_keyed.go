@@ -2,6 +2,7 @@ package decoder
 
 import (
 	"fmt"
+	"iter"
 	"strings"
 )
 
@@ -76,4 +77,33 @@ func (n *NodeKeyed) String() string {
 	myself.WriteRune('}')
 
 	return myself.String()
+}
+
+// Implement the Keyed interface
+
+func (n *NodeKeyed) ValueForKey(key string) (any, bool) {
+	value, has := n.element[key]
+
+	return value, has
+}
+
+func (n *NodeKeyed) HasKey(key string) bool {
+	_, has := n.element[key]
+
+	return has
+}
+
+func (n *NodeKeyed) Keys() []string {
+	return n.keys
+}
+
+func (n *NodeKeyed) KeyValuePairs() iter.Seq2[string, any] {
+	return func(yield func(string, any) bool) {
+		for _, key := range n.keys {
+			value := n.element[key]
+			if !yield(key, value) {
+				return
+			}
+		}
+	}
 }
