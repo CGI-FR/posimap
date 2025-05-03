@@ -15,7 +15,7 @@ func NewDecoderString(encoding encoding.Encoding, length int) *String {
 	return &String{encoding.NewDecoder(), length}
 }
 
-func (s *String) Unmarshal(node Node, data Buffer, offset int) (any, int) {
+func (s *String) Unmarshal(data Buffer, offset int) (any, int) {
 	working := make([]byte, utf8.UTFMax)
 
 	value := make([]rune, s.length)

@@ -61,7 +61,7 @@ func (n *NodeKeyed) Unmarshal(data Buffer) {
 
 	for _, key := range n.keys {
 		dec := n.values[key]
-		n.element[key], size = dec.Unmarshal(n, data, n.end)
+		n.element[key], size = dec.Unmarshal(data, n.end)
 		n.end += size
 	}
 }

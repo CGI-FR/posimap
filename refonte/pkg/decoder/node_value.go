@@ -52,7 +52,7 @@ func (n *NodeValue) Unmarshal(data Buffer) {
 
 	var size int
 
-	n.element, size = n.decoder.Unmarshal(n, data, n.end)
+	n.element, size = n.decoder.Unmarshal(data, n.end)
 
 	n.end += size
 }
