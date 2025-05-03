@@ -11,8 +11,12 @@ func NewStatic(data []byte) *Static {
 }
 
 func (b *Static) Peek(start, length int) []byte {
-	if start+length > len(b.data) {
+	if start < 0 || start >= len(b.data) {
 		return nil
+	}
+
+	if start+length > len(b.data) {
+		return b.data[start:]
 	}
 
 	return b.data[start : start+length]

@@ -9,7 +9,7 @@ import (
 )
 
 func Example() {
-	data := buffer.NewStatic([]byte("Héllo, World!   "))
+	data := buffer.NewStatic([]byte("Héllo, World!"))
 
 	firstWord := decoder.NewDecoderString(unicode.UTF8, 5)
 	comma := decoder.NewDecoderString(unicode.UTF8, 2)
