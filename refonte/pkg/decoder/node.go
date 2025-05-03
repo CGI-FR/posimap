@@ -4,7 +4,14 @@ import "fmt"
 
 type Node interface {
 	Unmarshal(data Buffer)
-	getEnd() int
-	setPrev(node Node)
+	State() *NodeState
 	fmt.Stringer
+}
+
+type NodeState struct {
+	prev Node
+	next []Node
+
+	start int
+	end   int
 }

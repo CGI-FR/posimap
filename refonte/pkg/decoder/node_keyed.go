@@ -6,11 +6,7 @@ import (
 )
 
 type NodeKeyed struct {
-	prev Node
-	next []Node
-
-	start int
-	end   int
+	state *NodeState
 
 	keys   []string
 	values map[string]Decoder
@@ -20,10 +16,7 @@ type NodeKeyed struct {
 
 func NewNodeKeyed() *NodeKeyed {
 	return &NodeKeyed{
-		prev:    nil,
-		next:    nil,
-		start:   0,
-		end:     0,
+		state:   &NodeState{}, //nolint:exhaustruct
 		keys:    nil,
 		values:  make(map[string]Decoder),
 		element: make(map[string]any),
@@ -35,34 +28,30 @@ func (n *NodeKeyed) Add(key string, value Decoder) {
 	n.values[key] = value
 }
 
-func (n *NodeKeyed) Chain(node Node) Node { //nolint:ireturn
-	n.next = append(n.next, node)
-	node.setPrev(n)
+func (n *NodeKeyed) Chain(next Node) Node { //nolint:ireturn
+	n.state.next = append(n.state.next, next)
+	next.State().prev = n
 
-	return node
+	return next
 }
 
-func (n *NodeKeyed) getEnd() int {
-	return n.end
-}
-
-func (n *NodeKeyed) setPrev(node Node) {
-	n.prev = node
+func (n *NodeKeyed) State() *NodeState {
+	return n.state
 }
 
 func (n *NodeKeyed) Unmarshal(data Buffer) {
-	if n.prev != nil {
-		n.prev.Unmarshal(data)
-		n.start = n.prev.getEnd()
-		n.end = n.start
+	if n.state.prev != nil {
+		n.state.prev.Unmarshal(data)
+		n.state.start = n.state.prev.State().end
+		n.state.end = n.state.start
 	}
 
 	var size int
 
 	for _, key := range n.keys {
 		dec := n.values[key]
-		n.element[key], size = dec.Unmarshal(data, n.end)
-		n.end += size
+		n.element[key], size = dec.Unmarshal(data, n.state.end)
+		n.state.end += size
 	}
 }
 

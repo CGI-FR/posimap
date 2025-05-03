@@ -6,11 +6,7 @@ import (
 )
 
 type NodeValue struct {
-	prev Node
-	next []Node
-
-	start int
-	end   int
+	state *NodeState
 
 	decoder Decoder
 
@@ -19,42 +15,35 @@ type NodeValue struct {
 
 func NewNode(decoder Decoder) *NodeValue {
 	return &NodeValue{
-		prev:    nil,
-		next:    nil,
-		start:   0,
-		end:     0,
+		state:   &NodeState{}, //nolint:exhaustruct
 		decoder: decoder,
 		element: nil,
 	}
 }
 
-func (n *NodeValue) Chain(node Node) Node { //nolint:ireturn
-	n.next = append(n.next, node)
-	node.setPrev(n)
+func (n *NodeValue) Chain(next Node) Node { //nolint:ireturn
+	n.state.next = append(n.state.next, next)
+	next.State().prev = n
 
-	return node
+	return next
 }
 
-func (n *NodeValue) getEnd() int {
-	return n.end
-}
-
-func (n *NodeValue) setPrev(node Node) {
-	n.prev = node
+func (n *NodeValue) State() *NodeState {
+	return n.state
 }
 
 func (n *NodeValue) Unmarshal(data Buffer) {
-	if n.prev != nil {
-		n.prev.Unmarshal(data)
-		n.start = n.prev.getEnd()
-		n.end = n.start
+	if n.state.prev != nil {
+		n.state.prev.Unmarshal(data)
+		n.state.start = n.state.prev.State().end
+		n.state.end = n.state.start
 	}
 
 	var size int
 
-	n.element, size = n.decoder.Unmarshal(data, n.end)
+	n.element, size = n.decoder.Unmarshal(data, n.state.end)
 
-	n.end += size
+	n.state.end += size
 }
 
 func (n *NodeValue) String() string {
