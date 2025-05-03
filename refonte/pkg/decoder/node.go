@@ -4,11 +4,11 @@ import "fmt"
 
 type Node interface {
 	Unmarshal(data Buffer)
-	State() *NodeState
+	_state() *nodeState
 	fmt.Stringer
 }
 
-type NodeState struct {
+type nodeState struct {
 	prev Node
 	next []Node
 
