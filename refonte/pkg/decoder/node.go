@@ -1,11 +1,9 @@
 package decoder
 
-import "fmt"
-
 type Node interface {
 	Unmarshal(data Buffer)
+	Chain(next Node) Node
 	_state() *nodeState
-	fmt.Stringer
 }
 
 type nodeState struct {

@@ -3,30 +3,46 @@ package decoder
 import (
 	"fmt"
 	"iter"
-	"strings"
 )
 
 type NodeKeyed struct {
 	state *nodeState
 
-	keys   []string
-	values map[string]Decoder
-
-	element map[string]any
+	keys      []string
+	values    map[string]Node
+	redefines map[string]bool
 }
 
 func NewNodeKeyed() *NodeKeyed {
 	return &NodeKeyed{
-		state:   &nodeState{}, //nolint:exhaustruct
-		keys:    nil,
-		values:  make(map[string]Decoder),
-		element: make(map[string]any),
+		state:     &nodeState{}, //nolint:exhaustruct
+		keys:      nil,
+		values:    make(map[string]Node),
+		redefines: make(map[string]bool),
 	}
 }
 
-func (n *NodeKeyed) Add(key string, value Decoder) {
+func (n *NodeKeyed) Add(key string, value Node) {
+	if len(n.keys) == 0 && n.state.prev != nil {
+		n.state.prev.Chain(value)
+	} else if len(n.keys) > 0 {
+		n.values[n.keys[len(n.keys)-1]].Chain(value)
+	}
+
+	value.Chain(n)
+
 	n.keys = append(n.keys, key)
 	n.values[key] = value
+}
+
+func (n *NodeKeyed) Redefine(key, redefined string, value Node) {
+	// assert redefined == last key
+	if n.keys[len(n.keys)-1] != redefined {
+		panic(fmt.Sprintf("redefined key %s is not the last key %s", redefined, n.keys[len(n.keys)-1]))
+	}
+
+	n.Add(key, value)
+	n.redefines[key] = true
 }
 
 func (n *NodeKeyed) Chain(next Node) Node { //nolint:ireturn
@@ -46,49 +62,18 @@ func (n *NodeKeyed) Unmarshal(data Buffer) {
 		n.state.start = n.state.prev._state().end
 		n.state.end = n.state.start
 	}
-
-	var size int
-
-	for _, key := range n.keys {
-		dec := n.values[key]
-		n.element[key], size = dec.Unmarshal(data, n.state.end)
-		n.state.end += size
-	}
-}
-
-func (n *NodeKeyed) String() string {
-	myself := strings.Builder{}
-
-	myself.WriteRune('{')
-
-	for idx, key := range n.keys {
-		if idx > 0 {
-			myself.WriteRune(',')
-		}
-
-		myself.WriteRune('"')
-		myself.WriteString(key)
-		myself.WriteRune('"')
-		myself.WriteRune(':')
-
-		myself.WriteString(fmt.Sprint(n.element[key]))
-	}
-
-	myself.WriteRune('}')
-
-	return myself.String()
 }
 
 // Implement the Keyed interface
 
 func (n *NodeKeyed) ValueForKey(key string) (any, bool) {
-	value, has := n.element[key]
+	value, has := n.values[key]
 
 	return value, has
 }
 
 func (n *NodeKeyed) HasKey(key string) bool {
-	_, has := n.element[key]
+	_, has := n.values[key]
 
 	return has
 }
@@ -100,7 +85,7 @@ func (n *NodeKeyed) Keys() []string {
 func (n *NodeKeyed) KeyValuePairs() iter.Seq2[string, any] {
 	return func(yield func(string, any) bool) {
 		for _, key := range n.keys {
-			value := n.element[key]
+			value := n.values[key]
 			if !yield(key, value) {
 				return
 			}

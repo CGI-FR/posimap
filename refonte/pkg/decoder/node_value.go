@@ -2,7 +2,6 @@ package decoder
 
 import (
 	"fmt"
-	"strings"
 )
 
 type NodeValue struct {
@@ -47,11 +46,5 @@ func (n *NodeValue) Unmarshal(data Buffer) {
 }
 
 func (n *NodeValue) String() string {
-	myself := strings.Builder{}
-
-	myself.WriteRune('"')
-	myself.WriteString(fmt.Sprint(n.element))
-	myself.WriteRune('"')
-
-	return myself.String()
+	return fmt.Sprint(n.element)
 }

@@ -17,11 +17,12 @@ func Example() {
 	exclamation := decoder.NewDecoderString(unicode.UTF8, 1)
 
 	record := decoder.NewNodeKeyed()
-	record.Add("firstWord", firstWord)
-	record.Add("comma", comma)
-	record.Add("secondWord", secondWord)
-	record.Add("exclamation", exclamation)
-	record.Unmarshal(data)
+	record.Add("firstWord", decoder.NewNode(firstWord))
+	record.Add("comma", decoder.NewNode(comma))
+	record.Add("secondWord", decoder.NewNode(secondWord))
+	record.Add("exclamation", decoder.NewNode(exclamation))
+	last, _ := record.ValueForKey("exclamation")
+	last.(decoder.Node).Unmarshal(data)
 
 	fmt.Println("{")
 
@@ -40,3 +41,41 @@ func Example() {
 	//     "exclamation": "!"
 	// }
 }
+
+// func TestRedefine(t *testing.T) {
+// 	data := buffer.NewStatic([]byte("20231001"))
+
+// 	date := decoder.NewDecoderString(unicode.UTF8, 8)
+// 	year := decoder.NewDecoderString(unicode.UTF8, 4)
+// 	month := decoder.NewDecoderString(unicode.UTF8, 2)
+// 	day := decoder.NewDecoderString(unicode.UTF8, 2)
+
+// 	recordDate := decoder.NewNodeKeyed()
+// 	recordDate.Add("year", year)
+// 	recordDate.Add("month", month)
+// 	recordDate.Add("day", day)
+
+// 	record := decoder.NewNodeKeyed()
+// 	record.Add("fulldate", date)
+// 	record.Redefine("date", "fulldate", recordDate)
+// 	record.Redefined("secondWord", "comma", secondWord)
+// 	record.Add("exclamation", exclamation)
+// 	record.Unmarshal(data)
+
+// 	fmt.Println("{")
+
+// 	for key, value := range record.KeyValuePairs() {
+// 		fmt.Printf(`    "%s": "%v"`, key, value)
+// 		fmt.Println()
+// 	}
+
+// 	fmt.Println("}")
+
+// 	// Output:
+// 	// {
+// 	//     "firstWord": "Héllo"
+// 	//     "comma": ", "
+// 	//     "secondWord": "World"
+// 	//     "exclamation": "!"
+// 	// }
+// }
