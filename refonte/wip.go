@@ -15,18 +15,18 @@ type String struct {
 	value   []rune
 }
 
-func (s *String) Unmarshal(d *Node, data Buffer) {
+func (s *String) Unmarshal(node *Node, data Buffer) {
 	working := make([]byte, utf8.UTFMax)
 
-	for idx := 0; idx < s.length; idx++ {
-		raw := data[d.end : d.end+utf8.UTFMax]
+	for idx := range s.length {
+		raw := data[node.end : node.end+utf8.UTFMax]
 
 		nDst, _, _ := s.decoder.Transform(working, raw, false)
 
 		r, size := utf8.DecodeRune(working[:nDst])
 		s.value[idx] = r
 
-		d.end += size
+		node.end += size
 	}
 }
 
@@ -53,10 +53,15 @@ func (s *String) Set(value any) {
 	}
 }
 
+func (s *String) String() string {
+	return string(s.value)
+}
+
 type Decoder interface {
 	Unmarshal(d *Node, data Buffer)
 	Get() any
 	Set(value any)
+	fmt.Stringer
 }
 
 type Node struct {
@@ -79,35 +84,35 @@ func NewString(encoding encoding.Encoding, length int) *Node {
 	}
 }
 
-func (d *Node) Then(next *Node) *Node {
-	d.next = append(d.next, *next)
-	next.prev = d
+func (n *Node) Then(next *Node) *Node {
+	n.next = append(n.next, *next)
+	next.prev = n
 
 	return next
 }
 
-func (d *Node) Unmarshal(data Buffer) {
-	if d.prev != nil {
-		d.prev.Unmarshal(data)
-		d.start = d.prev.end
-		d.end = d.start
+func (n *Node) Unmarshal(data Buffer) {
+	if n.prev != nil {
+		n.prev.Unmarshal(data)
+		n.start = n.prev.end
+		n.end = n.start
 	}
 
-	d.decoder.Unmarshal(d, data)
+	n.decoder.Unmarshal(n, data)
 }
 
-func (d *Node) Get() any {
-	return d.decoder.Get()
+func (n *Node) Get() any {
+	return n.decoder.Get()
 }
 
-func (d *Node) Set(value any) {
-	d.decoder.Set(value)
+func (n *Node) Set(value any) {
+	n.decoder.Set(value)
 }
 
-func (d *Node) String() string {
-	if d.prev != nil {
-		return d.prev.String() + "/" + fmt.Sprintf("%v", d.Get())
+func (n *Node) String() string {
+	if n.prev != nil {
+		return n.prev.String() + "/" + n.decoder.String()
 	}
 
-	return fmt.Sprintf("%v", d.Get())
+	return n.decoder.String()
 }
