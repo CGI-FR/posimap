@@ -63,11 +63,12 @@ search:
 			return runes, io.EOF
 		}
 
-		for idx := range len(sep) {
+		for idx := range sep {
 			if raw[idx] != sep[idx] {
 				r := s.charmap.DecodeByte(raw[0])
 				runes = append(runes, r)
 				_, _ = s.reader.Discard(1)
+
 				continue search
 			}
 		}
@@ -75,6 +76,7 @@ search:
 		// If we reach here, it means we found the separator.
 		// Discard the bytes that were read from the source.
 		_, _ = s.reader.Discard(len(sep))
+
 		break
 	}
 

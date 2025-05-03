@@ -49,6 +49,8 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 }
 
 func (u *Unfold) execute(_ *cobra.Command, _ []string) {
+	log.Info().Msg("Unfold command is disabled for now")
+
 	// source := object.NewJSONLineSource(os.Stdin, unicode.UTF8)
 	// sink := record.NewRecordSink(os.Stdout)
 

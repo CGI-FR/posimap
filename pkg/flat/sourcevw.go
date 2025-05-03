@@ -76,7 +76,7 @@ search:
 			return runes, io.EOF
 		}
 
-		for idx := range len(sep) {
+		for idx := range sep {
 			if raw[idx] != sep[idx] {
 				nDst, _, _ := s.decoder.Transform(s.working, raw, false)
 
@@ -98,6 +98,7 @@ search:
 		// If we reach here, it means we found the separator.
 		// Discard the bytes that were read from the source.
 		_, _ = s.reader.Discard(len(sep))
+
 		break
 	}
 

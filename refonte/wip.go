@@ -25,6 +25,7 @@ func (b *StaticBuffer) Peek(start, length int) []byte {
 	if start+length > len(b.data) {
 		return nil
 	}
+
 	return b.data[start : start+length]
 }
 
