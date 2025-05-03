@@ -9,7 +9,7 @@ import (
 
 func Example() {
 	// Example usage of the String struct
-	data := refonte.Buffer("Héllo, World!   ")
+	data := refonte.NewStaticBuffer([]byte("Héllo, World!   "))
 	encoding := unicode.UTF8
 
 	str := refonte.NewString(encoding, 5).

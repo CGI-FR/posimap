@@ -7,7 +7,26 @@ import (
 	"golang.org/x/text/encoding"
 )
 
-type Buffer []byte
+type Buffer interface {
+	Peek(start, length int) []byte
+}
+
+type StaticBuffer struct {
+	data []byte
+}
+
+func NewStaticBuffer(data []byte) *StaticBuffer {
+	return &StaticBuffer{
+		data: data,
+	}
+}
+
+func (b *StaticBuffer) Peek(start, length int) []byte {
+	if start+length > len(b.data) {
+		return nil
+	}
+	return b.data[start : start+length]
+}
 
 type String struct {
 	decoder *encoding.Decoder
@@ -19,7 +38,7 @@ func (s *String) Unmarshal(node *Node, data Buffer) {
 	working := make([]byte, utf8.UTFMax)
 
 	for idx := range s.length {
-		raw := data[node.end : node.end+utf8.UTFMax]
+		raw := data.Peek(node.end, utf8.UTFMax)
 
 		nDst, _, _ := s.decoder.Transform(working, raw, false)
 
