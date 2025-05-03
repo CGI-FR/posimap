@@ -4,7 +4,7 @@ type Static struct {
 	data []byte
 }
 
-func NewBufferStatic(data []byte) *Static {
+func NewStatic(data []byte) *Static {
 	return &Static{
 		data: data,
 	}
