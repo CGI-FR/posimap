@@ -39,10 +39,6 @@ func (n *NodeValue) getEnd() int {
 	return n.end
 }
 
-func (n *NodeValue) increaseEnd(size int) {
-	n.end += size
-}
-
 func (n *NodeValue) setPrev(node Node) {
 	n.prev = node
 }
@@ -54,7 +50,11 @@ func (n *NodeValue) Unmarshal(data Buffer) {
 		n.end = n.start
 	}
 
-	n.element = n.decoder.Unmarshal(n, data)
+	var size int
+
+	n.element, size = n.decoder.Unmarshal(n, data, n.end)
+
+	n.end += size
 }
 
 func (n *NodeValue) String() string {

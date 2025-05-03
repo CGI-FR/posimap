@@ -46,10 +46,6 @@ func (n *NodeKeyed) getEnd() int {
 	return n.end
 }
 
-func (n *NodeKeyed) increaseEnd(size int) {
-	n.end += size
-}
-
 func (n *NodeKeyed) setPrev(node Node) {
 	n.prev = node
 }
@@ -61,9 +57,12 @@ func (n *NodeKeyed) Unmarshal(data Buffer) {
 		n.end = n.start
 	}
 
+	var size int
+
 	for _, key := range n.keys {
 		dec := n.values[key]
-		n.element[key] = dec.Unmarshal(n, data)
+		n.element[key], size = dec.Unmarshal(n, data, n.end)
+		n.end += size
 	}
 }
 
