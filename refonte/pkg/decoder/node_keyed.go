@@ -51,11 +51,9 @@ func (n *NodeKeyed) Unmarshal(data Buffer) {
 		if idx == 0 {
 			n.state.start = prev._state().end
 			n.state.end = n.state.start
-		} else {
+		} else if n.state.end != prev._state().end {
 			// assert n.state.end == prev._state().end
-			if n.state.end != prev._state().end {
-				panic("inconsistent end state")
-			}
+			panic("inconsistent end state")
 		}
 	}
 }
