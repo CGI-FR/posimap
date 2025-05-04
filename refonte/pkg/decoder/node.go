@@ -2,14 +2,25 @@ package decoder
 
 type Node interface {
 	Unmarshal(data Buffer)
-	Chain(next Node) Node
 	_state() *nodeState
 }
 
+type Nodes []Node
+
 type nodeState struct {
-	prev Node
-	next []Node
+	prev Nodes
+	next Nodes
 
 	start int
 	end   int
+}
+
+func (set Nodes) Chain(next ...Node) {
+	for _, node := range set {
+		node._state().next = next
+	}
+
+	for _, node := range next {
+		node._state().prev = set
+	}
 }

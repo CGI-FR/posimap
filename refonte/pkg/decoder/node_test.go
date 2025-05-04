@@ -21,8 +21,7 @@ func Example() {
 	record.Add("comma", decoder.NewNode(comma))
 	record.Add("secondWord", decoder.NewNode(secondWord))
 	record.Add("exclamation", decoder.NewNode(exclamation))
-	last, _ := record.ValueForKey("exclamation")
-	last.(decoder.Node).Unmarshal(data)
+	record.Unmarshal(data)
 
 	fmt.Println("{")
 

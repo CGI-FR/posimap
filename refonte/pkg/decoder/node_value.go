@@ -20,22 +20,23 @@ func NewNode(decoder Decoder) *NodeValue {
 	}
 }
 
-func (n *NodeValue) Chain(next Node) Node { //nolint:ireturn
-	n.state.next = append(n.state.next, next)
-	next._state().prev = n
-
-	return next
-}
-
 func (n *NodeValue) _state() *nodeState {
 	return n.state
 }
 
 func (n *NodeValue) Unmarshal(data Buffer) {
-	if n.state.prev != nil {
-		n.state.prev.Unmarshal(data)
-		n.state.start = n.state.prev._state().end
-		n.state.end = n.state.start
+	for idx, prev := range n.state.prev {
+		prev.Unmarshal(data)
+
+		if idx == 0 {
+			n.state.start = prev._state().end
+			n.state.end = n.state.start
+		} else {
+			// assert n.state.end == prev._state().end
+			if n.state.end != prev._state().end {
+				panic("inconsistent end state")
+			}
+		}
 	}
 
 	var size int

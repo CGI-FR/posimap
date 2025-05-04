@@ -1,7 +1,6 @@
 package decoder
 
 import (
-	"fmt"
 	"iter"
 )
 
@@ -23,33 +22,22 @@ func NewNodeKeyed() *NodeKeyed {
 }
 
 func (n *NodeKeyed) Add(key string, value Node) {
-	if len(n.keys) == 0 && n.state.prev != nil {
-		n.state.prev.Chain(value)
-	} else if len(n.keys) > 0 {
-		n.values[n.keys[len(n.keys)-1]].Chain(value)
-	}
-
-	value.Chain(n)
+	n.state.prev.Chain(value)
+	n.state.prev = []Node{value}
+	value._state().next = []Node{n}
 
 	n.keys = append(n.keys, key)
 	n.values[key] = value
 }
 
-func (n *NodeKeyed) Redefine(key, redefined string, value Node) {
-	// assert redefined == last key
-	if n.keys[len(n.keys)-1] != redefined {
-		panic(fmt.Sprintf("redefined key %s is not the last key %s", redefined, n.keys[len(n.keys)-1]))
-	}
+func (n *NodeKeyed) Redefine(key, redefine string, value Node) {
+	redefined := n.values[redefine]
 
-	n.Add(key, value)
-	n.redefines[key] = true
-}
+	value._state().prev = redefined._state().prev
+	value._state().next = redefined._state().next
 
-func (n *NodeKeyed) Chain(next Node) Node { //nolint:ireturn
-	n.state.next = append(n.state.next, next)
-	next._state().prev = n
-
-	return next
+	n.keys = append(n.keys, key)
+	n.values[key] = value
 }
 
 func (n *NodeKeyed) _state() *nodeState {
@@ -57,10 +45,18 @@ func (n *NodeKeyed) _state() *nodeState {
 }
 
 func (n *NodeKeyed) Unmarshal(data Buffer) {
-	if n.state.prev != nil {
-		n.state.prev.Unmarshal(data)
-		n.state.start = n.state.prev._state().end
-		n.state.end = n.state.start
+	for idx, prev := range n.state.prev {
+		prev.Unmarshal(data)
+
+		if idx == 0 {
+			n.state.start = prev._state().end
+			n.state.end = n.state.start
+		} else {
+			// assert n.state.end == prev._state().end
+			if n.state.end != prev._state().end {
+				panic("inconsistent end state")
+			}
+		}
 	}
 }
 
