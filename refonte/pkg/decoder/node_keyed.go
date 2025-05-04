@@ -23,8 +23,8 @@ func NewNodeKeyed() *NodeKeyed {
 
 func (n *NodeKeyed) Add(key string, value Node) {
 	n.state.prev.Chain(value)
-	n.state.prev = []Node{value}
-	value._state().next = []Node{n}
+	n.state.prev = NodesOf(value)
+	value._state().next = NodesOf(n)
 
 	n.keys = append(n.keys, key)
 	n.values[key] = value
@@ -32,6 +32,14 @@ func (n *NodeKeyed) Add(key string, value Node) {
 
 func (n *NodeKeyed) Redefine(key, redefine string, value Node) {
 	redefined := n.values[redefine]
+
+	for _, prev := range redefined._state().prev.Nodes() {
+		prev._state().addNext(value)
+	}
+
+	for _, next := range redefined._state().next.Nodes() {
+		next._state().addPrev(value)
+	}
 
 	value._state().prev = redefined._state().prev
 	value._state().next = redefined._state().next
@@ -45,7 +53,7 @@ func (n *NodeKeyed) _state() *nodeState {
 }
 
 func (n *NodeKeyed) Unmarshal(data Buffer) {
-	for idx, prev := range n.state.prev {
+	for idx, prev := range n.state.prev.Nodes() {
 		prev.Unmarshal(data)
 
 		if idx == 0 {

@@ -2,6 +2,7 @@ package decoder_test
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/cgi-fr/posimap/refonte/infra/buffer"
 	"github.com/cgi-fr/posimap/refonte/pkg/decoder"
@@ -41,40 +42,41 @@ func Example() {
 	// }
 }
 
-// func TestRedefine(t *testing.T) {
-// 	data := buffer.NewStatic([]byte("20231001"))
+func TestRedefine(t *testing.T) {
+	data := buffer.NewStatic([]byte("AABB1122"))
 
-// 	date := decoder.NewDecoderString(unicode.UTF8, 8)
-// 	year := decoder.NewDecoderString(unicode.UTF8, 4)
-// 	month := decoder.NewDecoderString(unicode.UTF8, 2)
-// 	day := decoder.NewDecoderString(unicode.UTF8, 2)
+	group1 := decoder.NewDecoderString(unicode.UTF8, 2)
+	group2 := decoder.NewDecoderString(unicode.UTF8, 2)
+	group3 := decoder.NewDecoderString(unicode.UTF8, 2)
+	group4 := decoder.NewDecoderString(unicode.UTF8, 2)
+	groups := decoder.NewNodeKeyed()
+	groups.Add("group1", decoder.NewNode(group1)) // group1<->groups
+	groups.Add("group2", decoder.NewNode(group2)) // group1<->group2<->groups
+	groups.Add("group3", decoder.NewNode(group3)) // group1<->group2<->group3<->groups
+	groups.Add("group4", decoder.NewNode(group4)) // group1<->group2<->group3<->group4<->groups
 
-// 	recordDate := decoder.NewNodeKeyed()
-// 	recordDate.Add("year", year)
-// 	recordDate.Add("month", month)
-// 	recordDate.Add("day", day)
+	letters := decoder.NewDecoderString(unicode.UTF8, 4)
+	numbers := decoder.NewDecoderString(unicode.UTF8, 4)
+	chars := decoder.NewNodeKeyed()
+	chars.Add("letters", decoder.NewNode(letters))
+	chars.Add("numbers", decoder.NewNode(numbers))
 
-// 	record := decoder.NewNodeKeyed()
-// 	record.Add("fulldate", date)
-// 	record.Redefine("date", "fulldate", recordDate)
-// 	record.Redefined("secondWord", "comma", secondWord)
-// 	record.Add("exclamation", exclamation)
-// 	record.Unmarshal(data)
+	record := decoder.NewNodeKeyed()
+	record.Add("groups", groups) // groups<->record
+	// record.Redefine("chars", "groups", chars)
+	record.Unmarshal(data)
 
-// 	fmt.Println("{")
+	fmt.Println("{")
 
-// 	for key, value := range record.KeyValuePairs() {
-// 		fmt.Printf(`    "%s": "%v"`, key, value)
-// 		fmt.Println()
-// 	}
+	for key, value := range groups.KeyValuePairs() {
+		fmt.Printf(`    "%s": "%v"`, key, value)
+		fmt.Println()
+	}
 
-// 	fmt.Println("}")
+	for key, value := range chars.KeyValuePairs() {
+		fmt.Printf(`    "%s": "%v"`, key, value)
+		fmt.Println()
+	}
 
-// 	// Output:
-// 	// {
-// 	//     "firstWord": "Héllo"
-// 	//     "comma": ", "
-// 	//     "secondWord": "World"
-// 	//     "exclamation": "!"
-// 	// }
-// }
+	fmt.Println("}")
+}

@@ -25,7 +25,7 @@ func (n *NodeValue) _state() *nodeState {
 }
 
 func (n *NodeValue) Unmarshal(data Buffer) {
-	for idx, prev := range n.state.prev {
+	for idx, prev := range n.state.prev.Nodes() {
 		prev.Unmarshal(data)
 
 		if idx == 0 {
