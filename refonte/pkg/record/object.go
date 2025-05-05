@@ -42,3 +42,23 @@ func (o *Object) Marshal(buffer api.Buffer) error {
 
 	return nil
 }
+
+func (o *Object) Export(writer api.StructWriter) error {
+	for _, record := range o.records {
+		if err := record.Export(writer); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	}
+
+	return nil
+}
+
+func (o *Object) Import(reader api.StructReader) error {
+	for _, record := range o.records {
+		if err := record.Import(reader); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	}
+
+	return nil
+}
