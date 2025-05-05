@@ -56,18 +56,26 @@ func (o *Object) Marshal(buffer api.Buffer) error {
 	return nil
 }
 
-func (o *Object) Export(writer api.StructWriter) error {
+func (o *Object) Export(writer api.StructWriter, feedback func(api.Predicate) bool) error {
 	if err := writer.WriteToken(api.StructTokenObjectStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
-	for idx, key := range o.keys {
+	first := true
+
+	for _, key := range o.keys {
 		record := o.records[key]
 
-		if idx > 0 {
+		if ok := feedback(o.exports[key]); !ok {
+			continue
+		}
+
+		if !first {
 			if err := writer.WriteToken(api.StructTokenSeparator); err != nil {
 				return fmt.Errorf("%w", err)
 			}
+		} else {
+			first = false
 		}
 
 		if err := writer.WriteKey(key); err != nil {
