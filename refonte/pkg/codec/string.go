@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/cgi-fr/posimap/refonte/api"
 	"golang.org/x/text/encoding/charmap"
@@ -16,22 +17,22 @@ var (
 
 type String struct {
 	charmap charmap.Charmap
-	offset  int
 	length  int
+	trim    bool
 }
 
-func NewString(charmap charmap.Charmap, offset int, length int) *String {
+func NewString(charmap charmap.Charmap, length int, trim bool) *String {
 	return &String{
 		charmap: charmap,
-		offset:  offset,
 		length:  length,
+		trim:    trim,
 	}
 }
 
-func (s *String) Decode(buffer api.Buffer) (any, error) {
+func (s *String) Decode(buffer api.Buffer, offset int) (any, error) {
 	runes := make([]rune, 0, s.length)
 
-	bytes, err := buffer.Slice(s.offset, s.length)
+	bytes, err := buffer.Slice(offset, s.length)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, fmt.Errorf("%w", err)
 	}
@@ -40,10 +41,14 @@ func (s *String) Decode(buffer api.Buffer) (any, error) {
 		runes = append(runes, s.charmap.DecodeByte(b))
 	}
 
+	if s.trim {
+		return strings.TrimRight(string(runes), BlankRunes), err
+	}
+
 	return string(runes), err
 }
 
-func (s *String) Encode(buffer api.Buffer, value any) error {
+func (s *String) Encode(buffer api.Buffer, offset int, value any) error {
 	str, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("%w: got %T", ErrExpectedString, value)
@@ -64,7 +69,7 @@ func (s *String) Encode(buffer api.Buffer, value any) error {
 		bytes = append(bytes, b)
 	}
 
-	if err := buffer.Write(s.offset, bytes); err != nil {
+	if err := buffer.Write(offset, bytes); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
