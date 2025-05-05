@@ -10,15 +10,13 @@ type Value struct {
 	offset  int
 	decoder api.Decoder
 	encoder api.Encoder
-	export  api.Predicate
 }
 
-func NewValue(offset int, codec api.Codec, export api.Predicate) *Value {
+func NewValue(offset int, codec api.Codec) *Value {
 	return &Value{
 		offset:  offset,
 		decoder: codec,
 		encoder: codec,
-		export:  export,
 	}
 }
 
@@ -39,11 +37,7 @@ func (v *Value) Marshal(buffer api.Buffer, value any) error {
 	return nil
 }
 
-func (v *Value) Export(buffer api.Buffer, context any, writer api.StructWriter) error {
-	if v.export != nil && !v.export(context) {
-		return nil
-	}
-
+func (v *Value) Export(buffer api.Buffer, writer api.StructWriter) error {
 	value, err := v.Unmarshal(buffer)
 	if err != nil {
 		return fmt.Errorf("%w", err)

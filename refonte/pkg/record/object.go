@@ -13,7 +13,7 @@ type Object struct {
 	offset  int
 	keys    []string
 	records map[string]api.Record
-	export  api.Predicate
+	exports map[string]api.Predicate
 }
 
 func NewObject(offset int, export api.Predicate) *Object {
@@ -21,13 +21,14 @@ func NewObject(offset int, export api.Predicate) *Object {
 		offset:  offset,
 		keys:    make([]string, 0),
 		records: make(map[string]api.Record),
-		export:  export,
+		exports: make(map[string]api.Predicate),
 	}
 }
 
-func (o *Object) Add(key string, record api.Record) {
+func (o *Object) Add(key string, record api.Record, export api.Predicate) {
 	o.keys = append(o.keys, key)
 	o.records[key] = record
+	o.exports[key] = export
 }
 
 func (o *Object) Unmarshal(buffer api.Buffer) (any, error) {
@@ -69,17 +70,18 @@ func (o *Object) Marshal(buffer api.Buffer, value any) error {
 	return nil
 }
 
-func (o *Object) Export(buffer api.Buffer, context any, writer api.StructWriter) error {
-	if o.export != nil && !o.export(context) {
-		return nil
-	}
-
+func (o *Object) Export(buffer api.Buffer, writer api.StructWriter) error {
 	if err := writer.WriteToken(api.StructTokenObjectStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	for idx, key := range o.keys {
 		record := o.records[key]
+
+		export := o.exports[key]
+		if export != nil && !export(nil) {
+			continue
+		}
 
 		if idx > 0 {
 			if err := writer.WriteToken(api.StructTokenSeparator); err != nil {
@@ -91,7 +93,7 @@ func (o *Object) Export(buffer api.Buffer, context any, writer api.StructWriter)
 			return fmt.Errorf("%w", err)
 		}
 
-		if err := record.Export(buffer, context, writer); err != nil {
+		if err := record.Export(buffer, writer); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}
