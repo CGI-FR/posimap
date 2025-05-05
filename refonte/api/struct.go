@@ -3,13 +3,13 @@ package api
 type StructToken rune
 
 const (
-	StructTokenOpenRecord  StructToken = '('
-	StructTokenCloseRecord StructToken = ')'
-	StructTokenOpenObject  StructToken = '{'
-	StructTokenCloseObject StructToken = '}'
-	StructTokenOpenArray   StructToken = '['
-	StructTokenCloseArray  StructToken = ']'
-	StructTokenNext        StructToken = ','
+	StructTokenRecordStart StructToken = '('
+	StructTokenRecordEnd   StructToken = ')'
+	StructTokenObjectStart StructToken = '{'
+	StructTokenObjectEnd   StructToken = '}'
+	StructTokenArrayStart  StructToken = '['
+	StructTokenArrayEnd    StructToken = ']'
+	StructTokenSeparator   StructToken = ','
 	StructTokenKey         StructToken = ':'
 	StructTokenString      StructToken = '"'
 )
