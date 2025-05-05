@@ -24,7 +24,7 @@ type StructWriter interface {
 type StructReader interface {
 	Resource
 	Peek() (StructToken, error)
-	Skip() (StructToken, error)
+	Read() (StructToken, error)
 	ReadString() (string, error)
 	ReadKey() (string, error)
 }
