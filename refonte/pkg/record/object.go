@@ -7,10 +7,7 @@ import (
 	"github.com/cgi-fr/posimap/refonte/api"
 )
 
-var (
-	ErrUnexpectedObjectType = errors.New("unexpected object type")
-	ErrUnexpectedKey        = errors.New("unexpected key")
-)
+var ErrUnexpectedObjectType = errors.New("unexpected object type")
 
 type Object struct {
 	offset  int
@@ -61,7 +58,7 @@ func (o *Object) Marshal(buffer api.Buffer, value any) error {
 
 		val, exists := decoded[key]
 		if !exists {
-			return fmt.Errorf("%w: %s", ErrUnexpectedKey, key)
+			continue
 		}
 
 		if err := record.Marshal(buffer, val); err != nil {
