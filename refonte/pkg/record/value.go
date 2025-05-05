@@ -60,3 +60,16 @@ func (v *Value) Export(buffer api.Buffer, context any, writer api.StructWriter) 
 
 	return nil
 }
+
+func (v *Value) Import(buffer api.Buffer, reader api.StructReader) (any, error) {
+	str, err := reader.ReadString()
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+
+	if err := v.Marshal(buffer, str); err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+
+	return str, nil
+}
