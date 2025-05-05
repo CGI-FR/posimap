@@ -68,3 +68,7 @@ func (v *Value) Import(reader api.StructReader) error {
 
 	return nil
 }
+
+func (v *Value) AsPrimitive() any {
+	return v.content
+}

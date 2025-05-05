@@ -12,6 +12,10 @@ const (
 	StructTokenSeparator   StructToken = ','
 	StructTokenKey         StructToken = ':'
 	StructTokenString      StructToken = '"'
+	StructTokenNumber      StructToken = '0'
+	StructTokenBoolean     StructToken = 't'
+	StructTokenNull        StructToken = 'n'
+	StructTokenEOF         StructToken = 0
 )
 
 type StructWriter interface {
