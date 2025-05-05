@@ -20,24 +20,17 @@ func NewNamed(name string, record api.Record, export api.Predicate) Named {
 	}
 }
 
-func (n Named) Unmarshal(buffer api.Buffer, obj map[string]any) error {
-	decoded, err := n.record.Unmarshal(buffer)
+func (n Named) Unmarshal(buffer api.Buffer) error {
+	err := n.record.Unmarshal(buffer)
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
-	obj[n.name] = decoded
-
 	return nil
 }
 
-func (n Named) Marshal(buffer api.Buffer, obj map[string]any) error {
-	value, exists := obj[n.name]
-	if !exists {
-		return nil
-	}
-
-	if err := n.record.Marshal(buffer, value); err != nil {
+func (n Named) Marshal(buffer api.Buffer) error {
+	if err := n.record.Marshal(buffer); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 

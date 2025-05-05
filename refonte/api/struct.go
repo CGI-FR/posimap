@@ -23,8 +23,8 @@ type StructWriter interface {
 
 type StructReader interface {
 	Resource
-	Peek() (StructToken, error)
-	Read() (StructToken, error)
-	ReadString() (string, error)
+	PeekToken() (StructToken, error)
+	ReadToken() (StructToken, error)
+	ReadValue() (any, error)
 	ReadKey() (string, error)
 }

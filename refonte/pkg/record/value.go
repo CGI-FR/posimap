@@ -1,15 +1,19 @@
 package record
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cgi-fr/posimap/refonte/api"
 )
 
+var ErrUnexpectedValueType = errors.New("unexpected value type")
+
 type Value struct {
 	offset  int
 	decoder api.Decoder
 	encoder api.Encoder
+	content any
 }
 
 func NewValue(offset int, codec api.Codec) *Value {
@@ -17,53 +21,50 @@ func NewValue(offset int, codec api.Codec) *Value {
 		offset:  offset,
 		decoder: codec,
 		encoder: codec,
+		content: nil,
 	}
 }
 
-func (v *Value) Unmarshal(buffer api.Buffer) (any, error) {
-	decoded, err := v.decoder.Decode(buffer, v.offset)
+func (v *Value) Unmarshal(buffer api.Buffer) error {
+	var err error
+
+	v.content, err = v.decoder.Decode(buffer, v.offset)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-
-	return decoded, nil
-}
-
-func (v *Value) Marshal(buffer api.Buffer, value any) error {
-	if err := v.encoder.Encode(buffer, v.offset, value); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	return nil
 }
 
-func (v *Value) Export(buffer api.Buffer, writer api.StructWriter) error {
-	value, err := v.Unmarshal(buffer)
+func (v *Value) Marshal(buffer api.Buffer) error {
+	err := v.encoder.Encode(buffer, v.offset, v.content)
 	if err != nil {
-		return fmt.Errorf("%w", err)
-	}
-
-	str, ok := value.(string)
-	if !ok {
-		panic("expected string value")
-	}
-
-	if err := writer.WriteString(str); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	return nil
 }
 
-func (v *Value) Import(buffer api.Buffer, reader api.StructReader) (any, error) {
-	str, err := reader.ReadString()
+func (v *Value) Export(writer api.StructWriter) error {
+	switch typed := v.content.(type) {
+	case string:
+		if err := writer.WriteString(typed); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	default:
+		return fmt.Errorf("%w: %T", ErrUnexpectedValueType, typed)
+	}
+
+	return nil
+}
+
+func (v *Value) Import(reader api.StructReader) error {
+	var err error
+
+	v.content, err = reader.ReadValue()
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return fmt.Errorf("%w", err)
 	}
 
-	if err := v.Marshal(buffer, str); err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-
-	return str, nil
+	return nil
 }
