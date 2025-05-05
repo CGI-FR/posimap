@@ -56,9 +56,14 @@ func (o *Object) Marshal(buffer api.Buffer) error {
 	return nil
 }
 
-func (o *Object) Export(writer api.StructWriter, feedback func(api.Predicate) bool) error {
+//nolint:cyclop
+func (o *Object) Export(writer api.StructWriter, feedback ...api.Record) error {
 	if err := writer.WriteToken(api.StructTokenObjectStart); err != nil {
 		return fmt.Errorf("%w", err)
+	}
+
+	if len(feedback) == 0 {
+		feedback = []api.Record{o}
 	}
 
 	first := true
@@ -66,7 +71,8 @@ func (o *Object) Export(writer api.StructWriter, feedback func(api.Predicate) bo
 	for _, key := range o.keys {
 		record := o.records[key]
 
-		if ok := feedback(o.exports[key]); !ok {
+		if export, ok := o.exports[key]; ok && len(feedback) > 0 && !export(feedback[0]) {
+			// Skip the record if the export predicate returns false
 			continue
 		}
 
