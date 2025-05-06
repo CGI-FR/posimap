@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cgi-fr/posimap/refonte/api"
+	"github.com/cgi-fr/posimap/refonte/driven/document"
 )
 
 var ErrUnexpectedValueType = errors.New("unexpected value type")
@@ -45,11 +46,11 @@ func (v *Value) Marshal(buffer api.Buffer) error {
 	return nil
 }
 
-func (v *Value) export(writer api.StructWriter, _ Record) error {
+func (v *Value) export(writer document.Writer, _ Record) error {
 	return v.Export(writer)
 }
 
-func (v *Value) Export(writer api.StructWriter) error {
+func (v *Value) Export(writer document.Writer) error {
 	switch typed := v.content.(type) {
 	case string:
 		if err := writer.WriteString(typed); err != nil {
@@ -62,10 +63,10 @@ func (v *Value) Export(writer api.StructWriter) error {
 	return nil
 }
 
-func (v *Value) Import(reader api.StructReader) error {
+func (v *Value) Import(reader document.Reader) error {
 	var err error
 
-	v.content, err = reader.ReadValue()
+	_, v.content, err = reader.ReadValue()
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cgi-fr/posimap/refonte/api"
-	"github.com/cgi-fr/posimap/refonte/pkg/stoken"
+	"github.com/cgi-fr/posimap/refonte/driven/document"
 )
 
 var (
@@ -57,13 +57,13 @@ func (o *Object) Marshal(buffer api.Buffer) error {
 	return nil
 }
 
-func (o *Object) Export(writer api.StructWriter) error {
+func (o *Object) Export(writer document.Writer) error {
 	return o.export(writer, o)
 }
 
 //nolint:cyclop
-func (o *Object) export(writer api.StructWriter, feedback Record) error {
-	if err := writer.WriteToken(stoken.ObjectStart); err != nil {
+func (o *Object) export(writer document.Writer, feedback Record) error {
+	if err := writer.WriteToken(document.TokenObjStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -78,7 +78,7 @@ func (o *Object) export(writer api.StructWriter, feedback Record) error {
 		}
 
 		if !first {
-			if err := writer.WriteToken(stoken.Separator); err != nil {
+			if err := writer.WriteToken(document.TokenValSep); err != nil {
 				return fmt.Errorf("%w", err)
 			}
 		} else {
@@ -94,27 +94,27 @@ func (o *Object) export(writer api.StructWriter, feedback Record) error {
 		}
 	}
 
-	if err := writer.WriteToken(stoken.ObjectEnd); err != nil {
+	if err := writer.WriteToken(document.TokenObjEnd); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	return nil
 }
 
-func (o *Object) Import(reader api.StructReader) error {
+func (o *Object) Import(reader document.Reader) error {
 	if token, err := reader.ReadToken(); err != nil {
 		return fmt.Errorf("%w", err)
-	} else if token != stoken.ObjectStart {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, stoken.ObjectStart)
+	} else if token != document.TokenObjStart {
+		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenObjStart)
 	}
 
 	for {
 		if token, err := reader.ReadToken(); err != nil {
 			return fmt.Errorf("%w", err)
-		} else if token == stoken.ObjectEnd {
+		} else if token == document.TokenObjEnd {
 			break
-		} else if token != stoken.Key {
-			return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, stoken.Key)
+		} else if token != document.TokenKey {
+			return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenKey)
 		}
 
 		key, err := reader.ReadKey()

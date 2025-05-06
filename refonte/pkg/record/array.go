@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cgi-fr/posimap/refonte/api"
-	"github.com/cgi-fr/posimap/refonte/pkg/stoken"
+	"github.com/cgi-fr/posimap/refonte/driven/document"
 )
 
 type Array struct {
@@ -41,18 +41,18 @@ func (a *Array) Marshal(buffer api.Buffer) error {
 	return nil
 }
 
-func (a *Array) Export(writer api.StructWriter) error {
+func (a *Array) Export(writer document.Writer) error {
 	return a.export(writer, a)
 }
 
-func (a *Array) export(writer api.StructWriter, _ Record) error {
-	if err := writer.WriteToken(stoken.ArrayStart); err != nil {
+func (a *Array) export(writer document.Writer, _ Record) error {
+	if err := writer.WriteToken(document.TokenArrStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	for idx, record := range a.records {
 		if idx > 0 {
-			if err := writer.WriteToken(stoken.Separator); err != nil {
+			if err := writer.WriteToken(document.TokenValSep); err != nil {
 				return fmt.Errorf("%w", err)
 			}
 		}
@@ -62,18 +62,18 @@ func (a *Array) export(writer api.StructWriter, _ Record) error {
 		}
 	}
 
-	if err := writer.WriteToken(stoken.ArrayEnd); err != nil {
+	if err := writer.WriteToken(document.TokenArrEnd); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	return nil
 }
 
-func (a *Array) Import(reader api.StructReader) error {
+func (a *Array) Import(reader document.Reader) error {
 	if token, err := reader.ReadToken(); err != nil {
 		return fmt.Errorf("%w", err)
-	} else if token != stoken.ArrayStart {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, stoken.ArrayStart)
+	} else if token != document.TokenArrStart {
+		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenArrStart)
 	}
 
 	for _, record := range a.records {
@@ -84,8 +84,8 @@ func (a *Array) Import(reader api.StructReader) error {
 
 	if token, err := reader.ReadToken(); err != nil {
 		return fmt.Errorf("%w", err)
-	} else if token != stoken.ArrayEnd {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, stoken.ArrayEnd)
+	} else if token != document.TokenArrEnd {
+		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenArrEnd)
 	}
 
 	return nil
