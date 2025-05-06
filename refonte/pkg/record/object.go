@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cgi-fr/posimap/refonte/api"
+	"github.com/cgi-fr/posimap/refonte/pkg/stoken"
 )
 
 var (
@@ -62,7 +63,7 @@ func (o *Object) Export(writer api.StructWriter) error {
 
 //nolint:cyclop
 func (o *Object) export(writer api.StructWriter, feedback Record) error {
-	if err := writer.WriteToken(api.StructTokenObjectStart); err != nil {
+	if err := writer.WriteToken(stoken.ObjectStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -77,7 +78,7 @@ func (o *Object) export(writer api.StructWriter, feedback Record) error {
 		}
 
 		if !first {
-			if err := writer.WriteToken(api.StructTokenSeparator); err != nil {
+			if err := writer.WriteToken(stoken.Separator); err != nil {
 				return fmt.Errorf("%w", err)
 			}
 		} else {
@@ -93,7 +94,7 @@ func (o *Object) export(writer api.StructWriter, feedback Record) error {
 		}
 	}
 
-	if err := writer.WriteToken(api.StructTokenObjectEnd); err != nil {
+	if err := writer.WriteToken(stoken.ObjectEnd); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -103,17 +104,17 @@ func (o *Object) export(writer api.StructWriter, feedback Record) error {
 func (o *Object) Import(reader api.StructReader) error {
 	if token, err := reader.ReadToken(); err != nil {
 		return fmt.Errorf("%w", err)
-	} else if token != api.StructTokenObjectStart {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, api.StructTokenObjectStart)
+	} else if token != stoken.ObjectStart {
+		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, stoken.ObjectStart)
 	}
 
 	for {
 		if token, err := reader.ReadToken(); err != nil {
 			return fmt.Errorf("%w", err)
-		} else if token == api.StructTokenObjectEnd {
+		} else if token == stoken.ObjectEnd {
 			break
-		} else if token != api.StructTokenKey {
-			return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, api.StructTokenKey)
+		} else if token != stoken.Key {
+			return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, stoken.Key)
 		}
 
 		key, err := reader.ReadKey()

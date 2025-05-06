@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/cgi-fr/posimap/refonte/api"
+	"github.com/cgi-fr/posimap/refonte/pkg/stoken"
 )
 
 type Writer struct {
@@ -33,23 +34,23 @@ func (w *Writer) Close() error {
 //nolint:cyclop
 func (w *Writer) WriteToken(token api.StructToken) error {
 	switch token { //nolint:exhaustive
-	case api.StructTokenObjectStart:
+	case stoken.ObjectStart:
 		if _, err := w.writer.WriteRune('{'); err != nil {
 			return fmt.Errorf("%w", err)
 		}
-	case api.StructTokenObjectEnd:
+	case stoken.ObjectEnd:
 		if _, err := w.writer.WriteRune('}'); err != nil {
 			return fmt.Errorf("%w", err)
 		}
-	case api.StructTokenArrayStart:
+	case stoken.ArrayStart:
 		if _, err := w.writer.WriteRune('['); err != nil {
 			return fmt.Errorf("%w", err)
 		}
-	case api.StructTokenArrayEnd:
+	case stoken.ArrayEnd:
 		if _, err := w.writer.WriteRune(']'); err != nil {
 			return fmt.Errorf("%w", err)
 		}
-	case api.StructTokenSeparator:
+	case stoken.Separator:
 		if _, err := w.writer.WriteRune(','); err != nil {
 			return fmt.Errorf("%w", err)
 		}

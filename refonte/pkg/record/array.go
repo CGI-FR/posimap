@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cgi-fr/posimap/refonte/api"
+	"github.com/cgi-fr/posimap/refonte/pkg/stoken"
 )
 
 type Array struct {
@@ -45,13 +46,13 @@ func (a *Array) Export(writer api.StructWriter) error {
 }
 
 func (a *Array) export(writer api.StructWriter, _ Record) error {
-	if err := writer.WriteToken(api.StructTokenArrayStart); err != nil {
+	if err := writer.WriteToken(stoken.ArrayStart); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
 	for idx, record := range a.records {
 		if idx > 0 {
-			if err := writer.WriteToken(api.StructTokenSeparator); err != nil {
+			if err := writer.WriteToken(stoken.Separator); err != nil {
 				return fmt.Errorf("%w", err)
 			}
 		}
@@ -61,7 +62,7 @@ func (a *Array) export(writer api.StructWriter, _ Record) error {
 		}
 	}
 
-	if err := writer.WriteToken(api.StructTokenArrayEnd); err != nil {
+	if err := writer.WriteToken(stoken.ArrayEnd); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -71,8 +72,8 @@ func (a *Array) export(writer api.StructWriter, _ Record) error {
 func (a *Array) Import(reader api.StructReader) error {
 	if token, err := reader.ReadToken(); err != nil {
 		return fmt.Errorf("%w", err)
-	} else if token != api.StructTokenArrayStart {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, api.StructTokenArrayStart)
+	} else if token != stoken.ArrayStart {
+		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, stoken.ArrayStart)
 	}
 
 	for _, record := range a.records {
@@ -83,8 +84,8 @@ func (a *Array) Import(reader api.StructReader) error {
 
 	if token, err := reader.ReadToken(); err != nil {
 		return fmt.Errorf("%w", err)
-	} else if token != api.StructTokenArrayEnd {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, api.StructTokenArrayEnd)
+	} else if token != stoken.ArrayEnd {
+		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, stoken.ArrayEnd)
 	}
 
 	return nil
