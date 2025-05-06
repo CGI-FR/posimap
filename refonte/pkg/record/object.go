@@ -14,19 +14,19 @@ var (
 
 type Object struct {
 	keys    []string
-	records map[string]api.Record
+	records map[string]Record
 	exports map[string]api.Predicate
 }
 
 func NewObject() *Object {
 	return &Object{
 		keys:    make([]string, 0),
-		records: make(map[string]api.Record),
+		records: make(map[string]Record),
 		exports: make(map[string]api.Predicate),
 	}
 }
 
-func (o *Object) Add(key string, record api.Record, export api.Predicate) {
+func (o *Object) Add(key string, record Record, export api.Predicate) {
 	o.keys = append(o.keys, key)
 	o.records[key] = record
 	o.exports[key] = export
@@ -56,14 +56,14 @@ func (o *Object) Marshal(buffer api.Buffer) error {
 	return nil
 }
 
+func (o *Object) Export(writer api.StructWriter) error {
+	return o.export(writer, o)
+}
+
 //nolint:cyclop
-func (o *Object) Export(writer api.StructWriter, feedback ...api.Record) error {
+func (o *Object) export(writer api.StructWriter, feedback Record) error {
 	if err := writer.WriteToken(api.StructTokenObjectStart); err != nil {
 		return fmt.Errorf("%w", err)
-	}
-
-	if len(feedback) == 0 {
-		feedback = []api.Record{o}
 	}
 
 	first := true
@@ -71,7 +71,7 @@ func (o *Object) Export(writer api.StructWriter, feedback ...api.Record) error {
 	for _, key := range o.keys {
 		record := o.records[key]
 
-		if export, ok := o.exports[key]; ok && export != nil && len(feedback) > 0 && !export(feedback[0]) {
+		if export, ok := o.exports[key]; ok && export != nil && feedback != nil && !export(feedback) {
 			// Skip the record if the export predicate returns false
 			continue
 		}
