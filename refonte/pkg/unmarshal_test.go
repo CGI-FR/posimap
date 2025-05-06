@@ -28,15 +28,11 @@ func Example() {
 	}
 
 	writer := jsonline.NewWriter(os.Stdout)
-	if err := writer.Open(); err != nil {
-		panic(err)
-	}
-
 	if err := rec.Export(writer); err != nil {
 		panic(err)
 	}
 
-	if err := writer.Close(); err != nil {
+	if err := writer.WriteEOF(); err != nil {
 		panic(err)
 	}
 

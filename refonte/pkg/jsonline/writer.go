@@ -24,18 +24,6 @@ func NewWriter(writer io.Writer) *Writer {
 	}
 }
 
-func (w *Writer) Open() error {
-	return nil
-}
-
-func (w *Writer) Close() error {
-	if err := w.writer.Flush(); err != nil {
-		return fmt.Errorf("%w", err)
-	}
-
-	return nil
-}
-
 //nolint:cyclop
 func (w *Writer) WriteToken(token document.Token) error {
 	var err error
@@ -161,6 +149,14 @@ func (w *Writer) WriteBool(value bool) error {
 
 func (w *Writer) WriteNull() error {
 	if _, err := w.writer.WriteString("null"); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	return nil
+}
+
+func (w *Writer) WriteEOF() error {
+	if err := w.writer.Flush(); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
