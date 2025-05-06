@@ -33,7 +33,7 @@ func (w *Writer) Close() error {
 
 //nolint:cyclop
 func (w *Writer) WriteToken(token api.StructToken) error {
-	switch token { //nolint:exhaustive
+	switch token {
 	case stoken.ObjectStart:
 		if _, err := w.writer.WriteRune('{'); err != nil {
 			return fmt.Errorf("%w", err)
