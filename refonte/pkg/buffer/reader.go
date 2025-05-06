@@ -20,13 +20,18 @@ func NewReader(source io.Reader) *Reader {
 }
 
 func (r *Reader) Slice(offset, length int) ([]byte, error) {
-	var err error
+	requiredLength := offset + length
+	if len(r.buffer) < requiredLength {
+		newBuffer := make([]byte, requiredLength)
+		copy(newBuffer, r.buffer)
+		r.buffer = newBuffer
 
-	if len(r.buffer) < offset+length {
-		_, err = r.source.Read(r.buffer[len(r.buffer) : offset+length])
+		if _, err := r.source.Read(r.buffer[len(r.buffer)-length:]); err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
 	}
 
-	return r.buffer[len(r.buffer) : offset+length], fmt.Errorf("%w", err)
+	return r.buffer[offset:requiredLength], nil
 }
 
 func (r *Reader) Write(_ int, _ []byte) error {

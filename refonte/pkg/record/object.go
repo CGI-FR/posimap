@@ -71,7 +71,7 @@ func (o *Object) Export(writer api.StructWriter, feedback ...api.Record) error {
 	for _, key := range o.keys {
 		record := o.records[key]
 
-		if export, ok := o.exports[key]; ok && len(feedback) > 0 && !export(feedback[0]) {
+		if export, ok := o.exports[key]; ok && export != nil && len(feedback) > 0 && !export(feedback[0]) {
 			// Skip the record if the export predicate returns false
 			continue
 		}

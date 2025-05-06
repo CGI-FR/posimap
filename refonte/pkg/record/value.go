@@ -45,7 +45,7 @@ func (v *Value) Marshal(buffer api.Buffer) error {
 	return nil
 }
 
-func (v *Value) Export(writer api.StructWriter) error {
+func (v *Value) Export(writer api.StructWriter, _ ...api.Record) error {
 	switch typed := v.content.(type) {
 	case string:
 		if err := writer.WriteString(typed); err != nil {

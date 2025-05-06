@@ -16,12 +16,12 @@ var (
 )
 
 type String struct {
-	charmap charmap.Charmap
+	charmap *charmap.Charmap
 	length  int
 	trim    bool
 }
 
-func NewString(charmap charmap.Charmap, length int, trim bool) *String {
+func NewString(charmap *charmap.Charmap, length int, trim bool) *String {
 	return &String{
 		charmap: charmap,
 		length:  length,
