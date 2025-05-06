@@ -3,17 +3,13 @@ package document
 type Token rune
 
 const (
-	TokenDocSep   Token = '\n'
 	TokenObjStart Token = '{'
 	TokenObjEnd   Token = '}'
 	TokenArrStart Token = '['
 	TokenArrEnd   Token = ']'
-	TokenValSep   Token = ','
-	TokenKey      Token = ':' // with String value
-	TokenString   Token = '"' // with String value
-	TokenNumber   Token = '0' // with Number value
-	TokenTrue     Token = 't'
-	TokenFalse    Token = 'f'
+	TokenString   Token = '"' // with string value
+	TokenNumber   Token = '0' // with float64 value
+	TokenTrue     Token = 't' // with bool value
+	TokenFalse    Token = 'f' // with bool value
 	TokenNull     Token = 'n'
-	TokenEOF      Token = 0
 )

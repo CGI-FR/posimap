@@ -50,13 +50,7 @@ func (a *Array) export(writer document.Writer, _ Record) error {
 		return fmt.Errorf("%w", err)
 	}
 
-	for idx, record := range a.records {
-		if idx > 0 {
-			if err := writer.WriteToken(document.TokenValSep); err != nil {
-				return fmt.Errorf("%w", err)
-			}
-		}
-
+	for _, record := range a.records {
 		if err := record.Export(writer); err != nil {
 			return fmt.Errorf("%w", err)
 		}

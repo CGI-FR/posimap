@@ -14,7 +14,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
-func Example() {
+func ExampleRecord_Export() {
 	data := strings.NewReader("JOHN DOE                           1234 ELM STREET               SPRINGFIELD, IL 62704         ")
 	buffer := buffer.NewReader(data)
 

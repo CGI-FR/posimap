@@ -67,8 +67,6 @@ func (o *Object) export(writer document.Writer, feedback Record) error {
 		return fmt.Errorf("%w", err)
 	}
 
-	first := true
-
 	for _, key := range o.keys {
 		record := o.records[key]
 
@@ -77,15 +75,7 @@ func (o *Object) export(writer document.Writer, feedback Record) error {
 			continue
 		}
 
-		if !first {
-			if err := writer.WriteToken(document.TokenValSep); err != nil {
-				return fmt.Errorf("%w", err)
-			}
-		} else {
-			first = false
-		}
-
-		if err := writer.WriteKey(key); err != nil {
+		if err := writer.WriteString(key); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
@@ -113,11 +103,11 @@ func (o *Object) Import(reader document.Reader) error {
 			return fmt.Errorf("%w", err)
 		} else if token == document.TokenObjEnd {
 			break
-		} else if token != document.TokenKey {
-			return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenKey)
+		} else if token != document.TokenString {
+			return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenString)
 		}
 
-		key, err := reader.ReadKey()
+		key, err := reader.ReadString()
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		} else if _, ok := o.records[key]; !ok {
