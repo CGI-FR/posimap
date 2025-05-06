@@ -2,37 +2,57 @@ package jsonline
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 
 	"github.com/cgi-fr/posimap/refonte/driven/document"
 )
 
-var (
-	ErrTokenNeedValue = errors.New("token need a value")
-	ErrUnknownToken   = errors.New("unknown token")
-)
-
 type Writer struct {
-	writer *bufio.Writer
+	writer  *bufio.Writer
+	pointer *Pointer
 }
 
 func NewWriter(writer io.Writer) *Writer {
 	return &Writer{
-		writer: bufio.NewWriter(writer),
+		writer:  bufio.NewWriter(writer),
+		pointer: NewPointer(),
 	}
 }
 
-//nolint:cyclop
-func (w *Writer) WriteToken(token document.Token) error {
+//nolint:cyclop,funlen
+func (w *Writer) WriteValue(token document.Token, value any) error {
 	var err error
 
+	//nolint:exhaustive
 	switch token {
-	case document.TokenDocSep:
-		if _, err = w.writer.WriteRune('\n'); err == nil {
-			err = w.writer.Flush()
+	case document.TokenObjStart:
+		w.pointer.OpenObject()
+	case document.TokenArrStart:
+		w.pointer.OpenArray()
+	case document.TokenObjEnd:
+		if err := w.pointer.CloseObject(); err != nil {
+			return fmt.Errorf("%w", err)
 		}
+	case document.TokenArrEnd:
+		if err := w.pointer.CloseArray(); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	}
+
+	if sep := w.pointer.Shift(); sep != 0 {
+		if _, err := w.writer.WriteRune(sep); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		if sep == '\n' {
+			if err := w.writer.Flush(); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+		}
+	}
+
+	switch token {
 	case document.TokenObjStart:
 		_, err = w.writer.WriteRune('{')
 	case document.TokenObjEnd:
@@ -41,20 +61,24 @@ func (w *Writer) WriteToken(token document.Token) error {
 		_, err = w.writer.WriteRune('[')
 	case document.TokenArrEnd:
 		_, err = w.writer.WriteRune(']')
-	case document.TokenValSep:
-		_, err = w.writer.WriteRune(',')
 	case document.TokenTrue:
 		err = w.WriteBool(true)
 	case document.TokenFalse:
 		err = w.WriteBool(false)
 	case document.TokenNull:
 		err = w.WriteNull()
-	case document.TokenEOF:
-		err = w.writer.Flush()
-	case document.TokenKey:
 	case document.TokenString:
+		if str, ok := value.(string); ok {
+			err = w.WriteString(str)
+		} else {
+			err = fmt.Errorf("%w: %T", ErrUnexpectedType, value)
+		}
 	case document.TokenNumber:
-		err = fmt.Errorf("%w: %v", ErrTokenNeedValue, token)
+		if num, ok := value.(float64); ok {
+			err = w.WriteNumber(num)
+		} else {
+			err = fmt.Errorf("%w: %T", ErrUnexpectedType, value)
+		}
 	default:
 		err = fmt.Errorf("%w: %v", ErrUnknownToken, token)
 	}
@@ -66,31 +90,19 @@ func (w *Writer) WriteToken(token document.Token) error {
 	return nil
 }
 
-//nolint:cyclop
-func (w *Writer) WriteValue(token document.Token, value any) error {
+func (w *Writer) WriteToken(token document.Token) error {
 	switch token {
-	case document.TokenKey:
-		if str, ok := value.(string); ok {
-			return w.WriteKey(str)
-		}
 	case document.TokenString:
-		if str, ok := value.(string); ok {
-			return w.WriteString(str)
-		}
+		return fmt.Errorf("%w: %v", ErrTokenNeedValue, token)
 	case document.TokenNumber:
-		if num, ok := value.(float64); ok {
-			return w.WriteNumber(num)
-		}
-	case document.TokenDocSep:
+		return fmt.Errorf("%w: %v", ErrTokenNeedValue, token)
 	case document.TokenObjStart:
 	case document.TokenObjEnd:
 	case document.TokenArrStart:
 	case document.TokenArrEnd:
-	case document.TokenValSep:
 	case document.TokenTrue:
 	case document.TokenFalse:
 	case document.TokenNull:
-	case document.TokenEOF:
 		return w.WriteToken(token)
 	}
 
