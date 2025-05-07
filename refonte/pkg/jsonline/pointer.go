@@ -13,22 +13,20 @@ var (
 )
 
 type Pointer struct {
-	indexes []*uint
+	indexes []uint
 	levels  string
 }
 
 func NewPointer() *Pointer {
 	return &Pointer{
-		indexes: make([]*uint, 0),
+		indexes: make([]uint, 0),
 		levels:  "",
 	}
 }
 
 func (p *Pointer) OpenObject() {
-	var zero uint
-
 	p.levels += "{"
-	p.indexes = append(p.indexes, &zero)
+	p.indexes = append(p.indexes, 0)
 }
 
 func (p *Pointer) CloseObject() error {
@@ -36,8 +34,8 @@ func (p *Pointer) CloseObject() error {
 		return fmt.Errorf("%w", ErrNoObjectToClose)
 	}
 
-	index := *p.indexes[len(p.indexes)-1]
-	if index%2 == 0 {
+	index := p.indexes[len(p.indexes)-1]
+	if index%2 == 1 {
 		return fmt.Errorf("%w", ErrIncompleteObject)
 	}
 
@@ -48,10 +46,8 @@ func (p *Pointer) CloseObject() error {
 }
 
 func (p *Pointer) OpenArray() {
-	var zero uint
-
 	p.levels += "["
-	p.indexes = append(p.indexes, &zero)
+	p.indexes = append(p.indexes, 0)
 }
 
 func (p *Pointer) CloseArray() error {
@@ -70,7 +66,7 @@ func (p *Pointer) Index() uint {
 		return 0
 	}
 
-	return *p.indexes[len(p.indexes)-1]
+	return p.indexes[len(p.indexes)-1]
 }
 
 func (p *Pointer) Shift() rune {
@@ -78,19 +74,18 @@ func (p *Pointer) Shift() rune {
 		return '\n' // next document requires a new line
 	}
 
-	index := *p.indexes[len(p.indexes)-1]
+	index := p.indexes[len(p.indexes)-1]
 	index++
+	p.indexes[len(p.indexes)-1] = index
+
+	typ := p.levels[len(p.levels)-1]
 
 	if index == 1 {
 		return 0 // first element requires no separator
 	}
 
-	typ := p.levels[len(p.levels)-1]
-
-	switch {
-	case typ == '{' && index%2 == 0:
-		return ','
-	case typ == '{' && index%2 != 0:
+	// objects need a colon as separator between key and value
+	if typ == '{' && index%2 != 0 {
 		return ':'
 	}
 
