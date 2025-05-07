@@ -18,15 +18,15 @@
 package command
 
 import (
+	"errors"
+	"io"
 	"os"
 
 	"github.com/cgi-fr/posimap/internal/infra/config"
-	"github.com/cgi-fr/posimap/internal/infra/object"
-	"github.com/cgi-fr/posimap/internal/infra/record"
-	"github.com/cgi-fr/posimap/pkg/data"
+	"github.com/cgi-fr/posimap/internal/infra/jsonline"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/unicode"
 )
 
 type Fold struct {
@@ -59,8 +59,8 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 }
 
 func (f *Fold) execute(_ *cobra.Command, _ []string) {
-	source := record.NewRecordSource(os.Stdin, unicode.UTF8)
-	sink := object.NewJSON(os.Stdout)
+	buffer := buffer.NewBufferReader(os.Stdin)
+	writer := jsonline.NewWriter(os.Stdout)
 
 	config, err := config.LoadConfigFromFile(f.configfile)
 	if err != nil {
@@ -68,13 +68,35 @@ func (f *Fold) execute(_ *cobra.Command, _ []string) {
 	}
 
 	if f.trim {
-		config.Trim = true
+		// TODO: Implement trim functionality
+		// config.Trim = true
 	}
 
-	root := data.NewBuilder().Build(config.Compile())
+	schema := config.Compile()
 
-	if err := data.TransformRecordsToObjects(root, source, sink); err != nil {
-		log.Fatal().Err(err).Msg("Failed to process records")
+	record, err := schema.Build()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to build record")
+	}
+
+	for {
+		if err := record.Unmarshal(buffer); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			log.Fatal().Err(err).Msg("Failed to unmarshal record")
+		}
+
+		if err := record.Export(writer); err != nil {
+			log.Fatal().Err(err).Msg("Failed to export record")
+		}
+
+		if err := buffer.Reset(); errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			log.Fatal().Err(err).Msg("Failed to reset buffer")
+		}
 	}
 
 	log.Info().Msg("Fold command completed successfully")
