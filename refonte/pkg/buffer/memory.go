@@ -40,6 +40,12 @@ func (m *Memory) Write(offset int, data []byte) error {
 	return nil
 }
 
+func (m *Memory) Reset() {
+	size := len(m.buffer)
+	m.buffer = m.buffer[:0]
+	m.Required(size) // immediately refill the buffer
+}
+
 func (m *Memory) Bytes() []byte {
 	return m.buffer
 }

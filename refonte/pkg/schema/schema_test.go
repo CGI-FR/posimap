@@ -40,8 +40,8 @@ func Example() {
 	}
 
 	data := "" +
-		"JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704    56 MAPLE AVENUE          RIVERSIDE, CA 92501      0DRPR    " + "\n" + //nolint:lll
-		"ACME COMPANY    1234 ELM STREET          SPRINGFIELD, IL 62704    56 MAPLE AVENUE          RIVERSIDE, CA 92501      1DRPR    " //nolint:lll
+		"JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704    56 MAPLE AVENUE          RIVERSIDE, CA 92501      0DRPR    " + //nolint:lll
+		"ACME COMPANY    789 OAK STREET           DALLAS, TX 75201         12 PINE ROAD             AUSTIN, TX 73301         1MR      " //nolint:lll
 	source := strings.NewReader(data)
 	buffer := buffer.NewMemoryWithSource(source)
 
@@ -54,10 +54,22 @@ func Example() {
 		panic(err)
 	}
 
+	// read the next record
+	buffer.Reset()
+
+	if err := record.Unmarshal(buffer); err != nil && !errors.Is(err, io.EOF) {
+		panic(err)
+	}
+
+	if err := record.Export(writer); err != nil {
+		panic(err)
+	}
+
 	if err := writer.WriteEOF(); err != nil {
 		panic(err)
 	}
 
 	// Output:
 	// {"PERSON":{"FIRSTNAME":"JOHN","LASTNAME":"DOE"},"ADDRESSES":[{"LINE-1":"1234 ELM STREET","LINE-2":"SPRINGFIELD, IL 62704"},{"LINE-1":"56 MAPLE AVENUE","LINE-2":"RIVERSIDE, CA 92501"}],"ISCOMPANY":"0","TITLES":["DR","PR","",""]}
+	// {"COMPANY":{"NAME":"ACME COMPANY"},"ADDRESSES":[{"LINE-1":"789 OAK STREET","LINE-2":"DALLAS, TX 75201"},{"LINE-1":"12 PINE ROAD","LINE-2":"AUSTIN, TX 73301"}],"ISCOMPANY":"1","TITLES":["MR","","",""]}
 }
