@@ -73,5 +73,13 @@ func (s *String) Encode(buffer api.Buffer, offset int, value any) error {
 		return fmt.Errorf("%w", err)
 	}
 
+	if s.length-len(bytes) > 0 {
+		for idx := range s.length - len(bytes) {
+			if err := buffer.Write(offset+len(bytes)+idx, []byte{' '}); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+		}
+	}
+
 	return nil
 }
