@@ -5,3 +5,6 @@ schema:
     length: 8
   - name: ADDRESS
     schema: "schema-address.yaml"
+  - name: NL
+    length: 1
+    when: !!str false

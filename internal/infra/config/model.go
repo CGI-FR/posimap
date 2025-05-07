@@ -1,133 +1,107 @@
-// Copyright (C) 2025 CGI France
-//
-// This file is part of posimap.
-//
-// posimap is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// posimap is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with posimap.  If not, see <http://www.gnu.org/licenses/>.
-
 package config
 
 import (
-	"errors"
-	"fmt"
-
-	"github.com/cgi-fr/posimap/pkg/data"
-	"gopkg.in/yaml.v3"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/predicate"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/schema"
+	"golang.org/x/text/encoding/charmap"
 )
 
 type Config struct {
 	Schema Schema `yaml:"schema"`
-	Trim   bool   `yaml:"trim,omitempty"`
 }
 
 type Schema []Field
 
-type Either[T1 any, T2 any] struct {
-	T1 T1
-	T2 T2
-}
-
-func (e *Either[T1, T2]) UnmarshalYAML(value *yaml.Node) error {
-	out, err := yaml.Marshal(value)
-	if err != nil {
-		return fmt.Errorf("%w", err)
-	}
-
-	if err := yaml.Unmarshal(out, &e.T1); err == nil {
-		return nil
-	}
-
-	if err := yaml.Unmarshal(out, &e.T2); err == nil {
-		return nil
-	}
-
-	return fmt.Errorf("%w", err)
-}
-
 type Field struct {
-	Name     string                 `yaml:"name"`
-	Length   int                    `yaml:"length"`
-	Occurs   int                    `yaml:"occurs,omitempty"`
-	Redefine string                 `yaml:"redefine,omitempty"`
-	Trim     bool                   `yaml:"trim,omitempty"`
-	When     string                 `yaml:"when,omitempty"`
-	Schema   Either[string, Schema] `yaml:"schema,omitempty"` // either filename for external schema or inlined schema
-	schema   Schema
+	Name     string `yaml:"name"`
+	Occurs   int    `yaml:"occurs,omitempty"`
+	Redefine string `yaml:"redefine,omitempty"`
+	When     string `yaml:"when,omitempty"`
+
+	Length  int    `yaml:"length"`
+	Trim    bool   `yaml:"trim,omitempty"`
+	Charset string `yaml:"charset,omitempty"`
+
+	Schema Either[string, Schema] `yaml:"schema"` // either filename for external schema or embedded schema
 }
 
-var (
-	ErrFieldNameEmpty     = errors.New("field name cannot be empty")
-	ErrFieldLengthZero    = errors.New("field length cannot be zero")
-	ErrFieldStartNegative = errors.New("field start position cannot be negative")
-)
+func (f Field) IsRecord() bool {
+	return f.Schema.T2 != nil
+}
 
-func (f Field) Validate() error {
-	if f.Name == "" {
-		return ErrFieldNameEmpty
+func (f Field) CompileOptions() []schema.Option {
+	options := make([]schema.Option, 0)
+
+	if f.Occurs > 0 {
+		options = append(options, schema.Occurs(f.Occurs))
 	}
 
-	return nil
-}
-
-func (f Field) Build(trim bool) data.FieldSchema {
-	return data.FieldSchema{
-		Name:     f.Name,
-		Length:   f.Length,
-		Occurs:   f.Occurs,
-		Redefine: f.Redefine,
-		Trim:     f.Trim || trim,
-		When:     data.When(f.When),
-		Schema:   f.schema.Compile(trim),
+	if f.Redefine != "" {
+		options = append(options, schema.Redefines(f.Redefine))
 	}
+
+	if f.When != "" {
+		options = append(options, schema.Condition(predicate.When(f.When)))
+	}
+
+	return options
 }
 
-func (s Schema) Validate() error {
-	for idx, field := range s {
-		if err := field.Validate(); err != nil {
-			return fmt.Errorf("%v.%w", idx, err)
-		}
-
-		if field.schema != nil {
-			if err := field.schema.Validate(); err != nil {
-				return fmt.Errorf("%v.%w", idx, err)
-			}
+func (f Field) CompileCharset() *charmap.Charmap {
+	for _, encoding := range charmap.All {
+		if charmap, ok := encoding.(*charmap.Charmap); ok && charmap.String() == f.Charset {
+			return charmap
 		}
 	}
 
-	return nil
+	return charmap.ISO8859_1
 }
 
-func (s Schema) Compile(trim bool) data.RecordSchema {
-	if len(s) == 0 {
-		return nil
+func (f Field) Compile(record schema.Record, defaults ...Default) schema.Record {
+	if f.IsRecord() {
+		record = record.WithRecord(f.Name, f.Schema.T2.Compile(defaults...), f.CompileOptions()...)
+	} else {
+		record = record.WithField(f.Name, codec.NewString(f.CompileCharset(), f.Length, f.Trim), f.CompileOptions()...)
 	}
 
-	result := make(data.RecordSchema, len(s))
-	for i, field := range s {
-		result[i] = field.Build(trim)
-	}
-
-	return result
+	return record
 }
 
-func (c Config) Validate() error {
-	if err := c.Schema.Validate(); err != nil {
-		return fmt.Errorf("schema validation failed: %w", err)
+func (s Schema) Compile(defaults ...Default) schema.Record {
+	record := make(schema.Record, 0, len(s))
+
+	for _, field := range s {
+		for _, defaultFunc := range defaults {
+			field = defaultFunc(field)
+		}
+
+		record = field.Compile(record)
 	}
 
-	return nil
+	return record
 }
 
-func (c Config) Compile() data.RecordSchema {
-	return c.Schema.Compile(c.Trim)
+func (c Config) Compile(defaults ...Default) schema.Record {
+	schema := make(schema.Record, 0, len(c.Schema))
+
+	for _, field := range c.Schema {
+		for _, defaultFunc := range defaults {
+			field = defaultFunc(field)
+		}
+
+		schema = field.Compile(schema, defaults...)
+	}
+
+	return schema
+}
+
+type Default func(field Field) Field
+
+func Trim(enable bool) Default {
+	return func(field Field) Field {
+		field.Trim = enable
+
+		return field
+	}
 }

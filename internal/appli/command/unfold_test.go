@@ -2,6 +2,7 @@ package command_test
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"testing"
 
@@ -22,7 +23,7 @@ func BenchmarkUnfold(b *testing.B) {
 		command := command.NewUnfoldCommand("posimap", "testgroup")
 		command.SetArgs([]string{"-c", "testdata/schema.yaml"})
 		command.SetIn(bytes.NewReader(datafile))
-		command.SetOut(os.Stdout)
+		command.SetOut(io.Discard)
 
 		if err := command.Execute(); err != nil {
 			b.Fatalf("Failed to execute command: %v", err)

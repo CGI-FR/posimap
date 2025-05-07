@@ -1,23 +1,7 @@
-// Copyright (C) 2025 CGI France
-//
-// This file is part of posimap.
-//
-// posimap is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// posimap is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with posimap.  If not, see <http://www.gnu.org/licenses/>.
-
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -26,30 +10,25 @@ import (
 )
 
 func LoadConfigFromYAML(data []byte, rootpath string) (Config, error) {
-	// Unmarshal the YAML data into a Config struct
+	dec := yaml.NewDecoder(bytes.NewReader(data))
+	dec.KnownFields(true)
+
 	var config Config
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return Config{}, fmt.Errorf("failed to unmarshal YAML: %w", err)
+	if err := dec.Decode(&config); err != nil {
+		return Config{}, fmt.Errorf("%w", err)
 	}
 
 	if err := resolveIncludes(config.Schema, rootpath); err != nil {
 		return Config{}, fmt.Errorf("failed to resolve includes: %w", err)
 	}
 
-	// Validate the schema
-	if err := config.Validate(); err != nil {
-		return Config{}, fmt.Errorf("schema validation failed: %w", err)
-	}
-
-	// Return the loaded schema
 	return config, nil
 }
 
 func LoadConfigFromFile(filename string) (Config, error) {
-	// Read the YAML file
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return Config{}, fmt.Errorf("failed to read file: %w", err)
+		return Config{}, fmt.Errorf("%w", err)
 	}
 
 	return LoadConfigFromYAML(data, filepath.Dir(filename))
@@ -59,22 +38,19 @@ func LoadConfigFromFile(filename string) (Config, error) {
 // par le contenu de file.yaml (parsé dans le champ schema privé).
 func resolveIncludes(schema Schema, rootpath string) error {
 	for idx, field := range schema {
-		if field.Schema.T1 != "" {
-			includedSchema, err := LoadConfigFromFile(filepath.Join(rootpath, field.Schema.T1))
+		if field.Schema.T1 != nil {
+			includedSchema, err := LoadConfigFromFile(filepath.Join(rootpath, *field.Schema.T1))
 			if err != nil {
-				return fmt.Errorf("failed to load included schema %s: %w", field.Schema.T1, err)
+				return fmt.Errorf("failed to load included schema %s: %w", *field.Schema.T1, err)
 			}
 			// Replace the field schema with the included schema
-			schema[idx].schema = includedSchema.Schema
-			schema[idx].Schema.T1 = ""
-		} else if field.Schema.T2 != nil {
-			schema[idx].schema = field.Schema.T2
-			field.Schema.T2 = nil
+			schema[idx].Schema.T2 = &includedSchema.Schema
+			schema[idx].Schema.T1 = nil
 		}
 
-		if schema[idx].schema != nil {
+		if schema[idx].Schema.T2 != nil {
 			// Recursively resolve includes in the nested schema
-			if err := resolveIncludes(schema[idx].schema, rootpath); err != nil {
+			if err := resolveIncludes(*schema[idx].Schema.T2, rootpath); err != nil {
 				return fmt.Errorf("failed to resolve includes in nested schema: %w", err)
 			}
 		}

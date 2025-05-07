@@ -18,15 +18,14 @@
 package command
 
 import (
-	"os"
+	"errors"
+	"io"
 
 	"github.com/cgi-fr/posimap/internal/infra/config"
-	"github.com/cgi-fr/posimap/internal/infra/object"
-	"github.com/cgi-fr/posimap/internal/infra/record"
-	"github.com/cgi-fr/posimap/pkg/data"
+	"github.com/cgi-fr/posimap/internal/infra/jsonline"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/unicode"
 )
 
 type Fold struct {
@@ -47,7 +46,7 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 			GroupID: groupid,
 		},
 		configfile: "schema.yaml",
-		trim:       false,
+		trim:       true,
 	}
 
 	fold.cmd.Flags().StringVarP(&fold.configfile, "config", "c", fold.configfile, "set the config file")
@@ -58,23 +57,44 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 	return fold.cmd
 }
 
-func (f *Fold) execute(_ *cobra.Command, _ []string) {
-	source := record.NewRecordSource(os.Stdin, unicode.UTF8)
-	sink := object.NewJSON(os.Stdout)
+func (f *Fold) execute(cmd *cobra.Command, _ []string) {
+	reader := buffer.NewBufferReader(cmd.InOrStdin())
+	writer := jsonline.NewWriter(cmd.OutOrStdout())
 
-	config, err := config.LoadConfigFromFile(f.configfile)
+	cfg, err := config.LoadConfigFromFile(f.configfile)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load schema")
 	}
 
-	if f.trim {
-		config.Trim = true
+	schema := cfg.Compile(config.Trim(f.trim))
+
+	record, err := schema.Build()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to build record")
 	}
 
-	root := data.NewBuilder().Build(config.Compile())
+	for {
+		if err := record.Unmarshal(reader); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
 
-	if err := data.TransformRecordsToObjects(root, source, sink); err != nil {
-		log.Fatal().Err(err).Msg("Failed to process records")
+			log.Fatal().Err(err).Msg("Failed to unmarshal record")
+		}
+
+		if err := record.Export(writer); err != nil {
+			log.Fatal().Err(err).Msg("Failed to export document")
+		}
+
+		if err := reader.Reset(); errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			log.Fatal().Err(err).Msg("Failed to reset buffer")
+		}
+	}
+
+	if err := writer.WriteEOF(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to close stream")
 	}
 
 	log.Info().Msg("Fold command completed successfully")
