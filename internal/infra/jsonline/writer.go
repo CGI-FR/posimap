@@ -212,6 +212,10 @@ func (w *Writer) WriteNull() error {
 }
 
 func (w *Writer) WriteEOF() error {
+	if _, err := w.writer.WriteRune('\n'); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
 	if err := w.writer.Flush(); err != nil {
 		return fmt.Errorf("%w", err)
 	}
