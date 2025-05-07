@@ -13,12 +13,14 @@ const (
 type Buffer struct {
 	buffer []byte
 	source io.Reader
+	target io.Writer
 }
 
-func NewBuffer() *Buffer {
+func NewBufferWriter(target io.Writer) *Buffer {
 	return &Buffer{
 		buffer: make([]byte, 0, defaultBufferSize),
 		source: nil,
+		target: target,
 	}
 }
 
@@ -26,6 +28,7 @@ func NewBufferReader(source io.Reader) *Buffer {
 	return &Buffer{
 		buffer: make([]byte, 0, defaultBufferSize),
 		source: source,
+		target: nil,
 	}
 }
 
@@ -48,6 +51,12 @@ func (m *Buffer) Write(offset int, data []byte) error {
 }
 
 func (m *Buffer) Reset() error {
+	if m.target != nil {
+		if _, err := m.target.Write(m.buffer); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	}
+
 	size := len(m.buffer)
 	m.buffer = m.buffer[:0]
 

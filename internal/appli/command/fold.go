@@ -20,7 +20,6 @@ package command
 import (
 	"errors"
 	"io"
-	"os"
 
 	"github.com/cgi-fr/posimap/internal/infra/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
@@ -58,9 +57,9 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 	return fold.cmd
 }
 
-func (f *Fold) execute(_ *cobra.Command, _ []string) {
-	buffer := buffer.NewBufferReader(os.Stdin)
-	writer := jsonline.NewWriter(os.Stdout)
+func (f *Fold) execute(cmd *cobra.Command, _ []string) {
+	reader := buffer.NewBufferReader(cmd.InOrStdin())
+	writer := jsonline.NewWriter(cmd.OutOrStdout())
 
 	cfg, err := config.LoadConfigFromFile(f.configfile)
 	if err != nil {
@@ -75,7 +74,7 @@ func (f *Fold) execute(_ *cobra.Command, _ []string) {
 	}
 
 	for {
-		if err := record.Unmarshal(buffer); err != nil {
+		if err := record.Unmarshal(reader); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
@@ -84,10 +83,10 @@ func (f *Fold) execute(_ *cobra.Command, _ []string) {
 		}
 
 		if err := record.Export(writer); err != nil {
-			log.Fatal().Err(err).Msg("Failed to export record")
+			log.Fatal().Err(err).Msg("Failed to export document")
 		}
 
-		if err := buffer.Reset(); errors.Is(err, io.EOF) {
+		if err := reader.Reset(); errors.Is(err, io.EOF) {
 			break
 		} else if err != nil {
 			log.Fatal().Err(err).Msg("Failed to reset buffer")

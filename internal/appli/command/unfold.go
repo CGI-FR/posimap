@@ -18,15 +18,14 @@
 package command
 
 import (
-	"os"
+	"errors"
+	"io"
 
 	"github.com/cgi-fr/posimap/internal/infra/config"
-	"github.com/cgi-fr/posimap/internal/infra/object"
-	"github.com/cgi-fr/posimap/internal/infra/record"
-	"github.com/cgi-fr/posimap/pkg/data"
+	"github.com/cgi-fr/posimap/internal/infra/jsonline"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/unicode"
 )
 
 type Unfold struct {
@@ -55,19 +54,38 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 	return unfold.cmd
 }
 
-func (u *Unfold) execute(_ *cobra.Command, _ []string) {
-	source := object.NewJSONLineSource(os.Stdin, unicode.UTF8)
-	sink := record.NewRecordSink(os.Stdout)
+func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
+	reader := jsonline.NewReader(cmd.InOrStdin())
+	writer := buffer.NewBufferWriter(cmd.OutOrStdout())
 
-	config, err := config.LoadConfigFromFile(u.configfile)
+	cfg, err := config.LoadConfigFromFile(u.configfile)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load schema")
 	}
 
-	root := data.NewBuilder().Build(config.Compile())
+	schema := cfg.Compile()
 
-	if err := data.TransformObjectsToRecords(root, source, sink); err != nil {
-		log.Fatal().Err(err).Msg("Failed to process records")
+	record, err := schema.Build()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to build record")
+	}
+
+	for {
+		if err := record.Import(reader); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			log.Fatal().Err(err).Msg("Failed to import document")
+		}
+
+		if err := record.Marshal(writer); err != nil {
+			log.Fatal().Err(err).Msg("Failed to marshal record")
+		}
+
+		if err := writer.Reset(); err != nil {
+			log.Fatal().Err(err).Msg("Failed to reset buffer")
+		}
 	}
 
 	log.Info().Msg("Unfold command completed successfully")

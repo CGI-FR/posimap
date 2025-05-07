@@ -14,7 +14,7 @@ import (
 )
 
 func ExampleRecord_Import() {
-	buffer := buffer.NewBuffer()
+	buffer := buffer.NewBufferWriter(os.Stdout)
 
 	rec := record.NewObject()
 	rec.Add("NAME", record.NewValue(0, codec.NewString(charmap.ISO8859_1, 35, true)), nil)
@@ -32,7 +32,9 @@ func ExampleRecord_Import() {
 		panic(err)
 	}
 
-	os.Stdout.Write(buffer.Bytes())
+	if err := buffer.Reset(); err != nil {
+		panic(err)
+	}
 
 	// Output:
 	// JOHN DOE                           1234 ELM STREET               SPRINGFIELD, IL 62704

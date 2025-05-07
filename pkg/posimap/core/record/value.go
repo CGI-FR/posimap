@@ -38,6 +38,10 @@ func (v *Value) Unmarshal(buffer api.Buffer) error {
 }
 
 func (v *Value) Marshal(buffer api.Buffer) error {
+	if v.content == nil {
+		return nil // document did not have the key set
+	}
+
 	err := v.encoder.Encode(buffer, v.offset, v.content)
 	if err != nil {
 		return fmt.Errorf("%w", err)
