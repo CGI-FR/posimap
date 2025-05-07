@@ -16,7 +16,7 @@ import (
 
 func ExampleRecord_Export() {
 	data := strings.NewReader("JOHN DOE                           1234 ELM STREET               SPRINGFIELD, IL 62704         ")
-	buffer := buffer.NewReader(data)
+	buffer := buffer.NewMemoryWithSource(data)
 
 	rec := record.NewObject()
 	rec.Add("NAME", record.NewValue(0, codec.NewString(charmap.ISO8859_1, 35, true)), nil)
