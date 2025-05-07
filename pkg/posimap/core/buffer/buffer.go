@@ -73,8 +73,7 @@ func (m *Buffer) Required(size int) error {
 	}
 
 	if m.source != nil {
-		_, err := m.source.Read(m.buffer[cursize:])
-		if err != nil {
+		if _, err := m.source.Read(m.buffer[cursize:]); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}

@@ -99,5 +99,9 @@ func (f *Fold) execute(_ *cobra.Command, _ []string) {
 		}
 	}
 
+	if err := writer.WriteEOF(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to close stream")
+	}
+
 	log.Info().Msg("Fold command completed successfully")
 }
