@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1746028913069,
+  "lastUpdate": 1746647113376,
   "repoUrl": "https://github.com/CGI-FR/posimap",
   "entries": {
     "Benchmark": [
@@ -144,6 +144,78 @@ window.BENCHMARK_DATA = {
             "value": 3443,
             "unit": "allocs/op",
             "extra": "6300 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "44274230+adrienaury@users.noreply.github.com",
+            "name": "Adrien Aury",
+            "username": "adrienaury"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d4991f7dcb87cfa2a37ca52e3eb0ff21b6128273",
+          "message": "refactor: fixed-width encoding (#1)\n\n* refactor: wip! buffer and string codec\n\n* refactor: wip! record value\n\n* refactor: wip! record value\n\n* refactor: wip! record object\n\n* refactor: wip! rename method\n\n* fix: wip! remove unused error\n\n* fix: wip! export is responsability of object\n\n* fix: wip! introduce named record\n\n* fix: wip! new approach for records\n\n* fix: wip! export/import objects\n\n* fix: wip! primitive + remove named and rewrite object\n\n* fix: wip! export feedback idea\n\n* fix: wip! here it is the genius idea\n\n* refactor: wip! test ok with object\n\n* refactor: wip! hide implementation detail for record\n\n* refactor: wip! add array record\n\n* refactor: wip! externalize struct tokens in its own package\n\n* style: lint\n\n* refactor: rewrite/rename struct to document\n\n* refactor: remove unused api\n\n* refactor: wip! predicate\n\n* refactor: predicate\n\n* refactor: wip! remove useless tokens\n\n* refactor: import\n\n* refactor: wip! buffers\n\n* refactor: wip! jsonline writer\n\n* refactor: wip! fix buffer and jsonline writer\n\n* refactor: wip! write spaces on trimmed strings\n\n* refactor: wip! feat schema\n\n* refactor: wip! buffer read next\n\n* refactor: wip! rename Memory to Buffer\n\n* refactor: move packages\n\n* refactor: wip! config\n\n* refactor: wip! config\n\n* refactor: wip! compile config\n\n* refactor: wip! fold command\n\n* refactor: wip! fix compile config\n\n* refactor: wip! fix writer flush\n\n* refactor: write last nl\n\n* refactor: wip! fold command trim\n\n* refactor: unfold command\n\n* test: benchmark discard output",
+          "timestamp": "2025-05-07T21:43:11+02:00",
+          "tree_id": "ee967873d900500ee6f491aa72eac9b5b26def20",
+          "url": "https://github.com/CGI-FR/posimap/commit/d4991f7dcb87cfa2a37ca52e3eb0ff21b6128273"
+        },
+        "date": 1746647112684,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFold",
+            "value": 962106,
+            "unit": "ns/op\t  781671 B/op\t    3809 allocs/op",
+            "extra": "12463 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - ns/op",
+            "value": 962106,
+            "unit": "ns/op",
+            "extra": "12463 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - B/op",
+            "value": 781671,
+            "unit": "B/op",
+            "extra": "12463 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - allocs/op",
+            "value": 3809,
+            "unit": "allocs/op",
+            "extra": "12463 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold",
+            "value": 920801,
+            "unit": "ns/op\t  625560 B/op\t    5688 allocs/op",
+            "extra": "13035 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - ns/op",
+            "value": 920801,
+            "unit": "ns/op",
+            "extra": "13035 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - B/op",
+            "value": 625560,
+            "unit": "B/op",
+            "extra": "13035 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - allocs/op",
+            "value": 5688,
+            "unit": "allocs/op",
+            "extra": "13035 times\n4 procs"
           }
         ]
       }
