@@ -5,7 +5,7 @@ import (
 	"html/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/cgi-fr/posimap/refonte/api"
+	"github.com/cgi-fr/posimap/pkg/posimap/api"
 )
 
 func If(value bool) api.Predicate {

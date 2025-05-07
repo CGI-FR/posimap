@@ -4,11 +4,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cgi-fr/posimap/refonte/pkg/buffer"
-	"github.com/cgi-fr/posimap/refonte/pkg/codec"
-	"github.com/cgi-fr/posimap/refonte/pkg/jsonline"
-	"github.com/cgi-fr/posimap/refonte/pkg/predicate"
-	"github.com/cgi-fr/posimap/refonte/pkg/schema"
+	"github.com/cgi-fr/posimap/internal/infra/jsonline"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/predicate"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/schema"
 	"golang.org/x/text/encoding/charmap"
 )
 

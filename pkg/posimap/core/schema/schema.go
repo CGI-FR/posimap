@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cgi-fr/posimap/refonte/api"
-	"github.com/cgi-fr/posimap/refonte/pkg/record"
+	"github.com/cgi-fr/posimap/pkg/posimap/api"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/record"
 )
 
 var ErrInvalidRedefines = errors.New("invalid redefines")

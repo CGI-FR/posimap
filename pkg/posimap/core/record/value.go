@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cgi-fr/posimap/refonte/api"
-	"github.com/cgi-fr/posimap/refonte/driven/document"
+	"github.com/cgi-fr/posimap/pkg/posimap/api"
+	"github.com/cgi-fr/posimap/pkg/posimap/driven/document"
 )
 
 var ErrUnexpectedValueType = errors.New("unexpected value type")

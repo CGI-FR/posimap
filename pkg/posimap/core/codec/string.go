@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/cgi-fr/posimap/refonte/api"
+	"github.com/cgi-fr/posimap/pkg/posimap/api"
 	"golang.org/x/text/encoding/charmap"
 )
 

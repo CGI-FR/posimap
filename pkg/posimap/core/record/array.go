@@ -3,8 +3,8 @@ package record
 import (
 	"fmt"
 
-	"github.com/cgi-fr/posimap/refonte/api"
-	"github.com/cgi-fr/posimap/refonte/driven/document"
+	"github.com/cgi-fr/posimap/pkg/posimap/api"
+	"github.com/cgi-fr/posimap/pkg/posimap/driven/document"
 )
 
 type Array struct {

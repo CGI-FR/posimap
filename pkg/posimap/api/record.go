@@ -1,6 +1,6 @@
 package api
 
-import "github.com/cgi-fr/posimap/refonte/driven/document"
+import "github.com/cgi-fr/posimap/pkg/posimap/driven/document"
 
 type Record interface {
 	Unmarshal(buffer Buffer) error

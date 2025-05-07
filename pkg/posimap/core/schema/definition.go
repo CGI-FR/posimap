@@ -1,6 +1,6 @@
 package schema
 
-import "github.com/cgi-fr/posimap/refonte/api"
+import "github.com/cgi-fr/posimap/pkg/posimap/api"
 
 type Definition struct {
 	codec  api.Codec

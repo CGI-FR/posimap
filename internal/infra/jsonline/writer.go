@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/cgi-fr/posimap/refonte/driven/document"
+	"github.com/cgi-fr/posimap/pkg/posimap/driven/document"
 )
 
 type Writer struct {
