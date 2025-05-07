@@ -83,3 +83,7 @@ func (s *String) Encode(buffer api.Buffer, offset int, value any) error {
 
 	return nil
 }
+
+func (s *String) Size() int {
+	return s.length
+}

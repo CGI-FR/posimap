@@ -19,7 +19,7 @@ type Pointer struct {
 
 func NewPointer() *Pointer {
 	return &Pointer{
-		indexes: make([]uint, 0),
+		indexes: make([]uint, 1), // start with a root level
 		levels:  "",
 	}
 }
@@ -62,21 +62,25 @@ func (p *Pointer) CloseArray() error {
 }
 
 func (p *Pointer) Index() uint {
-	if len(p.indexes) == 0 {
-		return 0
-	}
-
 	return p.indexes[len(p.indexes)-1]
 }
 
-func (p *Pointer) Shift() rune {
-	if len(p.indexes) == 0 {
-		return '\n' // next document requires a new line
-	}
+func (p *Pointer) Level() int {
+	return len(p.levels)
+}
 
+func (p *Pointer) Shift() rune {
 	index := p.indexes[len(p.indexes)-1]
 	index++
 	p.indexes[len(p.indexes)-1] = index
+
+	if len(p.indexes) == 1 {
+		if index > 1 {
+			return '\n' // first document requires a new line
+		}
+
+		return 0
+	}
 
 	typ := p.levels[len(p.levels)-1]
 
