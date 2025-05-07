@@ -1,59 +1,68 @@
 package buffer
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 const (
 	growthFactor      = 2
 	defaultBufferSize = 4 * 1024
 )
 
-type Memory struct {
+type Buffer struct {
 	buffer []byte
 	source io.Reader
 }
 
-func NewMemory() *Memory {
-	return &Memory{
+func NewBuffer() *Buffer {
+	return &Buffer{
 		buffer: make([]byte, 0, defaultBufferSize),
 		source: nil,
 	}
 }
 
-func NewMemoryWithSource(source io.Reader) *Memory {
-	return &Memory{
+func NewBufferReader(source io.Reader) *Buffer {
+	return &Buffer{
 		buffer: make([]byte, 0, defaultBufferSize),
 		source: source,
 	}
 }
 
-func (m *Memory) Slice(offset, length int) ([]byte, error) {
-	m.Required(offset + length)
+func (m *Buffer) Slice(offset, length int) ([]byte, error) {
+	if err := m.Required(offset + length); err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
 
 	return m.buffer[offset : offset+length], nil
 }
 
-func (m *Memory) Write(offset int, data []byte) error {
-	m.Required(offset + len(data))
+func (m *Buffer) Write(offset int, data []byte) error {
+	if err := m.Required(offset + len(data)); err != nil {
+		return fmt.Errorf("%w", err)
+	}
 
 	copy(m.buffer[offset:], data)
 
 	return nil
 }
 
-func (m *Memory) Reset() {
+func (m *Buffer) Reset() error {
 	size := len(m.buffer)
 	m.buffer = m.buffer[:0]
-	m.Required(size) // immediately refill the buffer
+
+	// immediately refill the buffer
+	return m.Required(size)
 }
 
-func (m *Memory) Bytes() []byte {
+func (m *Buffer) Bytes() []byte {
 	return m.buffer
 }
 
-func (m *Memory) Required(size int) {
+func (m *Buffer) Required(size int) error {
 	cursize := len(m.buffer)
 	if cursize >= size {
-		return
+		return nil
 	}
 
 	if !m.tryReslice(size) {
@@ -66,15 +75,17 @@ func (m *Memory) Required(size int) {
 	if m.source != nil {
 		_, err := m.source.Read(m.buffer[cursize:])
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("%w", err)
 		}
 	}
+
+	return nil
 }
 
 // tryReslice is an inlineable version for the fast-case where the
 // internal buffer only needs to be resliced.
 // It returns whether it succeeded.
-func (m *Memory) tryReslice(size int) bool {
+func (m *Buffer) tryReslice(size int) bool {
 	if size <= cap(m.buffer) {
 		m.buffer = m.buffer[:size]
 

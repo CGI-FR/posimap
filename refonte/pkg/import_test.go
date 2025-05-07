@@ -14,7 +14,7 @@ import (
 )
 
 func ExampleRecord_Import() {
-	buffer := buffer.NewMemory()
+	buffer := buffer.NewBuffer()
 
 	rec := record.NewObject()
 	rec.Add("NAME", record.NewValue(0, codec.NewString(charmap.ISO8859_1, 35, true)), nil)

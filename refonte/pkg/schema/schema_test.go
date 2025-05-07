@@ -1,8 +1,6 @@
 package schema_test
 
 import (
-	"errors"
-	"io"
 	"os"
 	"strings"
 
@@ -43,9 +41,9 @@ func Example() {
 		"JOHN    DOE     1234 ELM STREET          SPRINGFIELD, IL 62704    56 MAPLE AVENUE          RIVERSIDE, CA 92501      0DRPR    " + //nolint:lll
 		"ACME COMPANY    789 OAK STREET           DALLAS, TX 75201         12 PINE ROAD             AUSTIN, TX 73301         1MR      " //nolint:lll
 	source := strings.NewReader(data)
-	buffer := buffer.NewMemoryWithSource(source)
+	buffer := buffer.NewBufferReader(source)
 
-	if err := record.Unmarshal(buffer); err != nil && !errors.Is(err, io.EOF) {
+	if err := record.Unmarshal(buffer); err != nil {
 		panic(err)
 	}
 
@@ -55,9 +53,11 @@ func Example() {
 	}
 
 	// read the next record
-	buffer.Reset()
+	if err := buffer.Reset(); err != nil {
+		panic(err)
+	}
 
-	if err := record.Unmarshal(buffer); err != nil && !errors.Is(err, io.EOF) {
+	if err := record.Unmarshal(buffer); err != nil {
 		panic(err)
 	}
 
