@@ -27,14 +27,13 @@ func NewMemoryWithSource(source io.Reader) *Memory {
 }
 
 func (m *Memory) Slice(offset, length int) ([]byte, error) {
+	m.Required(offset + length)
+
 	return m.buffer[offset : offset+length], nil
 }
 
 func (m *Memory) Write(offset int, data []byte) error {
-	requiredSize := offset + len(data)
-	if len(m.buffer) < requiredSize {
-		m.Required(requiredSize)
-	}
+	m.Required(offset + len(data))
 
 	copy(m.buffer[offset:], data)
 

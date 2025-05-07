@@ -85,7 +85,7 @@ func (p *Pointer) Shift() rune {
 	}
 
 	// objects need a colon as separator between key and value
-	if typ == '{' && index%2 != 0 {
+	if typ == '{' && index%2 == 0 {
 		return ':'
 	}
 
