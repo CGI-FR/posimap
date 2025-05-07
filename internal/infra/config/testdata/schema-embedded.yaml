@@ -1,0 +1,4 @@
+schema:
+  - name: PERSON
+    length: 50
+    schema: "schema-simple.yaml"

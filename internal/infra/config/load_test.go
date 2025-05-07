@@ -68,14 +68,37 @@ func TestLoadSchemaFromYAML(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:     "embedded schema",
+			filename: "schema-embedded.yaml",
+			expected: config.Config{
+				Schema: config.Schema{
+					{
+						Name:   "PERSON",
+						Length: 50,
+						Schema: config.Either[string, config.Schema]{
+							T2: &config.Schema{
+								{
+									Name:   "FIRSTNAME",
+									Length: 25,
+								},
+								{
+									Name:   "LASTNAME",
+									Length: 25,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			// Load the schema from YAML
-			schema, err := config.LoadSchemaFromFile("testdata/" + testCase.filename)
+			schema, err := config.LoadConfigFromFile("testdata/" + testCase.filename)
 			if err != nil {
 				t.Fatalf("expected no error, got %v", err)
 			}
