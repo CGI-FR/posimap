@@ -47,7 +47,7 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 			GroupID: groupid,
 		},
 		configfile: "schema.yaml",
-		trim:       false,
+		trim:       true,
 	}
 
 	fold.cmd.Flags().StringVarP(&fold.configfile, "config", "c", fold.configfile, "set the config file")
@@ -62,17 +62,12 @@ func (f *Fold) execute(_ *cobra.Command, _ []string) {
 	buffer := buffer.NewBufferReader(os.Stdin)
 	writer := jsonline.NewWriter(os.Stdout)
 
-	config, err := config.LoadConfigFromFile(f.configfile)
+	cfg, err := config.LoadConfigFromFile(f.configfile)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load schema")
 	}
 
-	if f.trim {
-		// TODO: Implement trim functionality
-		// config.Trim = true
-	}
-
-	schema := config.Compile()
+	schema := cfg.Compile(config.Trim(f.trim))
 
 	record, err := schema.Build()
 	if err != nil {

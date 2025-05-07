@@ -58,9 +58,9 @@ func (f Field) CompileCharset() *charmap.Charmap {
 	return charmap.ISO8859_1
 }
 
-func (f Field) Compile(record schema.Record) schema.Record {
+func (f Field) Compile(record schema.Record, defaults ...Default) schema.Record {
 	if f.IsRecord() {
-		record = record.WithRecord(f.Name, f.Schema.T2.Compile(), f.CompileOptions()...)
+		record = record.WithRecord(f.Name, f.Schema.T2.Compile(defaults...), f.CompileOptions()...)
 	} else {
 		record = record.WithField(f.Name, codec.NewString(f.CompileCharset(), f.Length, f.Trim), f.CompileOptions()...)
 	}
@@ -68,22 +68,40 @@ func (f Field) Compile(record schema.Record) schema.Record {
 	return record
 }
 
-func (s Schema) Compile() schema.Record {
+func (s Schema) Compile(defaults ...Default) schema.Record {
 	record := make(schema.Record, 0, len(s))
 
 	for _, field := range s {
+		for _, defaultFunc := range defaults {
+			field = defaultFunc(field)
+		}
+
 		record = field.Compile(record)
 	}
 
 	return record
 }
 
-func (c Config) Compile() schema.Record {
+func (c Config) Compile(defaults ...Default) schema.Record {
 	schema := make(schema.Record, 0, len(c.Schema))
 
 	for _, field := range c.Schema {
-		schema = field.Compile(schema)
+		for _, defaultFunc := range defaults {
+			field = defaultFunc(field)
+		}
+
+		schema = field.Compile(schema, defaults...)
 	}
 
 	return schema
+}
+
+type Default func(field Field) Field
+
+func Trim(enable bool) Default {
+	return func(field Field) Field {
+		field.Trim = enable
+
+		return field
+	}
 }
