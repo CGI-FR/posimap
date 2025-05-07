@@ -10,4 +10,4 @@ schema:
   - name: ZIP
     length: 5
   - name: COUNTRY
-    length: 8
+    length: 3

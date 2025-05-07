@@ -1,4 +1,4 @@
-trim: true
+#trim: true
 schema:
   - name: RECORD-TYPE
     length: 16

@@ -58,19 +58,21 @@ func (f Field) CompileCharset() *charmap.Charmap {
 	return charmap.ISO8859_1
 }
 
-func (f Field) Compile(record schema.Record) {
+func (f Field) Compile(record schema.Record) schema.Record {
 	if f.IsRecord() {
-		record.WithRecord(f.Name, f.Schema.T2.Compile(), f.CompileOptions()...)
+		record = record.WithRecord(f.Name, f.Schema.T2.Compile(), f.CompileOptions()...)
 	} else {
-		record.WithField(f.Name, codec.NewString(f.CompileCharset(), f.Length, f.Trim), f.CompileOptions()...)
+		record = record.WithField(f.Name, codec.NewString(f.CompileCharset(), f.Length, f.Trim), f.CompileOptions()...)
 	}
+
+	return record
 }
 
 func (s Schema) Compile() schema.Record {
 	record := make(schema.Record, 0, len(s))
 
 	for _, field := range s {
-		field.Compile(record)
+		record = field.Compile(record)
 	}
 
 	return record
@@ -80,7 +82,7 @@ func (c Config) Compile() schema.Record {
 	schema := make(schema.Record, 0, len(c.Schema))
 
 	for _, field := range c.Schema {
-		field.Compile(schema)
+		schema = field.Compile(schema)
 	}
 
 	return schema
