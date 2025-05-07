@@ -1,0 +1,10 @@
+schema:
+  - name: BIRTHDATE
+    length: 8
+    schema:
+      - name: YEAR
+        length: 4
+      - name: MONTH
+        length: 2
+      - name: DAY
+        length: 2
