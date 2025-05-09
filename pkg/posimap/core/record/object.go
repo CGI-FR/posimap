@@ -141,3 +141,9 @@ func (o *Object) AsPrimitive() any {
 
 	return primitive
 }
+
+func (o *Object) Reset() {
+	for _, record := range o.records {
+		record.Reset()
+	}
+}

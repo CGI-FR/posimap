@@ -67,6 +67,12 @@ func (m *Buffer) Reset(size int) error {
 	return m.growTo(size)
 }
 
+func (m *Buffer) Fill(byteValue byte) {
+	for i := range m.buffer {
+		m.buffer[i] = byteValue
+	}
+}
+
 func (m *Buffer) Bytes() []byte {
 	return m.buffer
 }

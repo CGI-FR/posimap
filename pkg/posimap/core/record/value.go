@@ -81,3 +81,7 @@ func (v *Value) Import(reader document.Reader) error {
 func (v *Value) AsPrimitive() any {
 	return v.content
 }
+
+func (v *Value) Reset() {
+	v.content = nil
+}

@@ -94,3 +94,9 @@ func (a *Array) AsPrimitive() any {
 
 	return primitive
 }
+
+func (a *Array) Reset() {
+	for _, record := range a.records {
+		record.Reset()
+	}
+}

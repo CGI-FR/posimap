@@ -19,6 +19,7 @@ package command
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/cgi-fr/posimap/internal/appli/config"
@@ -77,10 +78,18 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to build record marshaler")
 	}
 
+	space, err := getSpaceInCharset(u.charset)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to get space character in charset")
+	}
+
 	for {
 		if err := writer.Reset(cfg.Length); err != nil {
 			log.Fatal().Err(err).Msg("Failed to prepare next byte buffer")
 		}
+
+		writer.Fill(space)
+		record.Reset()
 
 		if err := record.Import(reader); err != nil {
 			if errors.Is(err, io.EOF) {
@@ -96,4 +105,27 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 	}
 
 	log.Info().Msg("Unfold command completed successfully")
+}
+
+var ErrUnsupportedCharset = errors.New("unsupported charset")
+
+func getCharmap(charset string) (*charmap.Charmap, error) {
+	for _, encoding := range charmap.All {
+		if charmap, ok := encoding.(*charmap.Charmap); ok && charmap.String() == charset {
+			return charmap, nil
+		}
+	}
+
+	return nil, fmt.Errorf("%w: %s", ErrUnsupportedCharset, charset)
+}
+
+func getSpaceInCharset(charset string) (byte, error) {
+	charmap, err := getCharmap(charset)
+	if err != nil {
+		return 0, err
+	}
+
+	space, _ := charmap.EncodeRune(' ')
+
+	return space, nil
 }
