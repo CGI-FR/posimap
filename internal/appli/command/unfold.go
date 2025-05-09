@@ -21,17 +21,19 @@ import (
 	"errors"
 	"io"
 
-	"github.com/cgi-fr/posimap/internal/infra/config"
+	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/encoding/charmap"
 )
 
 type Unfold struct {
 	cmd *cobra.Command
 
 	configfile string
+	charset    string
 }
 
 func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
@@ -45,9 +47,11 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 			GroupID: groupid,
 		},
 		configfile: "schema.yaml",
+		charset:    charmap.ISO8859_1.String(),
 	}
 
 	unfold.cmd.Flags().StringVarP(&unfold.configfile, "config", "c", unfold.configfile, "set the config file")
+	unfold.cmd.Flags().StringVarP(&unfold.charset, "charset", "C", unfold.charset, "set the charset for the output records") //nolint:lll
 
 	unfold.cmd.Run = unfold.execute
 
@@ -63,7 +67,10 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to load schema")
 	}
 
-	schema := cfg.Compile()
+	schema, err := cfg.Compile(config.Charset(u.charset))
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to compile config")
+	}
 
 	record, err := schema.Build()
 	if err != nil {

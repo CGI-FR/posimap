@@ -21,11 +21,12 @@ import (
 	"errors"
 	"io"
 
-	"github.com/cgi-fr/posimap/internal/infra/config"
+	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/encoding/charmap"
 )
 
 type Fold struct {
@@ -33,6 +34,7 @@ type Fold struct {
 
 	configfile string
 	trim       bool
+	charset    string
 }
 
 func NewFoldCommand(rootname string, groupid string) *cobra.Command {
@@ -47,16 +49,19 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 		},
 		configfile: "schema.yaml",
 		trim:       true,
+		charset:    charmap.ISO8859_1.String(),
 	}
 
 	fold.cmd.Flags().StringVarP(&fold.configfile, "config", "c", fold.configfile, "set the config file")
 	fold.cmd.Flags().BoolVarP(&fold.trim, "trim", "t", fold.trim, "trim the input records")
+	fold.cmd.Flags().StringVarP(&fold.charset, "charset", "C", fold.charset, "set the charset for the input records")
 
 	fold.cmd.Run = fold.execute
 
 	return fold.cmd
 }
 
+//nolint:cyclop
 func (f *Fold) execute(cmd *cobra.Command, _ []string) {
 	reader := buffer.NewBufferReader(cmd.InOrStdin())
 	writer := jsonline.NewWriter(cmd.OutOrStdout())
@@ -66,7 +71,10 @@ func (f *Fold) execute(cmd *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to load schema")
 	}
 
-	schema := cfg.Compile(config.Trim(f.trim))
+	schema, err := cfg.Compile(config.Trim(f.trim), config.Charset(f.charset))
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to compile config")
+	}
 
 	record, err := schema.Build()
 	if err != nil {

@@ -25,3 +25,5 @@ schema:
         length: 11
       - name: FILLER
         length: 5
+  - name: NL
+    length: 1

@@ -1,9 +1,9 @@
 RECORD-TYPE-1   001JOHN DOE                           1234 ELM STREET               SPRINGFIELD, IL 62704         1234560100123456     XXXXX0200123456     XXXXX0300123456     XXXXX0400123456     XXXXX0500123456     XXXXX
 RECORD-TYPE-1   002JANE SMITH                         56 MAPLE AVENUE               RIVERSIDE, CA 92501           9876540100123456     XXXXX0200123456     XXXXX0300123456     XXXXX0400123456     XXXXX0500123456     XXXXX
-RECORD-TYPE-2   01202504302025043020250430AAAAABBBBBCCCCC
-RECORD-TYPE-2   02202504302025043020250430AAAAABBBBBCCCCC
-RECORD-TYPE-2   03202504302025043020250430AAAAABBBBBCCCCC
-RECORD-TYPE-2   04202504302025043020250430AAAAABBBBBCCCCC
-RECORD-TYPE-2   11202504302025043020250430XXXXXXXYYYYYYYY
-RECORD-TYPE-2   12202504302025043020250430XXXXXXXYYYYYYYY
-RECORD-TYPE-2   13202504302025043020250430XXXXXXXYYYYYYYY
+RECORD-TYPE-2   01202504302025043020250430AAAAABBBBBCCCCC                                                                                                                                                                   
+RECORD-TYPE-2   02202504302025043020250430AAAAABBBBBCCCCC                                                                                                                                                                   
+RECORD-TYPE-2   03202504302025043020250430AAAAABBBBBCCCCC                                                                                                                                                                   
+RECORD-TYPE-2   04202504302025043020250430AAAAABBBBBCCCCC                                                                                                                                                                   
+RECORD-TYPE-2   11202504302025043020250430XXXXXXXYYYYYYYY                                                                                                                                                                   
+RECORD-TYPE-2   12202504302025043020250430XXXXXXXYYYYYYYY                                                                                                                                                                   
+RECORD-TYPE-2   13202504302025043020250430XXXXXXXYYYYYYYY                                                                                                                                                                   

@@ -25,3 +25,7 @@ schema:
         length: 7
       - name: DATA-2-2
         length: 8
+  - name: FILLER
+    length: 163
+  - name: NL
+    length: 1
