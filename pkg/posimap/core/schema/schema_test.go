@@ -43,6 +43,11 @@ func Example() {
 	source := strings.NewReader(data)
 	buffer := buffer.NewBufferReader(source)
 
+	// preemptively read the first record
+	if err := buffer.Reset(125); err != nil {
+		panic(err)
+	}
+
 	if err := record.Unmarshal(buffer); err != nil {
 		panic(err)
 	}
@@ -53,7 +58,7 @@ func Example() {
 	}
 
 	// read the next record
-	if err := buffer.Reset(); err != nil {
+	if err := buffer.Reset(125); err != nil {
 		panic(err)
 	}
 
