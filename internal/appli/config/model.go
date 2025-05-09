@@ -19,11 +19,11 @@ type Field struct {
 	Redefine string `yaml:"redefine,omitempty"`
 	When     string `yaml:"when,omitempty"`
 
-	Length  int    `yaml:"length"`
-	Trim    bool   `yaml:"trim,omitempty"`
-	Charset string `yaml:"charset,omitempty"`
+	Length  int     `yaml:"length"`
+	Trim    *bool   `yaml:"trim,omitempty"`    // Trim can be nil if not set in the configuration file
+	Charset *string `yaml:"charset,omitempty"` // Charset can be nil if not set in the configuration file
 
-	Schema Either[string, Schema] `yaml:"schema"` // either filename for external schema or embedded schema
+	Schema Either[string, Schema] `yaml:"schema"` // Schema is either a filename (external schema) or an embedded schema
 }
 
 func (f Field) IsRecord() bool {
@@ -49,8 +49,12 @@ func (f Field) CompileOptions() []schema.Option {
 }
 
 func (f Field) CompileCharset() *charmap.Charmap {
+	if f.Charset == nil {
+		return charmap.ISO8859_1
+	}
+
 	for _, encoding := range charmap.All {
-		if charmap, ok := encoding.(*charmap.Charmap); ok && charmap.String() == f.Charset {
+		if charmap, ok := encoding.(*charmap.Charmap); ok && charmap.String() == *f.Charset {
 			return charmap
 		}
 	}
@@ -62,7 +66,7 @@ func (f Field) Compile(record schema.Record, defaults ...Default) schema.Record 
 	if f.IsRecord() {
 		record = record.WithRecord(f.Name, f.Schema.T2.Compile(defaults...), f.CompileOptions()...)
 	} else {
-		record = record.WithField(f.Name, codec.NewString(f.CompileCharset(), f.Length, f.Trim), f.CompileOptions()...)
+		record = record.WithField(f.Name, codec.NewString(f.CompileCharset(), f.Length, *f.Trim), f.CompileOptions()...)
 	}
 
 	return record
@@ -76,7 +80,7 @@ func (s Schema) Compile(defaults ...Default) schema.Record {
 			field = defaultFunc(field)
 		}
 
-		record = field.Compile(record)
+		record = field.Compile(record, defaults...)
 	}
 
 	return record
@@ -100,7 +104,9 @@ type Default func(field Field) Field
 
 func Trim(enable bool) Default {
 	return func(field Field) Field {
-		field.Trim = enable
+		if field.Trim == nil {
+			field.Trim = &enable
+		}
 
 		return field
 	}
