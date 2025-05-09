@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1746647113376,
+  "lastUpdate": 1746792138308,
   "repoUrl": "https://github.com/CGI-FR/posimap",
   "entries": {
     "Benchmark": [
@@ -216,6 +216,54 @@ window.BENCHMARK_DATA = {
             "value": 5688,
             "unit": "allocs/op",
             "extra": "13035 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "44274230+adrienaury@users.noreply.github.com",
+            "name": "Adrien Aury",
+            "username": "adrienaury"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "02e63fe66116c617d742143dd738125268009c2d",
+          "message": "feat: configure default encoding via flag (#20)\n\n* chore: fix fixed-width file editor config\n\n* test: fix test data schema definition\n\n* fix: do not trim control characters\n\n* fix: json string encoding\n\n* refactor: config is on the appli side, not infra\n\n* fix: flag config should not override yaml config\n\n* fix: flag config should not override yaml config\n\n* feat: configure default encoding via flag",
+          "timestamp": "2025-05-09T14:00:33+02:00",
+          "tree_id": "26d81ac63047b2dde333f6e5d348ef1f5cc6c551",
+          "url": "https://github.com/CGI-FR/posimap/commit/02e63fe66116c617d742143dd738125268009c2d"
+        },
+        "date": 1746792138028,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFold",
+            "value": 1357747,
+            "unit": "ns/op\t 1054970 B/op\t    6588 allocs/op",
+            "extra": "8523 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - ns/op",
+            "value": 1357747,
+            "unit": "ns/op",
+            "extra": "8523 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - B/op",
+            "value": 1054970,
+            "unit": "B/op",
+            "extra": "8523 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - allocs/op",
+            "value": 6588,
+            "unit": "allocs/op",
+            "extra": "8523 times\n4 procs"
           }
         ]
       }
