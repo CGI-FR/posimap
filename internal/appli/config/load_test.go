@@ -4,7 +4,7 @@ package config_test
 import (
 	"testing"
 
-	"github.com/cgi-fr/posimap/internal/infra/config"
+	"github.com/cgi-fr/posimap/internal/appli/config"
 	"gotest.tools/assert"
 )
 

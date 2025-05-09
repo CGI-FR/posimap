@@ -21,7 +21,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/cgi-fr/posimap/internal/infra/config"
+	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
 	"github.com/rs/zerolog/log"
