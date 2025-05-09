@@ -13,6 +13,7 @@ import (
 var ErrUnsupportedCharset = errors.New("unsupported charset")
 
 type Config struct {
+	Length int    `yaml:"length,omitempty"` // Length is the length of the record, optional
 	Schema Schema `yaml:"schema"`
 }
 

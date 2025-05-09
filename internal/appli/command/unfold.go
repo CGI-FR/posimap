@@ -64,34 +64,34 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 
 	cfg, err := config.LoadConfigFromFile(u.configfile)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load schema")
+		log.Fatal().Err(err).Msg("Failed to load configuration file")
 	}
 
-	schema, err := cfg.Compile(config.Charset(u.charset))
+	schema, err := cfg.Compile(config.Trim(true), config.Charset(u.charset))
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compile config")
+		log.Fatal().Err(err).Msg("Failed to compile configuration file")
 	}
 
 	record, err := schema.Build()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build record")
+		log.Fatal().Err(err).Msg("Failed to build record marshaler")
 	}
 
 	for {
+		if err := writer.Reset(cfg.Length); err != nil {
+			log.Fatal().Err(err).Msg("Failed to prepare next byte buffer")
+		}
+
 		if err := record.Import(reader); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
 
-			log.Fatal().Err(err).Msg("Failed to import document")
+			log.Fatal().Err(err).Msg("Failed to convert document to record")
 		}
 
 		if err := record.Marshal(writer); err != nil {
 			log.Fatal().Err(err).Msg("Failed to marshal record")
-		}
-
-		if err := writer.Reset(); err != nil {
-			log.Fatal().Err(err).Msg("Failed to reset buffer")
 		}
 	}
 

@@ -2,6 +2,7 @@ package predicate
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 
 	"github.com/Masterminds/sprig/v3"
@@ -9,15 +10,15 @@ import (
 )
 
 func If(value bool) api.Predicate {
-	return func(_ api.Record) bool { return value }
+	return func(_ api.Record) (bool, error) { return value, nil }
 }
 
 func Always() api.Predicate {
-	return func(_ api.Record) bool { return true }
+	return func(_ api.Record) (bool, error) { return true, nil }
 }
 
 func Never() api.Predicate {
-	return func(_ api.Record) bool { return false }
+	return func(_ api.Record) (bool, error) { return false, nil }
 }
 
 func When(tmpl string) api.Predicate {
@@ -30,10 +31,13 @@ func When(tmpl string) api.Predicate {
 		panic(err)
 	}
 
-	return func(root api.Record) bool {
+	return func(root api.Record) (bool, error) {
 		var result bytes.Buffer
-		_ = template.Execute(&result, root.AsPrimitive())
 
-		return result.String() != "false"
+		if err := template.Execute(&result, root.AsPrimitive()); err != nil {
+			return false, fmt.Errorf("%w", err)
+		}
+
+		return result.String() != "false", nil
 	}
 }

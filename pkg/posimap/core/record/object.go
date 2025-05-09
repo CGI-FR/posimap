@@ -61,6 +61,7 @@ func (o *Object) Export(writer document.Writer) error {
 	return o.export(writer, o)
 }
 
+//nolint:cyclop
 func (o *Object) export(writer document.Writer, feedback Record) error {
 	if err := writer.WriteToken(document.TokenObjStart); err != nil {
 		return fmt.Errorf("%w", err)
@@ -69,16 +70,20 @@ func (o *Object) export(writer document.Writer, feedback Record) error {
 	for _, key := range o.keys {
 		record := o.records[key]
 
-		if export, ok := o.exports[key]; ok && export != nil && feedback != nil && !export(feedback) {
+		if export, ok := o.exports[key]; ok && export != nil && feedback != nil {
 			// Skip the record if the export predicate returns false
-			continue
+			if ok, err := export(feedback); err != nil {
+				return fmt.Errorf("%w", err)
+			} else if !ok {
+				continue
+			}
 		}
 
 		if err := writer.WriteString(key); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
-		if err := record.Export(writer); err != nil {
+		if err := record.export(writer, feedback); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}

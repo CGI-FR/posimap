@@ -68,20 +68,26 @@ func (f *Fold) execute(cmd *cobra.Command, _ []string) {
 
 	cfg, err := config.LoadConfigFromFile(f.configfile)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load schema")
+		log.Fatal().Err(err).Msg("Failed to load configuration file")
 	}
 
 	schema, err := cfg.Compile(config.Trim(f.trim), config.Charset(f.charset))
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compile config")
+		log.Fatal().Err(err).Msg("Failed to compile configuration file")
 	}
 
 	record, err := schema.Build()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build record")
+		log.Fatal().Err(err).Msg("Failed to build record unmarshaler")
 	}
 
 	for {
+		if err := reader.Reset(cfg.Length); errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			log.Fatal().Err(err).Msg("Failed to read next byte buffer")
+		}
+
 		if err := record.Unmarshal(reader); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
@@ -91,13 +97,7 @@ func (f *Fold) execute(cmd *cobra.Command, _ []string) {
 		}
 
 		if err := record.Export(writer); err != nil {
-			log.Fatal().Err(err).Msg("Failed to export document")
-		}
-
-		if err := reader.Reset(); errors.Is(err, io.EOF) {
-			break
-		} else if err != nil {
-			log.Fatal().Err(err).Msg("Failed to reset buffer")
+			log.Fatal().Err(err).Msg("Failed to convert record to document")
 		}
 	}
 

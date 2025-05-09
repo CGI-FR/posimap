@@ -33,7 +33,7 @@ func NewBufferReader(source io.Reader) *Buffer {
 }
 
 func (m *Buffer) Slice(offset, length int) ([]byte, error) {
-	if err := m.Required(offset + length); err != nil {
+	if err := m.growTo(offset + length); err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
 
@@ -41,7 +41,7 @@ func (m *Buffer) Slice(offset, length int) ([]byte, error) {
 }
 
 func (m *Buffer) Write(offset int, data []byte) error {
-	if err := m.Required(offset + len(data)); err != nil {
+	if err := m.growTo(offset + len(data)); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
@@ -50,25 +50,28 @@ func (m *Buffer) Write(offset int, data []byte) error {
 	return nil
 }
 
-func (m *Buffer) Reset() error {
+func (m *Buffer) Reset(size int) error {
 	if m.target != nil {
 		if _, err := m.target.Write(m.buffer); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}
 
-	size := len(m.buffer)
+	if size == 0 {
+		size = len(m.buffer)
+	}
+
 	m.buffer = m.buffer[:0]
 
 	// immediately refill the buffer
-	return m.Required(size)
+	return m.growTo(size)
 }
 
 func (m *Buffer) Bytes() []byte {
 	return m.buffer
 }
 
-func (m *Buffer) Required(size int) error {
+func (m *Buffer) growTo(size int) error {
 	cursize := len(m.buffer)
 	if cursize >= size {
 		return nil
