@@ -1,11 +1,16 @@
 package config
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/predicate"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/schema"
 	"golang.org/x/text/encoding/charmap"
 )
+
+var ErrUnsupportedCharset = errors.New("unsupported charset")
 
 type Config struct {
 	Schema Schema `yaml:"schema"`
@@ -48,31 +53,39 @@ func (f Field) CompileOptions() []schema.Option {
 	return options
 }
 
-func (f Field) CompileCharset() *charmap.Charmap {
-	if f.Charset == nil {
-		return charmap.ISO8859_1
-	}
-
+func (f Field) CompileCharset() (*charmap.Charmap, error) {
 	for _, encoding := range charmap.All {
 		if charmap, ok := encoding.(*charmap.Charmap); ok && charmap.String() == *f.Charset {
-			return charmap
+			return charmap, nil
 		}
 	}
 
-	return charmap.ISO8859_1
+	return nil, fmt.Errorf("%w: %s", ErrUnsupportedCharset, *f.Charset)
 }
 
-func (f Field) Compile(record schema.Record, defaults ...Default) schema.Record {
+func (f Field) Compile(record schema.Record, defaults ...Default) (schema.Record, error) {
 	if f.IsRecord() {
-		record = record.WithRecord(f.Name, f.Schema.T2.Compile(defaults...), f.CompileOptions()...)
+		schema, err := f.Schema.T2.Compile(defaults...)
+		if err != nil {
+			return nil, err
+		}
+
+		record = record.WithRecord(f.Name, schema, f.CompileOptions()...)
 	} else {
-		record = record.WithField(f.Name, codec.NewString(f.CompileCharset(), f.Length, *f.Trim), f.CompileOptions()...)
+		charset, err := f.CompileCharset()
+		if err != nil {
+			return nil, err
+		}
+
+		record = record.WithField(f.Name, codec.NewString(charset, f.Length, *f.Trim), f.CompileOptions()...)
 	}
 
-	return record
+	return record, nil
 }
 
-func (s Schema) Compile(defaults ...Default) schema.Record {
+func (s Schema) Compile(defaults ...Default) (schema.Record, error) {
+	var err error
+
 	record := make(schema.Record, 0, len(s))
 
 	for _, field := range s {
@@ -80,24 +93,17 @@ func (s Schema) Compile(defaults ...Default) schema.Record {
 			field = defaultFunc(field)
 		}
 
-		record = field.Compile(record, defaults...)
+		record, err = field.Compile(record, defaults...)
+		if err != nil {
+			return nil, fmt.Errorf("failed to compile field %s: %w", field.Name, err)
+		}
 	}
 
-	return record
+	return record, nil
 }
 
-func (c Config) Compile(defaults ...Default) schema.Record {
-	schema := make(schema.Record, 0, len(c.Schema))
-
-	for _, field := range c.Schema {
-		for _, defaultFunc := range defaults {
-			field = defaultFunc(field)
-		}
-
-		schema = field.Compile(schema, defaults...)
-	}
-
-	return schema
+func (c Config) Compile(defaults ...Default) (schema.Record, error) {
+	return c.Schema.Compile(defaults...)
 }
 
 type Default func(field Field) Field
@@ -106,6 +112,16 @@ func Trim(enable bool) Default {
 	return func(field Field) Field {
 		if field.Trim == nil {
 			field.Trim = &enable
+		}
+
+		return field
+	}
+}
+
+func Charset(name string) Default {
+	return func(field Field) Field {
+		if field.Charset == nil {
+			field.Charset = &name
 		}
 
 		return field

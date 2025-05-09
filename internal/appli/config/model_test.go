@@ -56,7 +56,10 @@ func TestCompile(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			result := test.schema.Compile(config.Trim(true))
+			result, err := test.schema.Compile(config.Trim(true), config.Charset(charmap.ISO8859_1.String()))
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
 
 			// Compare the loaded schema with the expected schema
 			assert.DeepEqual(t, result, test.expected,
