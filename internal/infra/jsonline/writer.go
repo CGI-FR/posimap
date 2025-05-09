@@ -2,6 +2,7 @@ package jsonline
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -154,15 +155,15 @@ func (w *Writer) WriteString(data string) error {
 		return err
 	}
 
-	if _, err := w.writer.WriteRune(rune(document.TokenString)); err != nil {
+	// when encoding/json/v2 is ready to use, switch to it
+	// for now, we use a simple escape from encoding/json
+
+	escapedBytes, err := json.Marshal(data)
+	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
-	if _, err := w.writer.WriteString(data); err != nil {
-		return fmt.Errorf("%w", err)
-	}
-
-	if _, err := w.writer.WriteRune(rune(document.TokenString)); err != nil {
+	if _, err := w.writer.Write(escapedBytes); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
