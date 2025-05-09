@@ -42,7 +42,7 @@ func (s *String) Decode(buffer api.Buffer, offset int) (any, error) {
 	}
 
 	if s.trim {
-		return strings.TrimRight(string(runes), BlankRunes), err
+		return strings.TrimRight(string(runes), VisibleBlankRunes), err
 	}
 
 	return string(runes), err
