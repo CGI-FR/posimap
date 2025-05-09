@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/cgi-fr/posimap/pkg/posimap/api"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/record"
+	"golang.org/x/text/encoding/charmap"
 )
 
 var ErrInvalidRedefines = errors.New("invalid redefines")
@@ -105,27 +107,35 @@ func (r Record) build(rec *record.Object, offset *int) error {
 	return nil
 }
 
-func (f Field) updateOffsetForRedefines(offset *int, redefines map[string]int) error {
+// updateOffsetForRedefines checks if the field redefines another field and updates the offset accordingly.
+// it returns the length of the redefined field or 0 if no field is redefined.
+func (f Field) updateOffsetForRedefines(offset *int, redefines map[string]int) (int, error) {
 	if f.redefines == "" {
-		return nil
+		return 0, nil
 	}
 
 	// Check if the field redefines another field and adjust the offset accordingly.
 	if pos, ok := redefines[f.redefines]; ok {
+		length := *offset - pos
 		*offset = pos
 
-		return nil
+		return length, nil
 	}
 
-	return fmt.Errorf("%w: %s", ErrInvalidRedefines, f.redefines)
+	return 0, fmt.Errorf("%w: %s", ErrInvalidRedefines, f.redefines)
 }
 
 func (f Field) build(rec *record.Object, offset *int, redefines map[string]int) error {
-	if err := f.updateOffsetForRedefines(offset, redefines); err != nil {
+	length, err := f.updateOffsetForRedefines(offset, redefines)
+	if err != nil {
 		return err
 	}
 
+	target := *offset + length
+
 	redefines[f.name] = *offset
+
+	var sub *record.Object
 
 	switch {
 	case f.occurs == 0 && f.definition.IsCodec():
@@ -133,12 +143,18 @@ func (f Field) build(rec *record.Object, offset *int, redefines map[string]int) 
 	case f.occurs > 0 && f.definition.IsCodec():
 		f.buildCodecArray(rec, offset)
 	case f.occurs == 0 && f.definition.IsSchema():
-		return f.buildSchema(rec, offset)
+		sub, err = f.buildSchema(rec, offset)
 	case f.occurs > 0 && f.definition.IsSchema():
-		return f.buildSchemaArray(rec, offset)
+		err = f.buildSchemaArray(rec, offset)
 	}
 
-	return nil
+	if *offset < target && length > 0 && sub != nil {
+		println("missing filler of", target-*offset, "bytes under", f.name)
+		sub.Add("FILLER", record.NewValue(*offset, codec.NewString(charmap.ISO8859_1, target-*offset, true)), nil)
+		*offset = target
+	}
+
+	return err
 }
 
 func (f Field) buildCodec(rec *record.Object, offset *int) {
@@ -157,15 +173,15 @@ func (f Field) buildCodecArray(rec *record.Object, offset *int) {
 	rec.Add(f.name, array, f.when)
 }
 
-func (f Field) buildSchema(rec *record.Object, offset *int) error {
+func (f Field) buildSchema(rec *record.Object, offset *int) (*record.Object, error) {
 	sub := record.NewObject()
 	if err := f.definition.Schema().build(sub, offset); err != nil {
-		return err
+		return nil, err
 	}
 
 	rec.Add(f.name, sub, f.when)
 
-	return nil
+	return sub, nil
 }
 
 func (f Field) buildSchemaArray(rec *record.Object, offset *int) error {
