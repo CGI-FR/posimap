@@ -12,12 +12,12 @@ var ErrUnexpectedValueType = errors.New("unexpected value type")
 
 type Value struct {
 	offset  int
-	decoder api.Decoder
-	encoder api.Encoder
+	decoder api.Decoder[any]
+	encoder api.Encoder[any]
 	content any
 }
 
-func NewValue(offset int, codec api.Codec) *Value {
+func NewValue(offset int, codec api.Codec[any]) *Value {
 	return &Value{
 		offset:  offset,
 		decoder: codec,
