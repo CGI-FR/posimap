@@ -133,6 +133,10 @@ func (n *node) printGraph(showDependsOn bool) {
 type Element interface {
 	Offset() int
 	Size() int
+	IsCodec() bool
+	IsSchema() bool
+	Codec() api.Codec[any]
+	Schema() *Record
 }
 
 type Field struct {
@@ -187,6 +191,10 @@ func (f *Field) Offset() int {
 		}
 	}
 
+	if f.occurs > 0 {
+		return maxOffset + f.Size()
+	}
+
 	return maxOffset + f.codec.Size()
 }
 
@@ -195,7 +203,27 @@ func (f *Field) Size() int {
 		return 0
 	}
 
+	if f.occurs > 0 {
+		return f.codec.Size() * f.occurs
+	}
+
 	return f.codec.Size()
+}
+
+func (f *Field) IsCodec() bool {
+	return true
+}
+
+func (f *Field) IsSchema() bool {
+	return false
+}
+
+func (f *Field) Codec() api.Codec[any] {
+	return f.codec
+}
+
+func (f *Field) Schema() *Record {
+	return nil
 }
 
 type Record struct {
@@ -247,6 +275,11 @@ func (r *Record) Offset() int {
 		}
 	}
 
+	if r.occurs > 0 {
+		// 1 occurs is already accounted for in the offset
+		return maxOffset + r.Size() - r.Size()/r.occurs
+	}
+
 	return maxOffset
 }
 
@@ -261,6 +294,10 @@ func (r *Record) Size() int {
 		if child.redefines == "" {
 			size += child.element.Size()
 		}
+	}
+
+	if r.occurs > 0 {
+		return size * r.occurs
 	}
 
 	return size
@@ -294,6 +331,22 @@ func (r *Record) PrintGraph(showDependsOn bool) {
 	r.node.printGraph(showDependsOn)
 
 	fmt.Printf("}\n")
+}
+
+func (r *Record) IsCodec() bool {
+	return false
+}
+
+func (r *Record) IsSchema() bool {
+	return true
+}
+
+func (r *Record) Codec() api.Codec[any] {
+	return nil
+}
+
+func (r *Record) Schema() *Record {
+	return r
 }
 
 type Option func(*node)
