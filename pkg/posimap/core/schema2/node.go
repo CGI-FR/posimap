@@ -2,8 +2,11 @@ package schema2
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/cgi-fr/posimap/pkg/posimap/api"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
+	"golang.org/x/text/encoding/charmap"
 )
 
 type node struct {
@@ -55,12 +58,65 @@ func (n *node) compileMarshalingPath() {
 	}
 }
 
-func (n *node) PrintGraph() {
+func (n *node) fixMissingFillers() {
+	if len(n.dependsOn) == 0 {
+		return
+	}
+
+	if len(n.dependsOn) == 1 {
+		n.dependsOn[0].fixMissingFillers()
+
+		return
+	}
+
+	offsets := make([]int, len(n.dependsOn))
+	for idx, dependent := range n.dependsOn {
+		offsets[idx] = dependent.element.Offset()
+	}
+
+	maxOffset := slices.Max(offsets)
+
+	for idx, dependent := range n.dependsOn {
+		dependentOffset := offsets[idx]
+		if dependentOffset < maxOffset {
+			println("Missing filler of len", maxOffset-dependentOffset, "for", dependent.name)
+			dependent.insertFillerOnNextRecord(maxOffset - dependentOffset)
+
+			break
+		}
+	}
+}
+
+func (n *node) insertFillerOnNextRecord(size int) {
+	switch typed := n.element.(type) {
+	case *Field:
+		fmt.Println("//Not implemented")
+	case *Record:
+		filler := &Field{
+			node: &node{
+				name:      "FILLER",
+				redefines: "",
+				occurs:    0,
+				when:      nil,
+				element:   nil,
+				redefined: make(map[string]*node),
+				children:  []*node{},
+				dependsOn: []*node{},
+			},
+			codec: codec.NewString(charmap.ISO8859_1, size, false),
+		}
+		filler.node.element = filler
+		typed.addChild(filler.node)
+		typed.setDependsOn(filler.node)
+	}
+}
+
+func (n *node) printGraph() {
 	for _, child := range n.children {
 		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", n.name, n.name, n.element.Size())
 		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", child.name, child.name, child.element.Size())
 		fmt.Printf("\t\"%s\" -> \"%s\";\n", n.name, child.name)
-		child.PrintGraph()
+		child.printGraph()
 	}
 
 	for _, dep := range n.dependsOn {
@@ -113,7 +169,7 @@ func (f *Field) Offset() int {
 		checkOffset := offsets[0]
 		for _, offset := range offsets {
 			if offset != checkOffset {
-				panic("Offsets are not equal")
+				fmt.Println("//Offsets are not equal")
 			}
 		}
 	}
@@ -212,7 +268,8 @@ func (r *Record) PrintGraph() {
 	fmt.Printf("\tnode [shape = box fixedsize=true width=3];\n")
 
 	r.node.compileMarshalingPath()
-	r.node.PrintGraph()
+	r.node.fixMissingFillers()
+	r.node.printGraph()
 
 	fmt.Printf("}\n")
 }
