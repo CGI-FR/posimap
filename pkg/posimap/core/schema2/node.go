@@ -181,7 +181,8 @@ func (f *Field) Offset() int {
 	if len(offsets) > 1 {
 		for idx, offset := range offsets {
 			if offset < maxOffset {
-				log.Warn().Msgf("Unmapped positions (length=%d) between %s and %s", maxOffset-offset, f.name, f.dependsOn[idx].name)
+				log.Error().
+					Msgf("Unmapped positions (length=%d) between %s and %s", maxOffset-offset, f.name, f.dependsOn[idx].name)
 			}
 		}
 	}
@@ -240,7 +241,8 @@ func (r *Record) Offset() int {
 	if len(offsets) > 1 {
 		for idx, offset := range offsets {
 			if offset < maxOffset {
-				log.Warn().Msgf("Unmapped positions (length=%d) between %s and %s", maxOffset-offset, r.name, r.dependsOn[idx].name)
+				log.Error().
+					Msgf("Unmapped positions (length=%d) between %s and %s", maxOffset-offset, r.name, r.dependsOn[idx].name)
 			}
 		}
 	}
@@ -275,11 +277,11 @@ func (r *Record) AddRecord(record *Record) {
 // Validate ensures the record and all its children are consistent.
 // It verifies that all field offsets are correct.
 // If fillers are missing, it attempts to add them.
-// Any unfixable issues will be logged at the warning level.
+// Any unfixable issues will be logged at the error level.
 func (r *Record) Validate() {
 	r.node.compileMarshalingPath()
 	r.node.fixMissingFillers()
-	r.Offset() // will trigger warnings if offsets are not correct
+	r.Offset() // will trigger error logs far any unfixable issues
 }
 
 func (r *Record) PrintGraph(showDependsOn bool) {
