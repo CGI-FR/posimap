@@ -272,6 +272,16 @@ func (r *Record) AddRecord(record *Record) {
 	r.addChild(record.node)
 }
 
+// Validate ensures the record and all its children are consistent.
+// It verifies that all field offsets are correct.
+// If fillers are missing, it attempts to add them.
+// Any unfixable issues will be logged at the warning level.
+func (r *Record) Validate() {
+	r.node.compileMarshalingPath()
+	r.node.fixMissingFillers()
+	r.Offset() // will trigger warnings if offsets are not correct
+}
+
 func (r *Record) PrintGraph(showDependsOn bool) {
 	fmt.Printf("digraph \"%s\" {\n", r.id)
 
