@@ -11,6 +11,7 @@ import (
 )
 
 type node struct {
+	id        string
 	name      string
 	redefines string
 	occurs    int
@@ -47,6 +48,7 @@ func (n *node) addChild(other *node) {
 
 func (n *node) compileMarshalingPath() {
 	for _, child := range n.children {
+		child.id = n.id + "." + child.name
 		if child.redefines != "" {
 			n.addDependsOn(child)
 		} else {
@@ -95,6 +97,7 @@ func (n *node) insertFiller(size int) {
 	case *Record:
 		filler := &Field{
 			node: &node{
+				id:        typed.id + ".FILLER",
 				name:      "FILLER",
 				redefines: "",
 				occurs:    0,
@@ -114,15 +117,15 @@ func (n *node) insertFiller(size int) {
 
 func (n *node) printGraph(showDependsOn bool) {
 	for _, child := range n.children {
-		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", n.name, n.name, n.element.Size())
-		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", child.name, child.name, child.element.Size())
-		fmt.Printf("\t\"%s\" -> \"%s\";\n", n.name, child.name)
+		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", n.id, n.name, n.element.Size())
+		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", child.id, child.name, child.element.Size())
+		fmt.Printf("\t\"%s\" -> \"%s\";\n", n.id, child.id)
 		child.printGraph(showDependsOn)
 	}
 
 	if showDependsOn {
 		for _, dep := range n.dependsOn {
-			fmt.Printf("\t\"%s\" -> \"%s\" [style=dashed constraint=false color=red label=%d];\n", n.name, dep.name, dep.element.Offset()) //nolint:lll
+			fmt.Printf("\t\"%s\" -> \"%s\" [style=dashed constraint=false color=red label=%d];\n", n.id, dep.id, dep.element.Offset()) //nolint:lll
 		}
 	}
 }
@@ -141,6 +144,7 @@ type Field struct {
 func NewField(name string, codec api.Codec[any], options ...Option) *Field {
 	field := &Field{
 		node: &node{
+			id:        "", // will be set in compileMarshalingPath
 			name:      name,
 			redefines: "",
 			occurs:    0,
@@ -200,6 +204,7 @@ type Record struct {
 func NewRecord(name string, options ...Option) *Record {
 	record := &Record{
 		node: &node{
+			id:        "ROOT", // will be set in compileMarshalingPath
 			name:      name,
 			redefines: "",
 			occurs:    0,
@@ -268,7 +273,7 @@ func (r *Record) AddRecord(record *Record) {
 }
 
 func (r *Record) PrintGraph(showDependsOn bool) {
-	fmt.Printf("digraph %s {\n", r.name)
+	fmt.Printf("digraph \"%s\" {\n", r.id)
 
 	fmt.Printf("\tnode [shape = box fixedsize=true width=3];\n")
 
