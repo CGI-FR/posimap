@@ -188,8 +188,11 @@ func (r *Record) Size() int {
 	}
 
 	size := 0
+
 	for _, child := range r.children {
-		size += child.element.Size()
+		if child.redefines == "" {
+			size += child.element.Size()
+		}
 	}
 
 	return size
