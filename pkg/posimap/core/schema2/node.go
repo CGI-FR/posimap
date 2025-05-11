@@ -80,7 +80,7 @@ func (n *node) fixMissingFillers() {
 	for idx, dependent := range n.dependsOn {
 		dependentOffset := offsets[idx]
 		if dependentOffset < maxOffset {
-			log.Warn().Msgf("Missing filler of len %d for %s", maxOffset-dependentOffset, dependent.name)
+			log.Warn().Msgf("Adding missing filler of len %d for %s", maxOffset-dependentOffset, dependent.name)
 			dependent.insertFiller(maxOffset - dependentOffset)
 
 			break
@@ -112,16 +112,18 @@ func (n *node) insertFiller(size int) {
 	}
 }
 
-func (n *node) printGraph() {
+func (n *node) printGraph(showDependsOn bool) {
 	for _, child := range n.children {
 		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", n.name, n.name, n.element.Size())
 		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", child.name, child.name, child.element.Size())
 		fmt.Printf("\t\"%s\" -> \"%s\";\n", n.name, child.name)
-		child.printGraph()
+		child.printGraph(showDependsOn)
 	}
 
-	for _, dep := range n.dependsOn {
-		fmt.Printf("\t\"%s\" -> \"%s\" [style=dashed constraint=false color=red label=%d];\n", n.name, dep.name, dep.element.Offset()) //nolint:lll
+	if showDependsOn {
+		for _, dep := range n.dependsOn {
+			fmt.Printf("\t\"%s\" -> \"%s\" [style=dashed constraint=false color=red label=%d];\n", n.name, dep.name, dep.element.Offset()) //nolint:lll
+		}
 	}
 }
 
@@ -166,20 +168,21 @@ func (f *Field) Offset() int {
 		offsets[idx] = dependent.element.Offset()
 	}
 
-	if len(offsets) > 1 {
-		checkOffset := offsets[0]
-		for _, offset := range offsets {
-			if offset != checkOffset {
-				log.Warn().Msgf("Redefined field with different length: %d != %d", checkOffset, offset)
-			}
-		}
-	}
-
 	if len(offsets) == 0 {
 		return f.codec.Size()
 	}
 
-	return offsets[0] + f.codec.Size()
+	maxOffset := slices.Max(offsets)
+
+	if len(offsets) > 1 {
+		for idx, offset := range offsets {
+			if offset < maxOffset {
+				log.Warn().Msgf("Unmapped positions (length=%d) between %s and %s", maxOffset-offset, f.name, f.dependsOn[idx].name)
+			}
+		}
+	}
+
+	return maxOffset + f.codec.Size()
 }
 
 func (f *Field) Size() int {
@@ -223,20 +226,21 @@ func (r *Record) Offset() int {
 		offsets[idx] = dependent.element.Offset()
 	}
 
-	if len(offsets) > 1 {
-		checkOffset := offsets[0]
-		for _, offset := range offsets {
-			if offset != checkOffset {
-				log.Warn().Msgf("Redefined field with different length: %d != %d", checkOffset, offset)
-			}
-		}
-	}
-
 	if len(offsets) == 0 {
 		return 0
 	}
 
-	return offsets[0]
+	maxOffset := slices.Max(offsets)
+
+	if len(offsets) > 1 {
+		for idx, offset := range offsets {
+			if offset < maxOffset {
+				log.Warn().Msgf("Unmapped positions (length=%d) between %s and %s", maxOffset-offset, r.name, r.dependsOn[idx].name)
+			}
+		}
+	}
+
+	return maxOffset
 }
 
 func (r *Record) Size() int {
@@ -263,14 +267,14 @@ func (r *Record) AddRecord(record *Record) {
 	r.addChild(record.node)
 }
 
-func (r *Record) PrintGraph() {
+func (r *Record) PrintGraph(showDependsOn bool) {
 	fmt.Printf("digraph %s {\n", r.name)
 
 	fmt.Printf("\tnode [shape = box fixedsize=true width=3];\n")
 
 	r.node.compileMarshalingPath()
 	r.node.fixMissingFillers()
-	r.node.printGraph()
+	r.node.printGraph(showDependsOn)
 
 	fmt.Printf("}\n")
 }

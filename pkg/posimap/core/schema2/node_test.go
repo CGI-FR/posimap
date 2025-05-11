@@ -38,7 +38,7 @@ func Example() {
 	root.AddField(rootIscompany)
 	root.AddField(rootTitles)
 
-	root.PrintGraph()
+	root.PrintGraph(true)
 
 	// Output:
 	// digraph ROOT {
