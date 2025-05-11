@@ -18,11 +18,11 @@ func Example() {
 	rootIscompany := schema2.NewField("ISCOMPANY", codec.NewString(charmap.ISO8859_1, 1, true))
 	rootTitles := schema2.NewField("TITLES", codec.NewString(charmap.ISO8859_1, 2, true))
 
-	person := schema2.NewRecord("PERSON")
+	person := schema2.NewRecord("PERSON", schema2.Redefines("ID"))
 	person.AddField(personFirstname)
 	person.AddField(personLastname)
 
-	company := schema2.NewRecord("COMPANY")
+	company := schema2.NewRecord("COMPANY", schema2.Redefines("ID"))
 	company.AddField(companyName)
 
 	addresses := schema2.NewRecord("ADDRESSES")

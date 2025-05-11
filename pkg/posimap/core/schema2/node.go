@@ -79,7 +79,7 @@ type Field struct {
 	codec api.Codec[any]
 }
 
-func NewField(name string, codec api.Codec[any]) *Field {
+func NewField(name string, codec api.Codec[any], options ...Option) *Field {
 	field := &Field{
 		node: &node{
 			name:      name,
@@ -92,6 +92,10 @@ func NewField(name string, codec api.Codec[any]) *Field {
 			dependsOn: []*node{},
 		},
 		codec: codec,
+	}
+
+	for _, option := range options {
+		option(field.node)
 	}
 
 	field.node.element = field
@@ -133,7 +137,7 @@ type Record struct {
 	*node
 }
 
-func NewRecord(name string) *Record {
+func NewRecord(name string, options ...Option) *Record {
 	record := &Record{
 		node: &node{
 			name:      name,
@@ -145,6 +149,10 @@ func NewRecord(name string) *Record {
 			children:  []*node{},
 			dependsOn: []*node{},
 		},
+	}
+
+	for _, option := range options {
+		option(record.node)
 	}
 
 	record.node.element = record
@@ -204,4 +212,24 @@ func (r *Record) PrintGraph() {
 	r.node.PrintGraph()
 
 	fmt.Printf("}\n")
+}
+
+type Option func(*node)
+
+func Occurs(occurs int) Option {
+	return func(n *node) {
+		n.occurs = occurs
+	}
+}
+
+func Condition(when api.Predicate) Option {
+	return func(n *node) {
+		n.when = when
+	}
+}
+
+func Redefines(redefines string) Option {
+	return func(n *node) {
+		n.redefines = redefines
+	}
 }
