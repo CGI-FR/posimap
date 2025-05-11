@@ -57,17 +57,20 @@ func (n *node) compileMarshalingPath() {
 
 func (n *node) PrintGraph() {
 	for _, child := range n.children {
+		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", n.name, n.name, n.element.Size())
+		fmt.Printf("\t\"%s\" [label = \"%s\\n%d\"];\n", child.name, child.name, child.element.Size())
 		fmt.Printf("\t\"%s\" -> \"%s\";\n", n.name, child.name)
 		child.PrintGraph()
 	}
 
 	for _, dep := range n.dependsOn {
-		fmt.Printf("\t\"%s\" -> \"%s\" [style=dashed constraint=false color=red label=%d];\n", n.name, dep.name, dep.element.Offset())
+		fmt.Printf("\t\"%s\" -> \"%s\" [style=dashed constraint=false color=red label=%d];\n", n.name, dep.name, dep.element.Offset()) //nolint:lll
 	}
 }
 
 type Element interface {
 	Offset() int
+	Size() int
 }
 
 type Field struct {
@@ -118,6 +121,14 @@ func (f *Field) Offset() int {
 	return offsets[0] + f.codec.Size()
 }
 
+func (f *Field) Size() int {
+	if f.codec == nil {
+		return 0
+	}
+
+	return f.codec.Size()
+}
+
 type Record struct {
 	*node
 }
@@ -161,6 +172,19 @@ func (r *Record) Offset() int {
 	}
 
 	return offsets[0]
+}
+
+func (r *Record) Size() int {
+	if len(r.children) == 0 {
+		return 0
+	}
+
+	size := 0
+	for _, child := range r.children {
+		size += child.element.Size()
+	}
+
+	return size
 }
 
 func (r *Record) AddField(field *Field) {
