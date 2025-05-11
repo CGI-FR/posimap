@@ -1,16 +1,16 @@
 package api
 
-type Decoder interface {
-	Decode(buffer Buffer, offset int) (any, error)
+type Decoder[T any] interface {
+	Decode(buffer Buffer, offset int) (T, error)
 	Size() int
 }
 
-type Encoder interface {
-	Encode(buffer Buffer, offset int, value any) error
+type Encoder[T any] interface {
+	Encode(buffer Buffer, offset int, value T) error
 	Size() int
 }
 
-type Codec interface {
-	Decoder
-	Encoder
+type Codec[T any] interface {
+	Decoder[T]
+	Encoder[T]
 }

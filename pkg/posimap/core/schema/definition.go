@@ -3,11 +3,11 @@ package schema
 import "github.com/cgi-fr/posimap/pkg/posimap/api"
 
 type Definition struct {
-	codec  api.Codec
+	codec  api.Codec[any]
 	schema Record
 }
 
-func NewCodec(codec api.Codec) Definition {
+func NewCodec(codec api.Codec[any]) Definition {
 	return Definition{
 		codec:  codec,
 		schema: nil,
@@ -29,7 +29,7 @@ func (d Definition) IsSchema() bool {
 	return d.schema != nil && d.codec == nil
 }
 
-func (d Definition) Codec() api.Codec { //nolint:ireturn
+func (d Definition) Codec() api.Codec[any] {
 	if d.IsCodec() {
 		return d.codec
 	}

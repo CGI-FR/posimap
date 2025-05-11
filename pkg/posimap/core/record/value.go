@@ -12,16 +12,14 @@ var ErrUnexpectedValueType = errors.New("unexpected value type")
 
 type Value struct {
 	offset  int
-	decoder api.Decoder
-	encoder api.Encoder
+	codec   api.Codec[any]
 	content any
 }
 
-func NewValue(offset int, codec api.Codec) *Value {
+func NewValue(offset int, codec api.Codec[any]) *Value {
 	return &Value{
 		offset:  offset,
-		decoder: codec,
-		encoder: codec,
+		codec:   codec,
 		content: nil,
 	}
 }
@@ -29,7 +27,7 @@ func NewValue(offset int, codec api.Codec) *Value {
 func (v *Value) Unmarshal(buffer api.Buffer) error {
 	var err error
 
-	v.content, err = v.decoder.Decode(buffer, v.offset)
+	v.content, err = v.codec.Decode(buffer, v.offset)
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
@@ -42,7 +40,7 @@ func (v *Value) Marshal(buffer api.Buffer) error {
 		return nil // document did not have the key set
 	}
 
-	err := v.encoder.Encode(buffer, v.offset, v.content)
+	err := v.codec.Encode(buffer, v.offset, v.content)
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}

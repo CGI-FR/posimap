@@ -50,7 +50,7 @@ func NewSchema() Record {
 	return make(Record, 0)
 }
 
-func (r Record) WithField(name string, codec api.Codec, options ...Option) Record {
+func (r Record) WithField(name string, codec api.Codec[any], options ...Option) Record {
 	field := Field{
 		name:       name,
 		redefines:  "",
