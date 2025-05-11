@@ -6,6 +6,7 @@ import (
 
 	"github.com/cgi-fr/posimap/pkg/posimap/api"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -79,18 +80,18 @@ func (n *node) fixMissingFillers() {
 	for idx, dependent := range n.dependsOn {
 		dependentOffset := offsets[idx]
 		if dependentOffset < maxOffset {
-			println("Missing filler of len", maxOffset-dependentOffset, "for", dependent.name)
-			dependent.insertFillerOnNextRecord(maxOffset - dependentOffset)
+			log.Warn().Msgf("Missing filler of len %d for %s", maxOffset-dependentOffset, dependent.name)
+			dependent.insertFiller(maxOffset - dependentOffset)
 
 			break
 		}
 	}
 }
 
-func (n *node) insertFillerOnNextRecord(size int) {
+func (n *node) insertFiller(size int) {
 	switch typed := n.element.(type) {
 	case *Field:
-		fmt.Println("//Not implemented")
+		log.Error().Msgf("Cannot add filler to field %s", typed.name)
 	case *Record:
 		filler := &Field{
 			node: &node{
@@ -169,7 +170,7 @@ func (f *Field) Offset() int {
 		checkOffset := offsets[0]
 		for _, offset := range offsets {
 			if offset != checkOffset {
-				fmt.Println("//Offsets are not equal")
+				log.Warn().Msgf("Redefined field with different length: %d != %d", checkOffset, offset)
 			}
 		}
 	}
@@ -226,7 +227,7 @@ func (r *Record) Offset() int {
 		checkOffset := offsets[0]
 		for _, offset := range offsets {
 			if offset != checkOffset {
-				panic("Offsets are not equal")
+				log.Warn().Msgf("Redefined field with different length: %d != %d", checkOffset, offset)
 			}
 		}
 	}
