@@ -39,6 +39,20 @@ func (n *node) addChild(other *node) {
 	}
 }
 
+func (n *node) compileMarshalingPath() {
+	for _, child := range n.children {
+		if child.redefines != "" {
+			n.addDependsOn(child)
+		} else {
+			n.setDependsOn(child)
+		}
+	}
+
+	for _, child := range n.children {
+		child.compileMarshalingPath()
+	}
+}
+
 func (n *node) PrintGraph() {
 	for _, child := range n.children {
 		fmt.Printf("\t\"%s\" -> \"%s\";\n", n.name, child.name)
@@ -102,6 +116,7 @@ func (r *Record) PrintGraph() {
 
 	fmt.Printf("\tnode [shape = box fixedsize=true width=3];\n")
 
+	r.node.compileMarshalingPath()
 	r.node.PrintGraph()
 
 	fmt.Printf("}\n")
