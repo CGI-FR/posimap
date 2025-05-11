@@ -12,6 +12,8 @@ type node struct {
 	occurs    int
 	when      api.Predicate
 
+	element Element
+
 	redefined map[string]*node
 	children  []*node
 	dependsOn []*node
@@ -60,8 +62,12 @@ func (n *node) PrintGraph() {
 	}
 
 	for _, dep := range n.dependsOn {
-		fmt.Printf("\t\"%s\" -> \"%s\" [style=dashed constraint=false color=red];\n", n.name, dep.name)
+		fmt.Printf("\t\"%s\" -> \"%s\" [style=dashed constraint=false color=red label=%d];\n", n.name, dep.name, dep.element.Offset())
 	}
+}
+
+type Element interface {
+	Offset() int
 }
 
 type Field struct {
@@ -71,18 +77,45 @@ type Field struct {
 }
 
 func NewField(name string, codec api.Codec[any]) *Field {
-	return &Field{
+	field := &Field{
 		node: &node{
 			name:      name,
 			redefines: "",
 			occurs:    0,
 			when:      nil,
+			element:   nil,
 			redefined: make(map[string]*node),
 			children:  []*node{},
 			dependsOn: []*node{},
 		},
 		codec: codec,
 	}
+
+	field.node.element = field
+
+	return field
+}
+
+func (f *Field) Offset() int {
+	offsets := make([]int, len(f.dependsOn))
+	for idx, dependent := range f.dependsOn {
+		offsets[idx] = dependent.element.Offset()
+	}
+
+	if len(offsets) > 1 {
+		checkOffset := offsets[0]
+		for _, offset := range offsets {
+			if offset != checkOffset {
+				panic("Offsets are not equal")
+			}
+		}
+	}
+
+	if len(offsets) == 0 {
+		return f.codec.Size()
+	}
+
+	return offsets[0] + f.codec.Size()
 }
 
 type Record struct {
@@ -90,17 +123,44 @@ type Record struct {
 }
 
 func NewRecord(name string) *Record {
-	return &Record{
+	record := &Record{
 		node: &node{
 			name:      name,
 			redefines: "",
 			occurs:    0,
 			when:      nil,
+			element:   nil,
 			redefined: make(map[string]*node),
 			children:  []*node{},
 			dependsOn: []*node{},
 		},
 	}
+
+	record.node.element = record
+
+	return record
+}
+
+func (r *Record) Offset() int {
+	offsets := make([]int, len(r.dependsOn))
+	for idx, dependent := range r.dependsOn {
+		offsets[idx] = dependent.element.Offset()
+	}
+
+	if len(offsets) > 1 {
+		checkOffset := offsets[0]
+		for _, offset := range offsets {
+			if offset != checkOffset {
+				panic("Offsets are not equal")
+			}
+		}
+	}
+
+	if len(offsets) == 0 {
+		return 0
+	}
+
+	return offsets[0]
 }
 
 func (r *Record) AddField(field *Field) {
