@@ -303,6 +303,38 @@ func (r *Record) Size() int {
 	return size
 }
 
+func (r *Record) WithField(name string, codec api.Codec[any], options ...Option) *Record {
+	field := NewField(name, codec, options...)
+
+	r.AddField(field)
+
+	return r
+}
+
+func (r *Record) WithRecord(name string, record *Record, options ...Option) *Record {
+	result := NewRecord(name, options...)
+
+	for _, field := range record.children {
+		result.addChild(field)
+	}
+
+	r.AddRecord(result)
+
+	return r
+}
+
+func (r *Record) Elements() []Element {
+	fields := make([]Element, 0)
+
+	for _, child := range r.children {
+		if child.redefines == "" {
+			fields = append(fields, child.element)
+		}
+	}
+
+	return fields
+}
+
 func (r *Record) AddField(field *Field) {
 	r.addChild(field.node)
 }

@@ -3,6 +3,7 @@ schema:
     length: 16
   - name: RECORD-BUFFER
     when: !!str false
+    length: 205
   - name: RECORD-TYPE-1
     redefine: RECORD-BUFFER
     when: '{{ index . "RECORD-TYPE" | eq "RECORD-TYPE-1" }}'
