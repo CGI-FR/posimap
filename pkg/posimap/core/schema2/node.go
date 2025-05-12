@@ -66,9 +66,11 @@ func (n *node) fixMissingFillers() {
 		return
 	}
 
-	if len(n.dependsOn) == 1 {
-		n.dependsOn[0].fixMissingFillers()
+	for _, dependent := range n.dependsOn {
+		dependent.fixMissingFillers()
+	}
 
+	if len(n.dependsOn) == 1 {
 		return
 	}
 
@@ -84,8 +86,6 @@ func (n *node) fixMissingFillers() {
 		if dependentOffset < maxOffset {
 			log.Warn().Msgf("Adding missing filler of len %d for %s", maxOffset-dependentOffset, dependent.name)
 			dependent.insertFiller(maxOffset - dependentOffset)
-
-			break
 		}
 	}
 }
