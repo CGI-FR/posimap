@@ -64,7 +64,7 @@ func (f Field) CompileCharset() (*charmap.Charmap, error) {
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedCharset, *f.Charset)
 }
 
-func (f Field) Compile(record schema.Record, defaults ...Default) (schema.Record, error) {
+func (f Field) Compile(record *schema.Record, defaults ...Default) (*schema.Record, error) {
 	if f.IsRecord() {
 		schema, err := f.Schema.T2.Compile(defaults...)
 		if err != nil {
@@ -84,10 +84,10 @@ func (f Field) Compile(record schema.Record, defaults ...Default) (schema.Record
 	return record, nil
 }
 
-func (s Schema) Compile(defaults ...Default) (schema.Record, error) {
+func (s Schema) Compile(defaults ...Default) (*schema.Record, error) {
 	var err error
 
-	record := make(schema.Record, 0, len(s))
+	record := schema.NewRecord("ROOT")
 
 	for _, field := range s {
 		for _, defaultFunc := range defaults {
@@ -103,7 +103,7 @@ func (s Schema) Compile(defaults ...Default) (schema.Record, error) {
 	return record, nil
 }
 
-func (c Config) Compile(defaults ...Default) (schema.Record, error) {
+func (c Config) Compile(defaults ...Default) (*schema.Record, error) {
 	return c.Schema.Compile(defaults...)
 }
 

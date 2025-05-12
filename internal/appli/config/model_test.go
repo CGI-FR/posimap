@@ -19,7 +19,7 @@ func TestCompile(t *testing.T) {
 	tests := []struct {
 		name     string
 		schema   config.Schema
-		expected schema.Record
+		expected *schema.Record
 	}{
 		{
 			name: "Simple schema",
@@ -29,7 +29,7 @@ func TestCompile(t *testing.T) {
 					Length: 10,
 				},
 			},
-			expected: schema.NewSchema().WithField("field1", codec.NewString(charmap.ISO8859_1, 10, true)),
+			expected: schema.NewRecord("ROOT").WithField("field1", codec.NewString(charmap.ISO8859_1, 10, true)),
 		},
 		{
 			name: "Nested schema",
@@ -46,8 +46,8 @@ func TestCompile(t *testing.T) {
 					},
 				},
 			},
-			expected: schema.NewSchema().WithRecord("lvel1",
-				schema.NewSchema().WithField("lvel2", codec.NewString(charmap.ISO8859_1, 10, true)),
+			expected: schema.NewRecord("ROOT").WithRecord("lvel1",
+				schema.NewRecord("ROOT").WithField("lvel2", codec.NewString(charmap.ISO8859_1, 10, true)),
 			),
 		},
 	}
@@ -63,8 +63,9 @@ func TestCompile(t *testing.T) {
 
 			// Compare the loaded schema with the expected schema
 			assert.DeepEqual(t, result, test.expected,
-				cmp.AllowUnexported(schema.Field{}, schema.Definition{}, codec.String{}, charmap.Charmap{}),
+				cmp.AllowUnexported(schema.Field{}, schema.Record{}, codec.String{}, charmap.Charmap{}),
 				cmpopts.IgnoreFields(charmap.Charmap{}, "decode"),
+				cmpopts.IgnoreUnexported(schema.Record{}),
 			)
 		})
 	}
