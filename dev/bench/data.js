@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1746949868738,
+  "lastUpdate": 1747039860140,
   "repoUrl": "https://github.com/CGI-FR/posimap",
   "entries": {
     "Benchmark": [
@@ -480,6 +480,78 @@ window.BENCHMARK_DATA = {
             "value": 5054,
             "unit": "allocs/op",
             "extra": "12825 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "44274230+adrienaury@users.noreply.github.com",
+            "name": "Adrien Aury",
+            "username": "adrienaury"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2923eae972512ac8445a84c919c8a286725f8a60",
+          "message": "feat: schema graph and auto-add fillers (#23)\n\n* refactor: wip! schema graph modelisation\n\n* refactor: wip! compile marshaling path\n\n* refactor: wip! compute offsets\n\n* refactor: wip! compute sizes\n\n* refactor: wip! take redefines into account\n\n* refactor: wip! fix size compute\n\n* refactor: wip! test expected output\n\n* refactor: wip! fix missing fillers\n\n* refactor: wip! fix missing fillers\n\n* refactor: wip! option to show dependsOn\n\n* refactor: wip! node use unique ids\n\n* refactor: wip! added schema validation\n\n* refactor: wip! log errors on validation\n\n* refactor: wip! take into account occurs\n\n* refactor: wip! use refactored code and add graph command\n\n* fix: add missing fillers\n\n* refactor(schema): remove old impl and fix tests\n\n* refactor(schema): final rename",
+          "timestamp": "2025-05-12T10:49:02+02:00",
+          "tree_id": "90c0fc2107af9ce8e0b40b468efbf0c9b9522433",
+          "url": "https://github.com/CGI-FR/posimap/commit/2923eae972512ac8445a84c919c8a286725f8a60"
+        },
+        "date": 1747039859404,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFold",
+            "value": 1407604,
+            "unit": "ns/op\t 1127607 B/op\t    7045 allocs/op",
+            "extra": "8341 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - ns/op",
+            "value": 1407604,
+            "unit": "ns/op",
+            "extra": "8341 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - B/op",
+            "value": 1127607,
+            "unit": "B/op",
+            "extra": "8341 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - allocs/op",
+            "value": 7045,
+            "unit": "allocs/op",
+            "extra": "8341 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold",
+            "value": 940670,
+            "unit": "ns/op\t  635883 B/op\t    5217 allocs/op",
+            "extra": "12764 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - ns/op",
+            "value": 940670,
+            "unit": "ns/op",
+            "extra": "12764 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - B/op",
+            "value": 635883,
+            "unit": "B/op",
+            "extra": "12764 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - allocs/op",
+            "value": 5217,
+            "unit": "allocs/op",
+            "extra": "12764 times\n4 procs"
           }
         ]
       }
