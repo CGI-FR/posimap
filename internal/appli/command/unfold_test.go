@@ -21,7 +21,7 @@ func BenchmarkUnfold(b *testing.B) {
 
 	for b.Loop() {
 		command := command.NewUnfoldCommand("posimap", "testgroup")
-		command.SetArgs([]string{"-c", "testdata/schema.yaml"})
+		command.SetArgs([]string{"-s", "testdata/schema.yaml"})
 		command.SetIn(bytes.NewReader(datafile))
 		command.SetOut(io.Discard)
 
