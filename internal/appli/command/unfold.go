@@ -137,7 +137,7 @@ func getCharmap(charset string) (*charmap.Charmap, error) {
 }
 
 func getSpaceInCharset(charset string) (byte, error) {
-	charmap, err := getCharmap(charset)
+	charmap, err := charsets.Get(charset)
 	if err != nil {
 		return 0, err
 	}
