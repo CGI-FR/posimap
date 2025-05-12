@@ -21,7 +21,7 @@ func BenchmarkFold(b *testing.B) {
 
 	for b.Loop() {
 		command := command.NewFoldCommand("posimap", "testgroup")
-		command.SetArgs([]string{"-c", "testdata/schema.yaml"})
+		command.SetArgs([]string{"-s", "testdata/schema.yaml"})
 		command.SetIn(bytes.NewReader(datafile))
 		command.SetOut(io.Discard)
 

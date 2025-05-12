@@ -51,8 +51,8 @@ func NewRoot(name, version, commit, buildDate, builtBy string) *Root {
 			Use:   name,
 			Short: "Transform fixed-length records into JSON objects",
 			Long:  "Transform fixed-length records into JSON objects",
-			Example: "  " + name + " fold   -c schema.yaml < input.txt  > output.json" + "\n" +
-				"  " + name + " unfold -c schema.yaml < input.json > output.txt",
+			Example: "  " + name + " fold   -s schema.yaml < input.fixed-width > output.jsonl" + "\n" +
+				"  " + name + " unfold -s schema.yaml < input.jsonl       > output.fixed-width",
 			Args: cobra.NoArgs,
 		},
 		name:      name,
