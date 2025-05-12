@@ -6,7 +6,7 @@ type Record interface {
 	Unmarshal(buffer Buffer) error
 	Marshal(buffer Buffer) error
 	Export(writer document.Writer) error
-	Import(reader document.Reader) error
+	Import(value any) error
 	Reset()
 	AsPrimitive() any
 }

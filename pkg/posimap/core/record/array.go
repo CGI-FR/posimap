@@ -63,23 +63,20 @@ func (a *Array) export(writer document.Writer, _ Record) error {
 	return nil
 }
 
-func (a *Array) Import(reader document.Reader) error {
-	if token, err := reader.ReadToken(); err != nil {
-		return fmt.Errorf("%w", err)
-	} else if token != document.TokenArrStart {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenArrStart)
-	}
+func (a *Array) Import(value any) error {
+	switch typed := value.(type) {
+	case []any:
+		for idx, record := range a.records {
+			if idx >= len(typed) {
+				return fmt.Errorf("%w: expected %d elements, got %d", ErrInvalidType, len(a.records), len(typed))
+			}
 
-	for _, record := range a.records {
-		if err := record.Import(reader); err != nil {
-			return fmt.Errorf("%w", err)
+			if err := record.Import(typed[idx]); err != nil {
+				return fmt.Errorf("%w", err)
+			}
 		}
-	}
-
-	if token, err := reader.ReadToken(); err != nil {
-		return fmt.Errorf("%w", err)
-	} else if token != document.TokenArrEnd {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenArrEnd)
+	default:
+		return fmt.Errorf("%w: expected array, got %T", ErrInvalidType, typed)
 	}
 
 	return nil
