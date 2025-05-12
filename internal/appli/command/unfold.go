@@ -29,7 +29,6 @@ import (
 	"github.com/cgi-fr/posimap/pkg/posimap/core/record"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/charmap"
 )
 
 type Unfold struct {
@@ -126,20 +125,10 @@ func (u *Unfold) buildRecord(cfg config.Config) *record.Object {
 
 var ErrUnsupportedCharset = errors.New("unsupported charset")
 
-func getCharmap(charset string) (*charmap.Charmap, error) {
-	for _, encoding := range charmap.All {
-		if charmap, ok := encoding.(*charmap.Charmap); ok && charmap.String() == charset {
-			return charmap, nil
-		}
-	}
-
-	return nil, fmt.Errorf("%w: %s", ErrUnsupportedCharset, charset)
-}
-
 func getSpaceInCharset(charset string) (byte, error) {
 	charmap, err := charsets.Get(charset)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w: %s", ErrUnsupportedCharset, charset)
 	}
 
 	space, _ := charmap.EncodeRune(' ')
