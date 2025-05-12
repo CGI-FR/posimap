@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgi-fr/posimap/internal/appli/charsets"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/predicate"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/schema"
@@ -55,13 +56,12 @@ func (f Field) CompileOptions() []schema.Option {
 }
 
 func (f Field) CompileCharset() (*charmap.Charmap, error) {
-	for _, encoding := range charmap.All {
-		if charmap, ok := encoding.(*charmap.Charmap); ok && charmap.String() == *f.Charset {
-			return charmap, nil
-		}
+	charset, err := charsets.Get(*f.Charset)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", ErrUnsupportedCharset, *f.Charset)
 	}
 
-	return nil, fmt.Errorf("%w: %s", ErrUnsupportedCharset, *f.Charset)
+	return charset, nil
 }
 
 func (f Field) Compile(record *schema.Record, defaults ...Default) (*schema.Record, error) {

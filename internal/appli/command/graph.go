@@ -1,10 +1,10 @@
 package command
 
 import (
+	"github.com/cgi-fr/posimap/internal/appli/charsets"
 	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/charmap"
 )
 
 type Graph struct {
@@ -42,7 +42,7 @@ func (g *Graph) execute(_ *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to load configuration file")
 	}
 
-	schema, err := cfg.Compile(config.Trim(true), config.Charset(charmap.ISO8859_1.String()))
+	schema, err := cfg.Compile(config.Trim(true), config.Charset(charsets.ISO88591))
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to compile configuration file")
 	}

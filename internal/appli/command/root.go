@@ -77,6 +77,7 @@ func NewRoot(name, version, commit, buildDate, builtBy string) *Root {
 
 	root.cmd.AddGroup(&cobra.Group{ID: "helpers", Title: "Helper commands:"})
 	root.cmd.AddCommand(NewGraphCommand(root.name, "helpers"))
+	root.cmd.AddCommand(NewCharsetsCommand(root.name, "helpers"))
 
 	root.cmd.PersistentPreRun = root.execute
 
