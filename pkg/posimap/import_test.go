@@ -24,7 +24,12 @@ func ExampleRecord_Import() {
 	data := strings.NewReader(`{"NAME":"JOHN DOE","ADDRESS-LINE1":"1234 ELM STREET","ADDRESS-LINE2":"SPRINGFIELD, IL 62704"}`) //nolint:lll
 	reader := jsonline.NewReader(data)
 
-	if err := rec.Import(reader); err != nil && !errors.Is(err, io.EOF) {
+	document, err := reader.Read()
+	if err != nil && !errors.Is(err, io.EOF) {
+		panic(err)
+	}
+
+	if err := rec.Import(document); err != nil && !errors.Is(err, io.EOF) {
 		panic(err)
 	}
 

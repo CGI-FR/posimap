@@ -25,6 +25,7 @@ import (
 	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/record"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding/charmap"
@@ -68,15 +69,7 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to load configuration file")
 	}
 
-	schema, err := cfg.Compile(config.Trim(true), config.Charset(u.charset))
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compile configuration file")
-	}
-
-	record, err := schema.Build()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build record marshaler")
-	}
+	record := u.buildRecord(cfg)
 
 	space, err := getSpaceInCharset(u.charset)
 	if err != nil {
@@ -114,6 +107,20 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 	}
 
 	log.Info().Msg("Unfold command completed successfully")
+}
+
+func (u *Unfold) buildRecord(cfg config.Config) *record.Object {
+	schema, err := cfg.Compile(config.Trim(true), config.Charset(u.charset))
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to compile configuration file")
+	}
+
+	record, err := schema.Build()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to build record marshaler")
+	}
+
+	return record
 }
 
 var ErrUnsupportedCharset = errors.New("unsupported charset")
