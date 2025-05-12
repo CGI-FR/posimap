@@ -66,8 +66,12 @@ func (a *Array) export(writer document.Writer, _ Record) error {
 func (a *Array) Import(value any) error {
 	switch typed := value.(type) {
 	case []any:
-		for idx, val := range typed {
-			if err := a.records[idx].Import(val); err != nil {
+		for idx, record := range a.records {
+			if idx >= len(typed) {
+				return fmt.Errorf("%w: expected %d elements, got %d", ErrInvalidType, len(a.records), len(typed))
+			}
+
+			if err := record.Import(typed[idx]); err != nil {
 				return fmt.Errorf("%w", err)
 			}
 		}
