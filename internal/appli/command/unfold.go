@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/cgi-fr/posimap/internal/appli/charsets"
 	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
@@ -49,7 +50,7 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 			GroupID: groupid,
 		},
 		configfile: "schema.yaml",
-		charset:    charmap.ISO8859_1.String(),
+		charset:    charsets.ISO88591,
 	}
 
 	unfold.cmd.Flags().StringVarP(&unfold.configfile, "schema", "s", unfold.configfile, "set the schema file")

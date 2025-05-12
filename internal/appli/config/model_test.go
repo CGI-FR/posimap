@@ -3,6 +3,7 @@ package config_test
 import (
 	"testing"
 
+	"github.com/cgi-fr/posimap/internal/appli/charsets"
 	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/schema"
@@ -56,7 +57,7 @@ func TestCompile(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			result, err := test.schema.Compile(config.Trim(true), config.Charset(charmap.ISO8859_1.String()))
+			result, err := test.schema.Compile(config.Trim(true), config.Charset(charsets.ISO88591))
 			if err != nil {
 				t.Fatalf("expected no error, got %v", err)
 			}

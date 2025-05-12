@@ -21,12 +21,12 @@ import (
 	"errors"
 	"io"
 
+	"github.com/cgi-fr/posimap/internal/appli/charsets"
 	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/encoding/charmap"
 )
 
 type Fold struct {
@@ -49,7 +49,7 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 		},
 		configfile: "schema.yaml",
 		trim:       true,
-		charset:    charmap.ISO8859_1.String(),
+		charset:    charsets.ISO88591,
 	}
 
 	fold.cmd.Flags().StringVarP(&fold.configfile, "schema", "s", fold.configfile, "set the schema file")
