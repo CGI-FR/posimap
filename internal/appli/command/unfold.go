@@ -91,7 +91,16 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 		writer.Fill(space)
 		record.Reset()
 
-		if err := record.Import(reader); err != nil {
+		document, err := reader.Read()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			log.Fatal().Err(err).Msg("Failed to read document")
+		}
+
+		if err := record.Import(document); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}

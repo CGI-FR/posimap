@@ -11,6 +11,7 @@ import (
 var (
 	ErrUnexpectedTokenType = errors.New("unexpected token type")
 	ErrUnexpectedKey       = errors.New("unexpected key")
+	ErrInvalidType         = errors.New("invalid type")
 )
 
 type Object struct {
@@ -95,36 +96,17 @@ func (o *Object) export(writer document.Writer, feedback Record) error {
 	return nil
 }
 
-func (o *Object) Import(reader document.Reader) error {
-	if token, err := reader.ReadToken(); err != nil {
-		return fmt.Errorf("%w", err)
-	} else if token != document.TokenObjStart {
-		return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenObjStart)
-	}
-
-loop:
-	for {
-		token, value, err := reader.ReadValue()
-
-		switch {
-		case err != nil:
-			return fmt.Errorf("%w", err)
-		case token == document.TokenObjEnd:
-			break loop
-		case token != document.TokenString:
-			return fmt.Errorf("%w: %q, expected %q", ErrUnexpectedTokenType, token, document.TokenString)
+func (o *Object) Import(value any) error {
+	switch typed := value.(type) {
+	case map[string]any:
+		for key, record := range o.records {
+			if err := record.Import(typed[key]); err != nil {
+				return fmt.Errorf("%w", err)
+			}
 		}
-
-		key, _ := value.(string)
-		if _, ok := o.records[key]; !ok {
-			return fmt.Errorf("%w: %s", ErrUnexpectedKey, key)
-		}
-
-		record := o.records[key]
-
-		if err := record.Import(reader); err != nil {
-			return fmt.Errorf("%w", err)
-		}
+	case nil: // skip nil values
+	default:
+		return fmt.Errorf("%w: expected object, got %T", ErrInvalidType, typed)
 	}
 
 	return nil

@@ -65,13 +65,8 @@ func (v *Value) Export(writer document.Writer) error {
 	return nil
 }
 
-func (v *Value) Import(reader document.Reader) error {
-	var err error
-
-	_, v.content, err = reader.ReadValue()
-	if err != nil {
-		return fmt.Errorf("%w", err)
-	}
+func (v *Value) Import(value any) error {
+	v.content = value
 
 	return nil
 }
