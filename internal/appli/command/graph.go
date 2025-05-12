@@ -10,8 +10,8 @@ import (
 type Graph struct {
 	cmd *cobra.Command
 
-	configfile        string
-	showDenpendencies bool
+	configfile       string
+	showDependencies bool
 }
 
 func NewGraphCommand(rootname string, groupid string) *cobra.Command {
@@ -24,12 +24,12 @@ func NewGraphCommand(rootname string, groupid string) *cobra.Command {
 			Args:    cobra.NoArgs,
 			GroupID: groupid,
 		},
-		configfile:        "schema.yaml",
-		showDenpendencies: false,
+		configfile:       "schema.yaml",
+		showDependencies: false,
 	}
 
 	graph.cmd.Flags().StringVarP(&graph.configfile, "schema", "s", graph.configfile, "set the schema file")
-	graph.cmd.Flags().BoolVarP(&graph.showDenpendencies, "dependencies", "d", graph.showDenpendencies, "show dependencies")
+	graph.cmd.Flags().BoolVarP(&graph.showDependencies, "dependencies", "d", graph.showDependencies, "show dependencies")
 
 	graph.cmd.Run = graph.execute
 
@@ -47,5 +47,5 @@ func (g *Graph) execute(_ *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to compile configuration file")
 	}
 
-	schema.PrintGraph(g.showDenpendencies)
+	schema.PrintGraph(g.showDependencies)
 }
