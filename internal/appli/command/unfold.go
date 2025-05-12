@@ -44,7 +44,7 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 			Use:     "unfold",
 			Short:   "Transform JSON objects into fixed-length records",
 			Long:    "Transform JSON objects into fixed-length records",
-			Example: "  " + rootname + "unfold -c schema.yaml < input.json > output.fixed-width",
+			Example: "  " + rootname + "unfold -s schema.yaml < input.jsonl > output.fixed-width",
 			Args:    cobra.NoArgs,
 			GroupID: groupid,
 		},
@@ -52,8 +52,8 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 		charset:    charmap.ISO8859_1.String(),
 	}
 
-	unfold.cmd.Flags().StringVarP(&unfold.configfile, "config", "c", unfold.configfile, "set the config file")
-	unfold.cmd.Flags().StringVarP(&unfold.charset, "charset", "C", unfold.charset, "set the charset for the output records") //nolint:lll
+	unfold.cmd.Flags().StringVarP(&unfold.configfile, "schema", "s", unfold.configfile, "set the schema file")
+	unfold.cmd.Flags().StringVarP(&unfold.charset, "charset", "c", unfold.charset, "set the charset for output records") //nolint:lll
 
 	unfold.cmd.Run = unfold.execute
 

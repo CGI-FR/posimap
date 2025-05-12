@@ -43,7 +43,7 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 			Use:     "fold",
 			Short:   "Transform fixed-length records into JSON objects",
 			Long:    "Transform fixed-length records into JSON objects",
-			Example: "  " + rootname + " fold -c schema.yaml < input.fixed-width > output.json",
+			Example: "  " + rootname + " fold -s schema.yaml < input.fixed-width > output.jsonl",
 			Args:    cobra.NoArgs,
 			GroupID: groupid,
 		},
@@ -52,9 +52,9 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 		charset:    charmap.ISO8859_1.String(),
 	}
 
-	fold.cmd.Flags().StringVarP(&fold.configfile, "config", "c", fold.configfile, "set the config file")
+	fold.cmd.Flags().StringVarP(&fold.configfile, "schema", "s", fold.configfile, "set the schema file")
 	fold.cmd.Flags().BoolVarP(&fold.trim, "trim", "t", fold.trim, "trim the input records")
-	fold.cmd.Flags().StringVarP(&fold.charset, "charset", "C", fold.charset, "set the charset for the input records")
+	fold.cmd.Flags().StringVarP(&fold.charset, "charset", "c", fold.charset, "set the charset for input records")
 
 	fold.cmd.Run = fold.execute
 
