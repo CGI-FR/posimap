@@ -74,8 +74,9 @@ func TestLoadSchemaFromYAML(t *testing.T) {
 			expected: config.Config{
 				Schema: config.Schema{
 					{
-						Name:   "PERSON",
-						Length: 50,
+						Name:     "PERSON",
+						Length:   50,
+						Feedback: true,
 						Schema: config.Either[string, config.Schema]{
 							T2: &config.Schema{
 								{

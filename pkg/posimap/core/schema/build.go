@@ -23,6 +23,10 @@ func (r *Record) Build() (*record.Object, error) {
 func (r *Record) build(rec *record.Object, offset *int) error {
 	redefines := make(map[string]int)
 
+	if r.feedback {
+		rec.SetFeedback()
+	}
+
 	for _, node := range r.children {
 		if err := node.build(rec, offset, redefines); err != nil {
 			return err

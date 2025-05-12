@@ -15,17 +15,23 @@ var (
 )
 
 type Object struct {
-	keys    []string
-	records map[string]Record
-	exports map[string]api.Predicate
+	keys     []string
+	records  map[string]Record
+	exports  map[string]api.Predicate
+	feedback bool
 }
 
 func NewObject() *Object {
 	return &Object{
-		keys:    make([]string, 0),
-		records: make(map[string]Record),
-		exports: make(map[string]api.Predicate),
+		keys:     make([]string, 0),
+		records:  make(map[string]Record),
+		exports:  make(map[string]api.Predicate),
+		feedback: false,
 	}
+}
+
+func (o *Object) SetFeedback() {
+	o.feedback = true
 }
 
 func (o *Object) Add(key string, record Record, export api.Predicate) {
@@ -66,6 +72,10 @@ func (o *Object) Export(writer document.Writer) error {
 func (o *Object) export(writer document.Writer, feedback Record) error {
 	if err := writer.WriteToken(document.TokenObjStart); err != nil {
 		return fmt.Errorf("%w", err)
+	}
+
+	if o.feedback {
+		feedback = o
 	}
 
 	for _, key := range o.keys {
