@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1747051313360,
+  "lastUpdate": 1747059446792,
   "repoUrl": "https://github.com/CGI-FR/posimap",
   "entries": {
     "Benchmark": [
@@ -696,6 +696,54 @@ window.BENCHMARK_DATA = {
             "value": 3707,
             "unit": "allocs/op",
             "extra": "13659 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "44274230+adrienaury@users.noreply.github.com",
+            "name": "Adrien Aury",
+            "username": "adrienaury"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "60bc36d34b4aff6ef025b6b2d7518b0f4fcc862c",
+          "message": "feat: add charsets command (#30)",
+          "timestamp": "2025-05-12T16:15:43+02:00",
+          "tree_id": "f451b3c9d434259654c0ceed6617027bffaed4c0",
+          "url": "https://github.com/CGI-FR/posimap/commit/60bc36d34b4aff6ef025b6b2d7518b0f4fcc862c"
+        },
+        "date": 1747059446522,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFold",
+            "value": 1437740,
+            "unit": "ns/op\t 1127601 B/op\t    7045 allocs/op",
+            "extra": "7554 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - ns/op",
+            "value": 1437740,
+            "unit": "ns/op",
+            "extra": "7554 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - B/op",
+            "value": 1127601,
+            "unit": "B/op",
+            "extra": "7554 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - allocs/op",
+            "value": 7045,
+            "unit": "allocs/op",
+            "extra": "7554 times\n4 procs"
           }
         ]
       }
