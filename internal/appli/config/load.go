@@ -46,6 +46,12 @@ func resolveIncludes(schema Schema, rootpath string) error {
 			// Replace the field schema with the included schema
 			schema[idx].Schema.T2 = &includedSchema.Schema
 			schema[idx].Schema.T1 = nil
+
+			if includedSchema.Feedback != nil {
+				schema[idx].Feedback = *includedSchema.Feedback
+			} else {
+				schema[idx].Feedback = true
+			}
 		}
 
 		if schema[idx].Schema.T2 != nil {

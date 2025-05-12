@@ -14,8 +14,9 @@ import (
 var ErrUnsupportedCharset = errors.New("unsupported charset")
 
 type Config struct {
-	Length int    `yaml:"length,omitempty"` // Length is the length of the record, optional
-	Schema Schema `yaml:"schema"`
+	Length   int    `yaml:"length,omitempty"` // Length is the length of the record, optional
+	Feedback *bool  `yaml:"feedback,omitempty"`
+	Schema   Schema `yaml:"schema"`
 }
 
 type Schema []Field
@@ -25,6 +26,7 @@ type Field struct {
 	Occurs   int    `yaml:"occurs,omitempty"`
 	Redefine string `yaml:"redefine,omitempty"`
 	When     string `yaml:"when,omitempty"`
+	Feedback bool   `yaml:"feedback,omitempty"`
 
 	Length  int     `yaml:"length"`
 	Trim    *bool   `yaml:"trim,omitempty"`    // Trim can be nil if not set in the configuration file
@@ -50,6 +52,10 @@ func (f Field) CompileOptions() []schema.Option {
 
 	if f.When != "" {
 		options = append(options, schema.Condition(predicate.When(f.When)))
+	}
+
+	if f.Feedback {
+		options = append(options, schema.Feedback())
 	}
 
 	return options

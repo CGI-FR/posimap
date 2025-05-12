@@ -16,6 +16,7 @@ type node struct {
 	redefines string
 	occurs    int
 	when      api.Predicate
+	feedback  bool
 
 	element Element
 
@@ -102,6 +103,7 @@ func (n *node) insertFiller(size int) {
 				redefines: "",
 				occurs:    0,
 				when:      nil,
+				feedback:  false,
 				element:   nil,
 				redefined: make(map[string]*node),
 				children:  []*node{},
@@ -153,6 +155,7 @@ func NewField(name string, codec api.Codec[any], options ...Option) *Field {
 			redefines: "",
 			occurs:    0,
 			when:      nil,
+			feedback:  false,
 			element:   nil,
 			redefined: make(map[string]*node),
 			children:  []*node{},
@@ -238,6 +241,7 @@ func NewRecord(name string, options ...Option) *Record {
 			redefines: "",
 			occurs:    0,
 			when:      nil,
+			feedback:  false,
 			element:   nil,
 			redefined: make(map[string]*node),
 			children:  []*node{},
@@ -252,6 +256,10 @@ func NewRecord(name string, options ...Option) *Record {
 	record.node.element = record
 
 	return record
+}
+
+func (r *Record) SetFeedback() {
+	r.feedback = true
 }
 
 func (r *Record) Offset() int {
@@ -398,5 +406,11 @@ func Condition(when api.Predicate) Option {
 func Redefines(redefines string) Option {
 	return func(n *node) {
 		n.redefines = redefines
+	}
+}
+
+func Feedback() Option {
+	return func(n *node) {
+		n.feedback = true
 	}
 }
