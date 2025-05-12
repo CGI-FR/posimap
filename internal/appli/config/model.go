@@ -6,7 +6,7 @@ import (
 
 	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/predicate"
-	"github.com/cgi-fr/posimap/pkg/posimap/core/schema2"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/schema"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -36,19 +36,19 @@ func (f Field) IsRecord() bool {
 	return f.Schema.T2 != nil
 }
 
-func (f Field) CompileOptions() []schema2.Option {
-	options := make([]schema2.Option, 0)
+func (f Field) CompileOptions() []schema.Option {
+	options := make([]schema.Option, 0)
 
 	if f.Occurs > 0 {
-		options = append(options, schema2.Occurs(f.Occurs))
+		options = append(options, schema.Occurs(f.Occurs))
 	}
 
 	if f.Redefine != "" {
-		options = append(options, schema2.Redefines(f.Redefine))
+		options = append(options, schema.Redefines(f.Redefine))
 	}
 
 	if f.When != "" {
-		options = append(options, schema2.Condition(predicate.When(f.When)))
+		options = append(options, schema.Condition(predicate.When(f.When)))
 	}
 
 	return options
@@ -64,7 +64,7 @@ func (f Field) CompileCharset() (*charmap.Charmap, error) {
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedCharset, *f.Charset)
 }
 
-func (f Field) Compile(record *schema2.Record, defaults ...Default) (*schema2.Record, error) {
+func (f Field) Compile(record *schema.Record, defaults ...Default) (*schema.Record, error) {
 	if f.IsRecord() {
 		schema, err := f.Schema.T2.Compile(defaults...)
 		if err != nil {
@@ -84,10 +84,10 @@ func (f Field) Compile(record *schema2.Record, defaults ...Default) (*schema2.Re
 	return record, nil
 }
 
-func (s Schema) Compile(defaults ...Default) (*schema2.Record, error) {
+func (s Schema) Compile(defaults ...Default) (*schema.Record, error) {
 	var err error
 
-	record := schema2.NewRecord("ROOT")
+	record := schema.NewRecord("ROOT")
 
 	for _, field := range s {
 		for _, defaultFunc := range defaults {
@@ -103,7 +103,7 @@ func (s Schema) Compile(defaults ...Default) (*schema2.Record, error) {
 	return record, nil
 }
 
-func (c Config) Compile(defaults ...Default) (*schema2.Record, error) {
+func (c Config) Compile(defaults ...Default) (*schema.Record, error) {
 	return c.Schema.Compile(defaults...)
 }
 
