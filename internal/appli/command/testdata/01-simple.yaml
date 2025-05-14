@@ -2,11 +2,11 @@ name: single string field - no separator - valid
 description: >-
   This is a test for a single string field with no separator.
   The field is valid and should be parsed correctly.
-stdin: testdata/01/stdin.fixed-width
+stdin: testdata/01-simple/stdin.fixed-width
 flags:
-  -s: testdata/01/schema.yaml
+  -s: testdata/01-simple/schema.yaml
 loglevel: error
 expected:
-  stdout: testdata/01/stdout.jsonl
-  stderr: testdata/01/stderr.txt
+  stdout: testdata/01-simple/stdout.jsonl
+  stderr: testdata/01-simple/stderr.txt
   exit_code: 0

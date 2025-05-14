@@ -2,11 +2,11 @@ name: multiple field record - no separator - valid
 description: >-
   This is a test for a multiple field record without separator.
   The record is valid and should be parsed correctly.
-stdin: testdata/03/stdin.fixed-width
+stdin: testdata/03-multiple/stdin.fixed-width
 flags:
-  -s: testdata/03/schema.yaml
+  -s: testdata/03-multiple/schema.yaml
 loglevel: error
 expected:
-  stdout: testdata/03/stdout.jsonl
-  stderr: testdata/03/stderr.txt
+  stdout: testdata/03-multiple/stdout.jsonl
+  stderr: testdata/03-multiple/stderr.txt
   exit_code: 0

@@ -1,0 +1,27 @@
+length: 18
+schema:
+  - name: KEY
+    length: 2
+  - name: DATA
+    length: 15
+    when: !!str false
+  - name: DATA-1
+    redefine: DATA
+    when: '{{ list "01" "02" "03" "04" | has (index . "KEY") }}'
+    schema:
+      - name: DATA-1-1
+        length: 5
+      - name: DATA-1-2
+        length: 5
+      - name: DATA-1-3
+        length: 5
+  - name: DATA-2
+    redefine: DATA
+    when: '{{ list "1" "2" | has (index . "KEY" | trunc 1) }}'
+    schema:
+      - name: DATA-2-1
+        length: 7
+      - name: DATA-2-2
+        length: 8
+  - name: NL # new line encoded as a position
+    length: 1

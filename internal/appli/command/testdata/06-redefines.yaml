@@ -1,0 +1,12 @@
+name: nested record with redefines - with separator encoded - valid
+description: >-
+  This is a test for redefined records with separator encoded.
+  The record is valid and should be parsed correctly.
+stdin: testdata/06-redefines/stdin.fixed-width
+flags:
+  -s: testdata/06-redefines/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/06-redefines/stdout.jsonl
+  stderr: testdata/06-redefines/stderr.txt
+  exit_code: 0
