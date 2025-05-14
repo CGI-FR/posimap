@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+
+	"github.com/rs/zerolog/log"
 )
 
 var ErrIncompleteBuffer = errors.New("incomplete buffer")
@@ -21,6 +23,8 @@ type Buffer struct {
 }
 
 func NewBufferWriter(target io.Writer) *Buffer {
+	log.Trace().Int("size", 0).Int("cap", defaultBufferSize).Msg("Creating new buffer writer")
+
 	return &Buffer{
 		buffer: make([]byte, 0, defaultBufferSize),
 		source: nil,
@@ -30,6 +34,8 @@ func NewBufferWriter(target io.Writer) *Buffer {
 }
 
 func NewBufferReader(source io.Reader) *Buffer {
+	log.Trace().Int("size", 0).Int("cap", defaultBufferSize).Msg("Creating new buffer reader")
+
 	return &Buffer{
 		buffer: make([]byte, 0, defaultBufferSize),
 		source: source,
@@ -65,7 +71,7 @@ func (m *Buffer) Write(offset int, data []byte) error {
 }
 
 func (m *Buffer) LockTo(separator []byte) error {
-	if len(separator) == 0 {
+	if len(separator) == 0 || m.source == nil {
 		return nil
 	}
 
@@ -90,11 +96,22 @@ search:
 	m.buffer = m.buffer[:size-len(separator)]
 	m.locked = true
 
+	log.Trace().Int("size", len(m.buffer)).Int("cap", cap(m.buffer)).Msg("Buffer locked to separator")
+
 	return nil
 }
 
 func (m *Buffer) Reset(size int, separator ...byte) error {
-	if m.target != nil {
+	log.Trace().
+		Int("size", len(m.buffer)).
+		Int("cap", cap(m.buffer)).
+		Msgf("Resetting buffer to %d bytes locking separator %q", size, separator)
+
+	defer func() {
+		log.Trace().Int("size", len(m.buffer)).Int("cap", cap(m.buffer)).Msg("Buffer reset")
+	}()
+
+	if m.target != nil && len(m.buffer) > 0 {
 		if _, err := m.target.Write(m.buffer); err != nil {
 			return fmt.Errorf("%w", err)
 		}
@@ -102,10 +119,6 @@ func (m *Buffer) Reset(size int, separator ...byte) error {
 		if _, err := m.target.Write(separator); err != nil {
 			return fmt.Errorf("%w", err)
 		}
-	}
-
-	if size == 0 && !m.locked {
-		size = len(m.buffer)
 	}
 
 	m.locked = false
