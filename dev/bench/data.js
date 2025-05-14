@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1747215210032,
+  "lastUpdate": 1747216223465,
   "repoUrl": "https://github.com/CGI-FR/posimap",
   "entries": {
     "Benchmark": [
@@ -888,6 +888,78 @@ window.BENCHMARK_DATA = {
             "value": 3703,
             "unit": "allocs/op",
             "extra": "13714 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "adrien.aury@cgi.com",
+            "name": "Adrien Aury",
+            "username": "adrienaury"
+          },
+          "committer": {
+            "email": "adrien.aury@cgi.com",
+            "name": "Adrien Aury",
+            "username": "adrienaury"
+          },
+          "distinct": true,
+          "id": "16fe22585fb188390fe6cdbcda06077c34a09d29",
+          "message": "refactor: add missing methods in buffer and document api",
+          "timestamp": "2025-05-14T09:48:15Z",
+          "tree_id": "df6c6da03f5f70f0afa298abb4d524dbd0ce2cb6",
+          "url": "https://github.com/CGI-FR/posimap/commit/16fe22585fb188390fe6cdbcda06077c34a09d29"
+        },
+        "date": 1747216222789,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFold",
+            "value": 1370211,
+            "unit": "ns/op\t 1067842 B/op\t    6620 allocs/op",
+            "extra": "8457 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - ns/op",
+            "value": 1370211,
+            "unit": "ns/op",
+            "extra": "8457 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - B/op",
+            "value": 1067842,
+            "unit": "B/op",
+            "extra": "8457 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - allocs/op",
+            "value": 6620,
+            "unit": "allocs/op",
+            "extra": "8457 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold",
+            "value": 883790,
+            "unit": "ns/op\t  682644 B/op\t    3703 allocs/op",
+            "extra": "13569 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - ns/op",
+            "value": 883790,
+            "unit": "ns/op",
+            "extra": "13569 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - B/op",
+            "value": 682644,
+            "unit": "B/op",
+            "extra": "13569 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - allocs/op",
+            "value": 3703,
+            "unit": "allocs/op",
+            "extra": "13569 times\n4 procs"
           }
         ]
       }
