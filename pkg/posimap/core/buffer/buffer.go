@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 
 	"github.com/rs/zerolog/log"
 )
@@ -78,20 +79,23 @@ func (m *Buffer) LockTo(separator []byte) error {
 	size := len(m.buffer)
 
 search:
-	for {
-		size++
-		if err := m.growTo(size); err != nil {
+	for inc := range math.MaxInt {
+		if err := m.growTo(size + inc + 1); errors.Is(err, io.EOF) && inc > 0 {
+			break // last separator is optional, if data has been read then we can stop
+		} else if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
 		for idx, sep := range separator {
-			if m.buffer[size-len(separator)+idx] != sep {
+			if m.buffer[size+inc+1-len(separator)+idx] != sep {
 				continue search
 			}
 		}
 
 		break
 	}
+
+	size = len(m.buffer)
 
 	m.buffer = m.buffer[:size-len(separator)]
 	m.locked = true
