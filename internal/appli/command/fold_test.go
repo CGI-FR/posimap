@@ -112,4 +112,5 @@ func TestFold(t *testing.T) {
 	t.Run("01.yaml", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "testdata/01.yaml") })
 	t.Run("02.yaml", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "testdata/02.yaml") })
 	t.Run("03.yaml", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "testdata/03.yaml") })
+	t.Run("04.yaml", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "testdata/04.yaml") })
 }
