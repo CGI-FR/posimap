@@ -66,7 +66,6 @@ func LoadFoldTestFromFile(filename string) (FoldTest, error) {
 
 func RunFoldTestFromFile(t *testing.T, filename string) {
 	t.Helper()
-	t.Parallel()
 
 	test, err := LoadFoldTestFromFile(filename)
 	require.NoError(t, err)
@@ -110,5 +109,7 @@ func RunFoldTestFromFile(t *testing.T, filename string) {
 func TestFold(t *testing.T) {
 	t.Parallel()
 
-	t.Run("01.yaml", func(t *testing.T) { RunFoldTestFromFile(t, "testdata/01.yaml") })
+	t.Run("01.yaml", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "testdata/01.yaml") })
+	t.Run("02.yaml", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "testdata/02.yaml") })
+	t.Run("03.yaml", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "testdata/03.yaml") })
 }
