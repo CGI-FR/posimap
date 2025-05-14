@@ -1,0 +1,12 @@
+name: error when last record is too short
+description: >-
+  This is a test for short records at the end of the file.
+  The record is invalid and should not be parsed.
+stdin: testdata/fold/99-eof-short/stdin.fixed-width
+flags:
+  -s: testdata/fold/99-eof-short/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/fold/99-eof-short/stdout.jsonl
+  stderr: testdata/fold/99-eof-short/stderr.txt
+  exit_code: 1

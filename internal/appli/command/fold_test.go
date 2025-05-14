@@ -40,15 +40,15 @@ func RunFoldTestFromFile(t *testing.T, filename string) {
 	RunCommandTestFromFile(t, command, "fold/"+filename)
 }
 
+//nolint:paralleltest // Cobra commands are not parallel-safe
 func TestFold(t *testing.T) {
-	t.Parallel()
-
-	t.Run("01-simple", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "01-simple.yaml") })
-	t.Run("02-simple-separator", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "02-simple-separator.yaml") })
-	t.Run("03-multiple", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "03-multiple.yaml") })
-	t.Run("04-nested", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "04-nested.yaml") })
-	t.Run("05-occurs", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "05-occurs.yaml") })
-	t.Run("06-redefines", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "06-redefines.yaml") })
-	t.Run("07-complete", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "07-complete.yaml") })
-	t.Run("08-missing-filler", func(t *testing.T) { t.Parallel(); RunFoldTestFromFile(t, "08-missing-filler.yaml") })
+	t.Run("01-simple", func(t *testing.T) { RunFoldTestFromFile(t, "01-simple.yaml") })
+	t.Run("02-simple-separator", func(t *testing.T) { RunFoldTestFromFile(t, "02-simple-separator.yaml") })
+	t.Run("03-multiple", func(t *testing.T) { RunFoldTestFromFile(t, "03-multiple.yaml") })
+	t.Run("04-nested", func(t *testing.T) { RunFoldTestFromFile(t, "04-nested.yaml") })
+	t.Run("05-occurs", func(t *testing.T) { RunFoldTestFromFile(t, "05-occurs.yaml") })
+	t.Run("06-redefines", func(t *testing.T) { RunFoldTestFromFile(t, "06-redefines.yaml") })
+	t.Run("07-complete", func(t *testing.T) { RunFoldTestFromFile(t, "07-complete.yaml") })
+	t.Run("08-missing-filler", func(t *testing.T) { RunFoldTestFromFile(t, "08-missing-filler.yaml") })
+	t.Run("99-eof-short", func(t *testing.T) { RunFoldTestFromFile(t, "99-eof-short.yaml") })
 }

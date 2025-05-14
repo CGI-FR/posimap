@@ -51,13 +51,6 @@ func RunCommandTestFromFile(t *testing.T, command *cobra.Command, filename strin
 	stdin, err := os.ReadFile(test.Stdin)
 	require.NoError(t, err)
 
-	logLvl, err := zerolog.ParseLevel(test.LogLevel)
-	require.NoError(t, err)
-
-	log.Logger = zerolog.New(os.Stderr)
-
-	zerolog.SetGlobalLevel(logLvl)
-
 	for flag, value := range test.Flags {
 		command.SetArgs([]string{flag, value})
 	}
@@ -69,15 +62,22 @@ func RunCommandTestFromFile(t *testing.T, command *cobra.Command, filename strin
 	command.SetOut(actualStdout)
 	command.SetErr(actualStderr)
 
-	if err := command.Execute(); assert.NoError(t, err) {
-		expectedStdout, err := os.ReadFile(test.Expected.Stdout)
-		require.NoError(t, err)
+	logLvl, err := zerolog.ParseLevel(test.LogLevel)
+	require.NoError(t, err)
 
-		assert.Equal(t, string(expectedStdout), actualStdout.String(), "stdout mismatch")
+	log.Logger = zerolog.New(actualStderr)
 
-		expectedStderr, err := os.ReadFile(test.Expected.Stderr)
-		require.NoError(t, err)
+	zerolog.SetGlobalLevel(logLvl)
 
-		assert.Equal(t, string(expectedStderr), actualStderr.String(), "stderr mismatch")
-	}
+	_ = command.Execute()
+
+	expectedStdout, err := os.ReadFile(test.Expected.Stdout)
+	require.NoError(t, err)
+
+	assert.Equal(t, string(expectedStdout), actualStdout.String(), "stdout mismatch")
+
+	expectedStderr, err := os.ReadFile(test.Expected.Stderr)
+	require.NoError(t, err)
+
+	assert.Equal(t, string(expectedStderr), actualStderr.String(), "stderr mismatch")
 }

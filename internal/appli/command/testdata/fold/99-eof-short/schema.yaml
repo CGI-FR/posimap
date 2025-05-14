@@ -1,0 +1,6 @@
+length: 10
+schema:
+  - name: field-1
+    length: 5
+  - name: field-2
+    length: 5
