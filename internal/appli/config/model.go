@@ -11,12 +11,17 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
-var ErrUnsupportedCharset = errors.New("unsupported charset")
+var (
+	ErrUnsupportedCharset      = errors.New("unsupported charset")
+	ErrEitherLengthOrSeparator = errors.New("either length or separator must be set")
+	ErrInvalidLength           = errors.New("length must be greater than 0")
+)
 
 type Config struct {
-	Length   int    `yaml:"length,omitempty"` // Length is the length of the record, optional
-	Feedback *bool  `yaml:"feedback,omitempty"`
-	Schema   Schema `yaml:"schema"`
+	Length    int    `yaml:"length,omitempty"`    // Length is the fixed length of the record, optional
+	Separator string `yaml:"separator,omitempty"` // Separator is the separator between records, optional
+	Feedback  *bool  `yaml:"feedback,omitempty"`
+	Schema    Schema `yaml:"schema"`
 }
 
 type Schema []Field
@@ -110,7 +115,24 @@ func (s Schema) Compile(defaults ...Default) (*schema.Record, error) {
 }
 
 func (c Config) Compile(defaults ...Default) (*schema.Record, error) {
+	if err := c.Validate(); err != nil {
+		return nil, fmt.Errorf("failed to validate configuration: %w", err)
+	}
+
 	return c.Schema.Compile(defaults...)
+}
+
+func (c Config) Validate() error {
+	// Either length or separator must be set
+	if c.Length == 0 && c.Separator == "" {
+		return fmt.Errorf("%w", ErrEitherLengthOrSeparator)
+	}
+
+	if c.Length <= 0 {
+		return fmt.Errorf("%w: got %d", ErrInvalidLength, c.Length)
+	}
+
+	return nil
 }
 
 type Default func(field Field) Field
