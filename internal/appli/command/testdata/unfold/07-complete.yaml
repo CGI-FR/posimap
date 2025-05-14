@@ -1,0 +1,12 @@
+name: nested config files with all capabilities activated
+description: >-
+  This is a test for nested config files with all capabilities activated.
+  The record is valid and should be parsed correctly.
+stdin: testdata/unfold/07-complete/stdin.jsonl
+flags:
+  -s: testdata/unfold/07-complete/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/unfold/07-complete/stdout.fixed-width
+  stderr: testdata/unfold/07-complete/stderr.txt
+  exit_code: 0

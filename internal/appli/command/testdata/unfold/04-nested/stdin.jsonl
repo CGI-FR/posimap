@@ -1,0 +1,5 @@
+{"PERSON":{"FIRST_NAME":"John","LAST_NAME":"Doe","ADDRESS":{"STREET":"123 Main St","CITY":"Springfield","STATE":"IL","ZIP_CODE":"62704"}},"EMPLOYMENT":{"JOB_TITLE":"Software Engineer","COMPANY":"Acme Corp","SALARY":"120000"}}
+{"PERSON":{"FIRST_NAME":"Jane","LAST_NAME":"Smith","ADDRESS":{"STREET":"456 Elm St","CITY":"Metropolis","STATE":"NY","ZIP_CODE":"10001"}},"EMPLOYMENT":{"JOB_TITLE":"Data Scientist","COMPANY":"Tech Solutions","SALARY":"95000"}}
+{"PERSON":{"FIRST_NAME":"Robert","LAST_NAME":"Brown","ADDRESS":{"STREET":"789 Oak St","CITY":"Smallville","STATE":"CA","ZIP_CODE":"90210"}},"EMPLOYMENT":{"JOB_TITLE":"Product Manager","COMPANY":"Innovatech","SALARY":"110000"}}
+{"PERSON":{"FIRST_NAME":"Emily","LAST_NAME":"Davis","ADDRESS":{"STREET":"321 Pine St","CITY":"Gotham","STATE":"TX","ZIP_CODE":"73301"}},"EMPLOYMENT":{"JOB_TITLE":"UX Designer","COMPANY":"Creative Studio","SALARY":"87000"}}
+{"PERSON":{"FIRST_NAME":"Michael","LAST_NAME":"Wilson","ADDRESS":{"STREET":"654 Maple St","CITY":"Star City","STATE":"FL","ZIP_CODE":"33101"}},"EMPLOYMENT":{"JOB_TITLE":"DevOps Engineer","COMPANY":"Cloudify","SALARY":"105000"}}

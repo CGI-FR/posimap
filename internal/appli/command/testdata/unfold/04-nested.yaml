@@ -1,0 +1,12 @@
+name: nested record - with separator - valid
+description: >-
+  This is a test for a multiple nested field record with line separator.
+  The record is valid and should be parsed correctly.
+stdin: testdata/unfold/04-nested/stdin.jsonl
+flags:
+  -s: testdata/unfold/04-nested/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/unfold/04-nested/stdout.fixed-width
+  stderr: testdata/unfold/04-nested/stderr.txt
+  exit_code: 0

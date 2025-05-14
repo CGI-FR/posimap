@@ -1,0 +1,4 @@
+length: 8
+schema:
+  - name: field1
+    length: 8

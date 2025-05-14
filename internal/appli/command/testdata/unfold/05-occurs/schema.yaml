@@ -1,0 +1,29 @@
+length: 244
+schema:
+  - name: PERSON
+    schema:
+      - name: FIRST_NAME
+        length: 10
+      - name: LAST_NAME
+        length: 10
+      - name: ADDRESSES
+        occurs: 2
+        schema:
+          - name: STREET
+            length: 20
+          - name: CITY
+            length: 15
+          - name: STATE
+            length: 2
+          - name: ZIP_CODE
+            length: 5
+  - name: EMPLOYMENTS
+    occurs: 2
+    schema:
+      - name: JOB_TITLE
+        length: 20
+      - name: COMPANY
+        length: 20
+      - name: SALARIES
+        occurs: 3
+        length: 10
