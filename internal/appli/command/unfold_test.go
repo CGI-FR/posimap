@@ -39,15 +39,14 @@ func RunUnfoldTestFromFile(t *testing.T, filename string) {
 	RunCommandTestFromFile(t, command, "unfold/"+filename)
 }
 
+//nolint:paralleltest // Cobra commands are not parallel-safe
 func TestUnfold(t *testing.T) {
-	t.Parallel()
-
-	t.Run("01-simple", func(t *testing.T) { t.Parallel(); RunUnfoldTestFromFile(t, "01-simple.yaml") })
-	t.Run("02-simple-separator", func(t *testing.T) { t.Parallel(); RunUnfoldTestFromFile(t, "02-simple-separator.yaml") })
-	t.Run("03-multiple", func(t *testing.T) { t.Parallel(); RunUnfoldTestFromFile(t, "03-multiple.yaml") })
-	t.Run("04-nested", func(t *testing.T) { t.Parallel(); RunUnfoldTestFromFile(t, "04-nested.yaml") })
-	t.Run("05-occurs", func(t *testing.T) { t.Parallel(); RunUnfoldTestFromFile(t, "05-occurs.yaml") })
-	t.Run("06-redefines", func(t *testing.T) { t.Parallel(); RunUnfoldTestFromFile(t, "06-redefines.yaml") })
-	t.Run("07-complete", func(t *testing.T) { t.Parallel(); RunUnfoldTestFromFile(t, "07-complete.yaml") })
-	t.Run("08-missing-filler", func(t *testing.T) { t.Parallel(); RunUnfoldTestFromFile(t, "08-missing-filler.yaml") })
+	t.Run("01-simple", func(t *testing.T) { RunUnfoldTestFromFile(t, "01-simple.yaml") })
+	t.Run("02-simple-separator", func(t *testing.T) { RunUnfoldTestFromFile(t, "02-simple-separator.yaml") })
+	t.Run("03-multiple", func(t *testing.T) { RunUnfoldTestFromFile(t, "03-multiple.yaml") })
+	t.Run("04-nested", func(t *testing.T) { RunUnfoldTestFromFile(t, "04-nested.yaml") })
+	t.Run("05-occurs", func(t *testing.T) { RunUnfoldTestFromFile(t, "05-occurs.yaml") })
+	t.Run("06-redefines", func(t *testing.T) { RunUnfoldTestFromFile(t, "06-redefines.yaml") })
+	t.Run("07-complete", func(t *testing.T) { RunUnfoldTestFromFile(t, "07-complete.yaml") })
+	t.Run("08-missing-filler", func(t *testing.T) { RunUnfoldTestFromFile(t, "08-missing-filler.yaml") })
 }

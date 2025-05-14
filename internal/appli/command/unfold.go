@@ -56,51 +56,64 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 	unfold.cmd.Flags().StringVarP(&unfold.configfile, "schema", "s", unfold.configfile, "set the schema file")
 	unfold.cmd.Flags().StringVarP(&unfold.charset, "charset", "c", unfold.charset, "set the charset for output records") //nolint:lll
 
-	unfold.cmd.Run = unfold.execute
+	unfold.cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		if err := unfold.execute(cmd, args); err != nil {
+			log.Error().Err(err).Msg("Unfold command failed")
+
+			return err
+		}
+
+		return nil
+	}
 
 	return unfold.cmd
 }
 
-func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
+func (u *Unfold) execute(cmd *cobra.Command, _ []string) error {
+	cmd.SilenceUsage = true
+	cmd.SilenceErrors = true
+
 	reader := jsonline.NewReader(cmd.InOrStdin())
 	writer := buffer.NewBufferWriter(cmd.OutOrStdout())
 
 	cfg, err := config.LoadConfigFromFile(u.configfile)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load configuration file")
+		return fmt.Errorf("failed to load configuration file : %w", err)
 	}
 
 	schema, err := cfg.Compile(config.Trim(true), config.Charset(u.charset))
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compile configuration file")
+		return fmt.Errorf("failed to compile configuration file : %w", err)
 	}
 
 	record, err := schema.Build()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build record marshaler")
+		return fmt.Errorf("failed to build record marshaler : %w", err)
 	}
 
 	if err := u.execUntilEOF(cfg, writer, reader, record); err != nil {
-		log.Fatal().Err(err).Msg("Unfold command failed")
+		return fmt.Errorf("%w", err)
 	}
 
 	log.Info().Msg("Unfold command completed successfully")
+
+	return nil
 }
 
 func (u *Unfold) execUntilEOF(cfg config.Config, buffer api.Buffer, reader document.Reader, record api.Record) error {
 	space, err := charsets.GetByteInCharset(u.charset, ' ')
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("failed to get space in charset : %w", err)
 	}
 
 	sep, err := charsets.GetBytesInCharset(u.charset, cfg.Separator)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("failed to get separator in charset : %w", err)
 	}
 
 	for {
 		if err := buffer.Reset(cfg.Length, sep...); err != nil {
-			return fmt.Errorf("%w", err)
+			return fmt.Errorf("failed to dump buffer : %w", err)
 		}
 
 		buffer.Fill(space)
@@ -110,15 +123,15 @@ func (u *Unfold) execUntilEOF(cfg config.Config, buffer api.Buffer, reader docum
 		if errors.Is(err, io.EOF) {
 			return nil
 		} else if err != nil {
-			return fmt.Errorf("%w", err)
+			return fmt.Errorf("failed to read next document : %w", err)
 		}
 
 		if err := record.Import(document); err != nil {
-			return fmt.Errorf("%w", err)
+			return fmt.Errorf("failed to import record : %w", err)
 		}
 
 		if err := record.Marshal(buffer); err != nil {
-			return fmt.Errorf("%w", err)
+			return fmt.Errorf("failed to marshal buffer : %w", err)
 		}
 	}
 }
