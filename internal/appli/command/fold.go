@@ -19,11 +19,13 @@ package command
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/cgi-fr/posimap/internal/appli/charsets"
 	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
+	"github.com/cgi-fr/posimap/pkg/posimap/api"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -81,29 +83,33 @@ func (f *Fold) execute(cmd *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to build record unmarshaler")
 	}
 
-	for {
-		if err := reader.Reset(cfg.Length); errors.Is(err, io.EOF) {
-			break
-		} else if err != nil {
-			log.Fatal().Err(err).Msg("Failed to read next byte buffer")
-		}
-
-		if err := record.Unmarshal(reader); err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-
-			log.Fatal().Err(err).Msg("Failed to unmarshal record")
-		}
-
-		if err := record.Export(writer); err != nil {
-			log.Fatal().Err(err).Msg("Failed to convert record to document")
-		}
-	}
-
-	if err := writer.WriteEOF(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to close stream")
+	if err := f.execUntilEOF(cfg, reader, writer, record); err != nil {
+		log.Fatal().Err(err).Msg("Fold command ended with error")
 	}
 
 	log.Info().Msg("Fold command completed successfully")
+}
+
+func (f *Fold) execUntilEOF(cfg config.Config, rdr *buffer.Buffer, wrtr *jsonline.Writer, rcrd api.Record) error {
+	defer func() {
+		if err := wrtr.WriteEOF(); err != nil {
+			log.Fatal().Err(err).Msg("Failed to close stream")
+		}
+	}()
+
+	for {
+		if err := rdr.Reset(cfg.Length); errors.Is(err, io.EOF) {
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		if err := rcrd.Unmarshal(rdr); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		if err := rcrd.Export(wrtr); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	}
 }

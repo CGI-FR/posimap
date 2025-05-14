@@ -1,9 +1,12 @@
 package buffer
 
 import (
+	"errors"
 	"fmt"
 	"io"
 )
+
+var ErrIncompleteBuffer = errors.New("incomplete buffer")
 
 const (
 	growthFactor      = 2
@@ -91,8 +94,10 @@ func (m *Buffer) growTo(size int) error {
 	}
 
 	if m.source != nil {
-		if _, err := m.source.Read(m.buffer[cursize:]); err != nil {
+		if n, err := m.source.Read(m.buffer[cursize:]); err != nil {
 			return fmt.Errorf("%w", err)
+		} else if n < size-cursize {
+			return fmt.Errorf("%w", ErrIncompleteBuffer)
 		}
 	}
 
