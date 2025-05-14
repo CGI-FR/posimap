@@ -19,13 +19,15 @@ package command
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/cgi-fr/posimap/internal/appli/charsets"
 	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
+	"github.com/cgi-fr/posimap/pkg/posimap/api"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
-	"github.com/cgi-fr/posimap/pkg/posimap/core/record"
+	"github.com/cgi-fr/posimap/pkg/posimap/driven/document"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -68,43 +70,6 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 		log.Fatal().Err(err).Msg("Failed to load configuration file")
 	}
 
-	record := u.buildRecord(cfg)
-
-	space, err := charsets.GetByteInCharset(u.charset, ' ')
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to get space character in charset")
-	}
-
-	for {
-		if err := writer.Reset(cfg.Length); err != nil {
-			log.Fatal().Err(err).Msg("Failed to prepare next buffer")
-		}
-
-		writer.Fill(space)
-		record.Reset()
-
-		document, err := reader.Read()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-
-			log.Fatal().Err(err).Msg("Failed to read document")
-		}
-
-		if err := record.Import(document); err != nil {
-			log.Fatal().Err(err).Msg("Failed to convert document to record")
-		}
-
-		if err := record.Marshal(writer); err != nil {
-			log.Fatal().Err(err).Msg("Failed to marshal record")
-		}
-	}
-
-	log.Info().Msg("Unfold command completed successfully")
-}
-
-func (u *Unfold) buildRecord(cfg config.Config) *record.Object {
 	schema, err := cfg.Compile(config.Trim(true), config.Charset(u.charset))
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to compile configuration file")
@@ -115,5 +80,45 @@ func (u *Unfold) buildRecord(cfg config.Config) *record.Object {
 		log.Fatal().Err(err).Msg("Failed to build record marshaler")
 	}
 
-	return record
+	if err := u.execUntilEOF(cfg, writer, reader, record); err != nil {
+		log.Fatal().Err(err).Msg("Unfold command failed")
+	}
+
+	log.Info().Msg("Unfold command completed successfully")
+}
+
+func (u *Unfold) execUntilEOF(cfg config.Config, buffer api.Buffer, reader document.Reader, record api.Record) error {
+	space, err := charsets.GetByteInCharset(u.charset, ' ')
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	sep, err := charsets.GetBytesInCharset(u.charset, cfg.Separator)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	for {
+		if err := buffer.Reset(cfg.Length, sep...); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		buffer.Fill(space)
+		record.Reset()
+
+		document, err := reader.Read()
+		if errors.Is(err, io.EOF) {
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		if err := record.Import(document); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		if err := record.Marshal(buffer); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+	}
 }

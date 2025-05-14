@@ -93,9 +93,13 @@ search:
 	return nil
 }
 
-func (m *Buffer) Reset(size int) error {
+func (m *Buffer) Reset(size int, separator ...byte) error {
 	if m.target != nil {
 		if _, err := m.target.Write(m.buffer); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		if _, err := m.target.Write(separator); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}
@@ -107,7 +111,12 @@ func (m *Buffer) Reset(size int) error {
 	m.locked = false
 	m.buffer = m.buffer[:0]
 
-	// immediately refill the buffer
+	// immediately refill the buffer either by locking to a separator
+	// or by growing to specified length
+	if err := m.LockTo(separator); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
 	return m.growTo(size)
 }
 

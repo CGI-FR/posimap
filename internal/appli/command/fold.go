@@ -84,7 +84,7 @@ func (f *Fold) execute(cmd *cobra.Command, _ []string) {
 	}
 
 	if err := f.execUntilEOF(cfg, reader, writer, record); err != nil {
-		log.Fatal().Err(err).Msg("Fold command ended with error")
+		log.Fatal().Err(err).Msg("Fold command failed")
 	}
 
 	log.Info().Msg("Fold command completed successfully")
@@ -103,13 +103,7 @@ func (f *Fold) execUntilEOF(cfg config.Config, buffer api.Buffer, writer documen
 	}
 
 	for {
-		if err := buffer.Reset(cfg.Length); errors.Is(err, io.EOF) {
-			return nil
-		} else if err != nil {
-			return fmt.Errorf("%w", err)
-		}
-
-		if err := buffer.LockTo(sep); errors.Is(err, io.EOF) {
+		if err := buffer.Reset(cfg.Length, sep...); errors.Is(err, io.EOF) {
 			return nil
 		} else if err != nil {
 			return fmt.Errorf("%w", err)
