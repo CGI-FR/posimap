@@ -78,7 +78,7 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 
 	for {
 		if err := writer.Reset(cfg.Length); err != nil {
-			log.Fatal().Err(err).Msg("Failed to prepare next byte buffer")
+			log.Fatal().Err(err).Msg("Failed to prepare next buffer")
 		}
 
 		writer.Fill(space)
@@ -94,10 +94,6 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 		}
 
 		if err := record.Import(document); err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-
 			log.Fatal().Err(err).Msg("Failed to convert document to record")
 		}
 
