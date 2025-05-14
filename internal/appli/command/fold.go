@@ -63,7 +63,6 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 	return fold.cmd
 }
 
-//nolint:cyclop
 func (f *Fold) execute(cmd *cobra.Command, _ []string) {
 	reader := buffer.NewBufferReader(cmd.InOrStdin())
 	writer := jsonline.NewWriter(cmd.OutOrStdout())
