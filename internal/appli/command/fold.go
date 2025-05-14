@@ -59,35 +59,48 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 	fold.cmd.Flags().BoolVarP(&fold.trim, "trim", "t", fold.trim, "trim the input records")
 	fold.cmd.Flags().StringVarP(&fold.charset, "charset", "c", fold.charset, "set the charset for input records")
 
-	fold.cmd.Run = fold.execute
+	fold.cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		if err := fold.execute(cmd, args); err != nil {
+			log.Error().Err(err).Msg("Fold command failed")
+
+			return err
+		}
+
+		return nil
+	}
 
 	return fold.cmd
 }
 
-func (f *Fold) execute(cmd *cobra.Command, _ []string) {
+func (f *Fold) execute(cmd *cobra.Command, _ []string) error {
+	cmd.SilenceUsage = true
+	cmd.SilenceErrors = true
+
 	reader := buffer.NewBufferReader(cmd.InOrStdin())
 	writer := jsonline.NewWriter(cmd.OutOrStdout())
 
 	cfg, err := config.LoadConfigFromFile(f.configfile)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load configuration file")
+		return fmt.Errorf("failed to load configuration file : %w", err)
 	}
 
 	schema, err := cfg.Compile(config.Trim(f.trim), config.Charset(f.charset))
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compile configuration file")
+		return fmt.Errorf("failed to compile configuration file : %w", err)
 	}
 
 	record, err := schema.Build()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build record unmarshaler")
+		return fmt.Errorf("failed to build record marshaler : %w", err)
 	}
 
 	if err := f.execUntilEOF(cfg, reader, writer, record); err != nil {
-		log.Fatal().Err(err).Msg("Fold command failed")
+		return fmt.Errorf("%w", err)
 	}
 
 	log.Info().Msg("Fold command completed successfully")
+
+	return nil
 }
 
 func (f *Fold) execUntilEOF(cfg config.Config, buffer api.Buffer, writer document.Writer, record api.Record) error {
@@ -99,22 +112,22 @@ func (f *Fold) execUntilEOF(cfg config.Config, buffer api.Buffer, writer documen
 
 	sep, err := charsets.GetBytesInCharset(f.charset, cfg.Separator)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("failed to get separator in charset : %w", err)
 	}
 
 	for {
 		if err := buffer.Reset(cfg.Length, sep...); errors.Is(err, io.EOF) {
 			return nil
 		} else if err != nil {
-			return fmt.Errorf("%w", err)
+			return fmt.Errorf("failed to read next buffer : %w", err)
 		}
 
 		if err := record.Unmarshal(buffer); err != nil {
-			return fmt.Errorf("%w", err)
+			return fmt.Errorf("failed to marshal buffer : %w", err)
 		}
 
 		if err := record.Export(writer); err != nil {
-			return fmt.Errorf("%w", err)
+			return fmt.Errorf("failed to export record : %w", err)
 		}
 	}
 }
