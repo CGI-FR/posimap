@@ -1,0 +1,30 @@
+separator: ","
+schema:
+  - name: iddc # international direct dialing code
+    length: 4
+  - name: phone
+    when: !!str false
+  - name: phone-us
+    redefine: phone
+    when: '{{ .iddc | eq "  +1" }}'
+    schema:
+      - name: area-code
+        length: 3
+      - name: number
+        length: 7
+  - name: phone-fr
+    redefine: phone
+    when: '{{ .iddc | eq " +33" }}'
+    schema:
+      - name: number
+        length: 9
+  - name: phone-uk
+    redefine: phone
+    when: '{{ .iddc | eq " +44" }}'
+    schema:
+      - name: zero
+        length: 1
+      - name: area-code
+        length: 5
+      - name: number
+        length: 6
