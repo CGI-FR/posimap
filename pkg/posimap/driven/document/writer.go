@@ -7,4 +7,5 @@ type Writer interface {
 	WriteNumber(value float64) error
 	WriteBool(value bool) error
 	WriteNull() error
+	Close() error
 }

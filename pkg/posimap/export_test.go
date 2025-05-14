@@ -32,7 +32,7 @@ func ExampleRecord_Export() {
 		panic(err)
 	}
 
-	if err := writer.WriteEOF(); err != nil {
+	if err := writer.Close(); err != nil {
 		panic(err)
 	}
 

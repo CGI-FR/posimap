@@ -27,6 +27,7 @@ import (
 	"github.com/cgi-fr/posimap/internal/infra/jsonline"
 	"github.com/cgi-fr/posimap/pkg/posimap/api"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/buffer"
+	"github.com/cgi-fr/posimap/pkg/posimap/driven/document"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -89,25 +90,25 @@ func (f *Fold) execute(cmd *cobra.Command, _ []string) {
 	log.Info().Msg("Fold command completed successfully")
 }
 
-func (f *Fold) execUntilEOF(cfg config.Config, rdr *buffer.Buffer, wrtr *jsonline.Writer, rcrd api.Record) error {
+func (f *Fold) execUntilEOF(cfg config.Config, buffer api.Buffer, writer document.Writer, record api.Record) error {
 	defer func() {
-		if err := wrtr.WriteEOF(); err != nil {
+		if err := writer.Close(); err != nil {
 			log.Fatal().Err(err).Msg("Failed to close stream")
 		}
 	}()
 
 	for {
-		if err := rdr.Reset(cfg.Length); errors.Is(err, io.EOF) {
+		if err := buffer.Reset(cfg.Length); errors.Is(err, io.EOF) {
 			return nil
 		} else if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
-		if err := rcrd.Unmarshal(rdr); err != nil {
+		if err := record.Unmarshal(buffer); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
-		if err := rcrd.Export(wrtr); err != nil {
+		if err := record.Export(writer); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}

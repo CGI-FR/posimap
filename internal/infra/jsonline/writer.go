@@ -212,7 +212,7 @@ func (w *Writer) WriteNull() error {
 	return nil
 }
 
-func (w *Writer) WriteEOF() error {
+func (w *Writer) Close() error {
 	if _, err := w.writer.WriteRune('\n'); err != nil {
 		return fmt.Errorf("%w", err)
 	}
