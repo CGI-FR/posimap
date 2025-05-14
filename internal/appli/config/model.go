@@ -14,9 +14,10 @@ import (
 var ErrUnsupportedCharset = errors.New("unsupported charset")
 
 type Config struct {
-	Length   int    `yaml:"length,omitempty"` // Length is the length of the record, optional
-	Feedback *bool  `yaml:"feedback,omitempty"`
-	Schema   Schema `yaml:"schema"`
+	Length    int    `yaml:"length,omitempty"`    // Length is the fixed length of the record, optional
+	Separator string `yaml:"separator,omitempty"` // Separator is the separator between records, optional
+	Feedback  *bool  `yaml:"feedback,omitempty"`
+	Schema    Schema `yaml:"schema"`
 }
 
 type Schema []Field

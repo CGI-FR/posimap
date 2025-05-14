@@ -17,6 +17,7 @@ type Buffer struct {
 	buffer []byte
 	source io.Reader
 	target io.Writer
+	locked bool
 }
 
 func NewBufferWriter(target io.Writer) *Buffer {
@@ -24,6 +25,7 @@ func NewBufferWriter(target io.Writer) *Buffer {
 		buffer: make([]byte, 0, defaultBufferSize),
 		source: nil,
 		target: target,
+		locked: false,
 	}
 }
 
@@ -32,12 +34,21 @@ func NewBufferReader(source io.Reader) *Buffer {
 		buffer: make([]byte, 0, defaultBufferSize),
 		source: source,
 		target: nil,
+		locked: false,
 	}
 }
 
 func (m *Buffer) Slice(offset, length int) ([]byte, error) {
 	if err := m.growTo(offset + length); err != nil {
 		return nil, fmt.Errorf("%w", err)
+	}
+
+	if offset > len(m.buffer) {
+		return []byte{}, nil
+	}
+
+	if offset+length > len(m.buffer) {
+		return m.buffer[offset:], nil
 	}
 
 	return m.buffer[offset : offset+length], nil
@@ -53,6 +64,35 @@ func (m *Buffer) Write(offset int, data []byte) error {
 	return nil
 }
 
+func (m *Buffer) LockTo(separator []byte) error {
+	if len(separator) == 0 {
+		return nil
+	}
+
+	size := len(m.buffer)
+
+search:
+	for {
+		size++
+		if err := m.growTo(size); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		for idx, sep := range separator {
+			if m.buffer[size-len(separator)+idx] != sep {
+				continue search
+			}
+		}
+
+		break
+	}
+
+	m.buffer = m.buffer[:size-len(separator)]
+	m.locked = true
+
+	return nil
+}
+
 func (m *Buffer) Reset(size int) error {
 	if m.target != nil {
 		if _, err := m.target.Write(m.buffer); err != nil {
@@ -60,10 +100,11 @@ func (m *Buffer) Reset(size int) error {
 		}
 	}
 
-	if size == 0 {
+	if size == 0 && !m.locked {
 		size = len(m.buffer)
 	}
 
+	m.locked = false
 	m.buffer = m.buffer[:0]
 
 	// immediately refill the buffer
@@ -82,7 +123,7 @@ func (m *Buffer) Bytes() []byte {
 
 func (m *Buffer) growTo(size int) error {
 	cursize := len(m.buffer)
-	if cursize >= size {
+	if cursize >= size || m.locked {
 		return nil
 	}
 

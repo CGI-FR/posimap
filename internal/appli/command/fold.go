@@ -97,8 +97,19 @@ func (f *Fold) execUntilEOF(cfg config.Config, buffer api.Buffer, writer documen
 		}
 	}()
 
+	sep, err := charsets.GetBytesInCharset(f.charset, cfg.Separator)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
 	for {
 		if err := buffer.Reset(cfg.Length); errors.Is(err, io.EOF) {
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		if err := buffer.LockTo(sep); errors.Is(err, io.EOF) {
 			return nil
 		} else if err != nil {
 			return fmt.Errorf("%w", err)

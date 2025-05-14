@@ -19,7 +19,6 @@ package command
 
 import (
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/cgi-fr/posimap/internal/appli/charsets"
@@ -71,7 +70,7 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) {
 
 	record := u.buildRecord(cfg)
 
-	space, err := getSpaceInCharset(u.charset)
+	space, err := charsets.GetByteInCharset(u.charset, ' ')
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to get space character in charset")
 	}
@@ -117,17 +116,4 @@ func (u *Unfold) buildRecord(cfg config.Config) *record.Object {
 	}
 
 	return record
-}
-
-var ErrUnsupportedCharset = errors.New("unsupported charset")
-
-func getSpaceInCharset(charset string) (byte, error) {
-	charmap, err := charsets.Get(charset)
-	if err != nil {
-		return 0, fmt.Errorf("%w: %s", ErrUnsupportedCharset, charset)
-	}
-
-	space, _ := charmap.EncodeRune(' ')
-
-	return space, nil
 }
