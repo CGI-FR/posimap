@@ -2,11 +2,11 @@ name: single string field - with separator - valid
 description: >-
   This is a test for a single string field with new line separator.
   The field is valid and should be parsed correctly.
-stdin: testdata/02-simple-separator/stdin.fixed-width
+stdin: testdata/fold/02-simple-separator/stdin.fixed-width
 flags:
-  -s: testdata/02-simple-separator/schema.yaml
+  -s: testdata/fold/02-simple-separator/schema.yaml
 loglevel: error
 expected:
-  stdout: testdata/02-simple-separator/stdout.jsonl
-  stderr: testdata/02-simple-separator/stderr.txt
+  stdout: testdata/fold/02-simple-separator/stdout.jsonl
+  stderr: testdata/fold/02-simple-separator/stderr.txt
   exit_code: 0

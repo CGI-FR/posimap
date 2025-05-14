@@ -2,11 +2,11 @@ name: nested record with occurs - without separator - valid
 description: >-
   This is a test for nested/occurs record without separator.
   The record is valid and should be parsed correctly.
-stdin: testdata/05-occurs/stdin.fixed-width
+stdin: testdata/fold/05-occurs/stdin.fixed-width
 flags:
-  -s: testdata/05-occurs/schema.yaml
+  -s: testdata/fold/05-occurs/schema.yaml
 loglevel: error
 expected:
-  stdout: testdata/05-occurs/stdout.jsonl
-  stderr: testdata/05-occurs/stderr.txt
+  stdout: testdata/fold/05-occurs/stdout.jsonl
+  stderr: testdata/fold/05-occurs/stderr.txt
   exit_code: 0

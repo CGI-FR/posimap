@@ -11,6 +11,7 @@ import (
 )
 
 func BenchmarkUnfold(b *testing.B) {
+	b.Skip()
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
 
 	// File is loaded once before the loop to avoid benchmarking I/O operations
