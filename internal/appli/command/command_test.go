@@ -15,11 +15,11 @@ import (
 )
 
 type CommandTest struct {
-	Name        string            `yaml:"name"`
-	Description string            `yaml:"description"`
-	Stdin       string            `yaml:"stdin"`
-	Flags       map[string]string `yaml:"flags"`
-	LogLevel    string            `yaml:"loglevel"`
+	Name        string         `yaml:"name"`
+	Description string         `yaml:"description"`
+	Stdin       string         `yaml:"stdin"`
+	Flags       map[string]any `yaml:"flags"`
+	LogLevel    string         `yaml:"loglevel"`
 	Expected    struct {
 		Stdout string `yaml:"stdout"`
 		Stderr string `yaml:"stderr"`
@@ -51,9 +51,20 @@ func RunCommandTestFromFile(t *testing.T, command *cobra.Command, filename strin
 	stdin, err := os.ReadFile(test.Stdin)
 	require.NoError(t, err)
 
+	args := []string{}
+
 	for flag, value := range test.Flags {
-		command.SetArgs([]string{flag, value})
+		switch param := value.(type) {
+		case string:
+			args = append(args, flag, param)
+		case bool:
+			if param {
+				args = append(args, flag)
+			}
+		}
 	}
+
+	command.SetArgs(args)
 
 	actualStdout := &bytes.Buffer{}
 	actualStderr := &bytes.Buffer{}
