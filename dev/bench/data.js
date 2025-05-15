@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1747228204885,
+  "lastUpdate": 1747308910197,
   "repoUrl": "https://github.com/CGI-FR/posimap",
   "entries": {
     "Benchmark": [
@@ -1032,6 +1032,78 @@ window.BENCHMARK_DATA = {
             "value": 3725,
             "unit": "allocs/op",
             "extra": "13622 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "44274230+adrienaury@users.noreply.github.com",
+            "name": "Adrien Aury",
+            "username": "adrienaury"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a0cc2f808431a0f12fe220d9822e40c0e5b649b8",
+          "message": "test: complete integration tests for fold and unfold (#35)\n\n* test(fold): create test framework\n\n* test(fold): add new tests\n\n* test(fold): add new test\n\n* test(fold): add new test\n\n* test(fold): final passing test\n\n* test(fold): move test data\n\n* test(unfold): add all tests\n\n* test: deduplicate test code\n\n* test: fix typo fisrt vs first\n\n* fix: last record separator is optional\n\n* test: fold redefines with missing fillers\n\n* test: unfold redefines with missing fillers\n\n* fix(fold): error handling in command\n\n* test(fold): eof with short buffer\n\n* style: lint\n\n* fix(unfold): error handling in command\n\n* test: trim option\n\n* fix(unfold): reset clean buffer with spaces\n\n* test: charset parameter\n\n* test: feedback parameter\n\n* test: json encoding is valid\n\n* test: test command boolean flags\n\n* fix: string codec space charset\n\n* fix: invert trim flag since it is false by default\n\n* test: add test for fold unfold flags",
+          "timestamp": "2025-05-15T13:33:10+02:00",
+          "tree_id": "7d656cf75bd1e846abb58555796f8b2e757edee3",
+          "url": "https://github.com/CGI-FR/posimap/commit/a0cc2f808431a0f12fe220d9822e40c0e5b649b8"
+        },
+        "date": 1747308909814,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFold",
+            "value": 1393976,
+            "unit": "ns/op\t 1068752 B/op\t    6641 allocs/op",
+            "extra": "8304 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - ns/op",
+            "value": 1393976,
+            "unit": "ns/op",
+            "extra": "8304 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - B/op",
+            "value": 1068752,
+            "unit": "B/op",
+            "extra": "8304 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - allocs/op",
+            "value": 6641,
+            "unit": "allocs/op",
+            "extra": "8304 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold",
+            "value": 920054,
+            "unit": "ns/op\t  686329 B/op\t    4916 allocs/op",
+            "extra": "13048 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - ns/op",
+            "value": 920054,
+            "unit": "ns/op",
+            "extra": "13048 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - B/op",
+            "value": 686329,
+            "unit": "B/op",
+            "extra": "13048 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - allocs/op",
+            "value": 4916,
+            "unit": "allocs/op",
+            "extra": "13048 times\n4 procs"
           }
         ]
       }
