@@ -1,0 +1,19 @@
+length: 16
+schema:
+  - name: trimmed_first
+    schema:
+      - name: trimmed
+        trim: true
+        length: 8
+      - name: not_trimmed
+        trim: false
+        length: 8
+  - name: trimmed_last
+    redefine: trimmed_first
+    schema:
+      - name: not_trimmed
+        trim: false
+        length: 8
+      - name: trimmed
+        trim: true
+        length: 8

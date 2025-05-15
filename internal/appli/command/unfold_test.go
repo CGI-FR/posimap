@@ -49,4 +49,5 @@ func TestUnfold(t *testing.T) {
 	t.Run("06-redefines", func(t *testing.T) { RunUnfoldTestFromFile(t, "06-redefines.yaml") })
 	t.Run("07-complete", func(t *testing.T) { RunUnfoldTestFromFile(t, "07-complete.yaml") })
 	t.Run("08-missing-filler", func(t *testing.T) { RunUnfoldTestFromFile(t, "08-missing-filler.yaml") })
+	t.Run("09-trim", func(t *testing.T) { RunUnfoldTestFromFile(t, "09-trim.yaml") })
 }
