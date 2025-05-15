@@ -1,0 +1,11 @@
+length: 4
+schema:
+  - name: ISO8859_1
+    charset: ISO8859_1
+    length: 4
+  - name: IBM_037
+    charset: IBM_037
+    length: 4
+  - name: Windows1252
+    charset: Windows1252
+    length: 4

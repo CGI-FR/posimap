@@ -1,0 +1,12 @@
+name: charsets - valid
+description: >-
+  This is a test validating different charsets option.
+  The record is valid and should be parsed correctly.
+stdin: testdata/fold/10-charsets/stdin.fixed-width
+flags:
+  -s: testdata/fold/10-charsets/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/fold/10-charsets/stdout.jsonl
+  stderr: testdata/fold/10-charsets/stderr.txt
+  exit_code: 0
