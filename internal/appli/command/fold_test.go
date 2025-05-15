@@ -53,4 +53,5 @@ func TestFold(t *testing.T) {
 	t.Run("09-trim", func(t *testing.T) { RunFoldTestFromFile(t, "09-trim.yaml") })
 	t.Run("10-charsets", func(t *testing.T) { RunFoldTestFromFile(t, "10-charsets.yaml") })
 	t.Run("99-eof-short", func(t *testing.T) { RunFoldTestFromFile(t, "99-eof-short.yaml") })
+	t.Run("99-feedback", func(t *testing.T) { RunFoldTestFromFile(t, "99-feedback.yaml") })
 }
