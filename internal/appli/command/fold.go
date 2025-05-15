@@ -36,7 +36,7 @@ type Fold struct {
 	cmd *cobra.Command
 
 	configfile string
-	trim       bool
+	notrim     bool
 	charset    string
 }
 
@@ -51,12 +51,12 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 			GroupID: groupid,
 		},
 		configfile: "schema.yaml",
-		trim:       true,
+		notrim:     false,
 		charset:    charsets.ISO88591,
 	}
 
 	fold.cmd.Flags().StringVarP(&fold.configfile, "schema", "s", fold.configfile, "set the schema file")
-	fold.cmd.Flags().BoolVarP(&fold.trim, "trim", "t", fold.trim, "trim the input records")
+	fold.cmd.Flags().BoolVarP(&fold.notrim, "notrim", "t", fold.notrim, "don't trim input  by default")
 	fold.cmd.Flags().StringVarP(&fold.charset, "charset", "c", fold.charset, "set the charset for input records")
 
 	fold.cmd.RunE = func(cmd *cobra.Command, args []string) error {
@@ -84,7 +84,7 @@ func (f *Fold) execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to load configuration file : %w", err)
 	}
 
-	schema, err := cfg.Compile(config.Trim(f.trim), config.Charset(f.charset))
+	schema, err := cfg.Compile(config.Trim(!f.notrim), config.Charset(f.charset))
 	if err != nil {
 		return fmt.Errorf("failed to compile configuration file : %w", err)
 	}
