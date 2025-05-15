@@ -16,10 +16,11 @@ Types of changes
 
 ## [0.1.0]
 
-- `Added` fold and unfold commands.
+- `Added` fold to jsonline and unfold back to fixed-width file.
 - `Added` schema definition file in YAML format.
-- `Added` ability to reference external schema file.
-- `Added` support for nested records, occurs and redefines.
-- `Added` auto-trim option to fold command.
+- `Added` ability to reference an external schema file.
+- `Added` support for nested records, occurrences, and redefines.
+- `Added` charset conversion, supporting most mono-byte charsets.
+- `Added` fold command automatically trim spaces (can be disabled via the `--notrim` flag).
 - `Added` unfold command automatically cut overflow runes.
-- `Added` trim option as a flag to fold command and as a parameter in schema definition.
+- `Added` graph and charsets commands.
