@@ -1,0 +1,4 @@
+separator: "\n"
+schema:
+  - name: field1
+    length: 8

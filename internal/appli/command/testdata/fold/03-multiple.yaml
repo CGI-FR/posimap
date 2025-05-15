@@ -1,0 +1,12 @@
+name: multiple field record - no separator - valid
+description: >-
+  This is a test for a multiple field record without separator.
+  The record is valid and should be parsed correctly.
+stdin: testdata/fold/03-multiple/stdin.fixed-width
+flags:
+  -s: testdata/fold/03-multiple/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/fold/03-multiple/stdout.jsonl
+  stderr: testdata/fold/03-multiple/stderr.txt
+  exit_code: 0

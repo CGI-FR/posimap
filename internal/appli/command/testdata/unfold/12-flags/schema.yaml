@@ -1,0 +1,10 @@
+length: 30
+schema:
+  - name: default
+    length: 10
+  - name: override_trim
+    trim: true
+    length: 10
+  - name: override_charset
+    charset: ISO8859_1
+    length: 10

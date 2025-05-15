@@ -124,11 +124,9 @@ func (c Config) Compile(defaults ...Default) (*schema.Record, error) {
 
 func (c Config) Validate() error {
 	// Either length or separator must be set
-	if c.Length == 0 && c.Separator == "" {
+	if c.Length == 0 && c.Separator == "" || c.Length != 0 && c.Separator != "" {
 		return fmt.Errorf("%w", ErrEitherLengthOrSeparator)
-	}
-
-	if c.Length <= 0 {
+	} else if c.Length < 0 {
 		return fmt.Errorf("%w: got %d", ErrInvalidLength, c.Length)
 	}
 

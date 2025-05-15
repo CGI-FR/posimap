@@ -1,0 +1,8 @@
+length: 24
+schema:
+  - name: field1
+    length: 7
+  - name: field2
+    length: 8
+  - name: field3
+    length: 9

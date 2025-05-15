@@ -1,0 +1,11 @@
+name: json encoding - valid
+description: >-
+  This test validates that json output is always correctly encoded and valid.
+stdin: testdata/fold/11-json/stdin.fixed-width
+flags:
+  -s: testdata/fold/11-json/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/fold/11-json/stdout.jsonl
+  stderr: testdata/fold/11-json/stderr.txt
+  exit_code: 0

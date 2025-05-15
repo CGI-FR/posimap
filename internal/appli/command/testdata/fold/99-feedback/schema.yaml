@@ -1,0 +1,24 @@
+length: 4
+schema:
+  - name: root
+    schema:
+      - name: nofeedback
+        feedback: false
+        schema:
+          - name: option1
+            length: 2
+            when: '{{ .root.nofeedback.option1 | eq "01" }}'
+          - name: option2
+            length: 2
+            redefine: option1
+            when: '{{ .root.nofeedback.option2 | eq "02" }}'
+      - name: feedback
+        feedback: true
+        schema:
+          - name: option1
+            length: 2
+            when: '{{ .option1 | eq "01" }}'
+          - name: option2
+            length: 2
+            redefine: option1
+            when: '{{ .option2 | eq "02" }}'

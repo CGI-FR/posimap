@@ -1,0 +1,12 @@
+name: trim option - valid
+description: >-
+  This is a test for the trim option.
+  The record is valid and should be parsed correctly.
+stdin: testdata/unfold/09-trim/stdin.jsonl
+flags:
+  -s: testdata/unfold/09-trim/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/unfold/09-trim/stdout.fixed-width
+  stderr: testdata/unfold/09-trim/stderr.txt
+  exit_code: 0

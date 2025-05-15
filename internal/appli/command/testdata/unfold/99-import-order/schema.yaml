@@ -1,0 +1,25 @@
+separator: "\n"
+schema:
+  - name: f1
+    length: 1
+  - name: f2
+    length: 1
+  - name: f3
+    length: 1
+  - name: obj
+    schema:
+      - name: f1
+        length: 1
+      - name: f2
+        length: 1
+      - name: f3
+        length: 1
+  - name: arr
+    occurs: 2
+    schema:
+      - name: f1
+        length: 1
+      - name: f2
+        length: 1
+      - name: f3
+        length: 1

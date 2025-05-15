@@ -1,0 +1,12 @@
+name: single string field - no separator - valid
+description: >-
+  This is a test for a single string field with no separator.
+  The field is valid and should be parsed correctly.
+stdin: testdata/fold/01-simple/stdin.fixed-width
+flags:
+  -s: testdata/fold/01-simple/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/fold/01-simple/stdout.jsonl
+  stderr: testdata/fold/01-simple/stderr.txt
+  exit_code: 0
