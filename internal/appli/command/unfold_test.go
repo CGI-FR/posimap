@@ -1,4 +1,3 @@
-//nolint:dupl
 package command_test
 
 import (
@@ -52,5 +51,6 @@ func TestUnfold(t *testing.T) {
 	t.Run("08-missing-filler", func(t *testing.T) { RunUnfoldTestFromFile(t, "08-missing-filler.yaml") })
 	t.Run("09-trim", func(t *testing.T) { RunUnfoldTestFromFile(t, "09-trim.yaml") })
 	t.Run("10-charsets", func(t *testing.T) { RunUnfoldTestFromFile(t, "10-charsets.yaml") })
+	t.Run("11-json", func(t *testing.T) { RunUnfoldTestFromFile(t, "11-json.yaml") })
 	t.Run("99-import-order", func(t *testing.T) { RunUnfoldTestFromFile(t, "99-import-order.yaml") })
 }

@@ -1,0 +1,4 @@
+length: 1
+schema:
+  - name: char
+    length: 1
