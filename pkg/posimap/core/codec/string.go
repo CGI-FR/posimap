@@ -56,8 +56,8 @@ func (s *String) Encode(buffer api.Buffer, offset int, value any) error {
 
 	bytes := make([]byte, 0, s.length)
 
-	for idx, rune := range str {
-		if idx == s.length {
+	for _, rune := range str {
+		if len(bytes) == s.length {
 			break
 		}
 
@@ -74,8 +74,9 @@ func (s *String) Encode(buffer api.Buffer, offset int, value any) error {
 	}
 
 	if s.length-len(bytes) > 0 {
+		space, _ := s.charmap.EncodeRune(' ')
 		for idx := range s.length - len(bytes) {
-			if err := buffer.Write(offset+len(bytes)+idx, []byte{' '}); err != nil {
+			if err := buffer.Write(offset+len(bytes)+idx, []byte{space}); err != nil {
 				return fmt.Errorf("%w", err)
 			}
 		}
