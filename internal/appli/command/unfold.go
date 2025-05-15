@@ -112,11 +112,10 @@ func (u *Unfold) execUntilEOF(cfg config.Config, buffer api.Buffer, reader docum
 	}
 
 	for {
-		if err := buffer.Reset(cfg.Length, sep...); err != nil {
+		if err := buffer.Reset(space, cfg.Length, sep...); err != nil {
 			return fmt.Errorf("failed to dump buffer : %w", err)
 		}
 
-		buffer.Fill(space)
 		record.Reset()
 
 		document, err := reader.Read()

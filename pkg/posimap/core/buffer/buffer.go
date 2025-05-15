@@ -105,7 +105,7 @@ search:
 	return nil
 }
 
-func (m *Buffer) Reset(size int, separator ...byte) error {
+func (m *Buffer) Reset(zero byte, size int, separator ...byte) error {
 	log.Trace().
 		Int("size", len(m.buffer)).
 		Int("cap", cap(m.buffer)).
@@ -124,6 +124,8 @@ func (m *Buffer) Reset(size int, separator ...byte) error {
 			return fmt.Errorf("%w", err)
 		}
 	}
+
+	m.Fill(zero)
 
 	m.locked = false
 	m.buffer = m.buffer[:0]

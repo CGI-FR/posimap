@@ -110,13 +110,18 @@ func (f *Fold) execUntilEOF(cfg config.Config, buffer api.Buffer, writer documen
 		}
 	}()
 
+	space, err := charsets.GetByteInCharset(f.charset, ' ')
+	if err != nil {
+		return fmt.Errorf("failed to get space in charset : %w", err)
+	}
+
 	sep, err := charsets.GetBytesInCharset(f.charset, cfg.Separator)
 	if err != nil {
 		return fmt.Errorf("failed to get separator in charset : %w", err)
 	}
 
 	for {
-		if err := buffer.Reset(cfg.Length, sep...); errors.Is(err, io.EOF) {
+		if err := buffer.Reset(space, cfg.Length, sep...); errors.Is(err, io.EOF) {
 			return nil
 		} else if err != nil {
 			return fmt.Errorf("failed to read next buffer : %w", err)

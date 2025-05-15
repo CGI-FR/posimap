@@ -37,7 +37,7 @@ func ExampleRecord_Import() {
 		panic(err)
 	}
 
-	if err := buffer.Reset(0); err != nil {
+	if err := buffer.Reset(0, 0); err != nil {
 		panic(err)
 	}
 

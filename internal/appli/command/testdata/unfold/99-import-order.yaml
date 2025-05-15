@@ -1,0 +1,13 @@
+name: import order - valid
+description: >-
+  This test verify that JSON input can be presented in any order.
+  The order of the fields in the JSON input should not matter.
+  It also checks that missing fields have no impact.
+stdin: testdata/unfold/99-import-order/stdin.jsonl
+flags:
+  -s: testdata/unfold/99-import-order/schema.yaml
+loglevel: error
+expected:
+  stdout: testdata/unfold/99-import-order/stdout.fixed-width
+  stderr: testdata/unfold/99-import-order/stderr.txt
+  exit_code: 0
