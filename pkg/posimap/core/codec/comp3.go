@@ -26,7 +26,10 @@ import (
 	"github.com/cgi-fr/posimap/pkg/posimap/api"
 )
 
-var ErrInvalidComp3Sign = errors.New("invalid COMP-3 sign nibble")
+var (
+	ErrInvalidComp3Sign = errors.New("invalid COMP-3 sign nibble")
+	ErrBufferTooShort   = errors.New("buffer too short for COMP-3 encoding")
+)
 
 type Comp3 struct {
 	intDigits int
@@ -38,7 +41,7 @@ func NewComp3(intDigits, decDigits int) *Comp3 {
 	return &Comp3{
 		intDigits: intDigits,
 		decDigits: decDigits,
-		size:      (intDigits + decDigits + 1) / 2, //nolint:mnd
+		size:      (intDigits + decDigits + 2) / 2, //nolint:mnd
 	}
 }
 
@@ -57,7 +60,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 
 	bytes, err := buffer.Slice(offset, c.size)
 	if err != nil && !errors.Is(err, io.EOF) {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("%w", err) // return error if buffer is too short
 	}
 
 	for byteIndex, byteVal := range bytes {
@@ -65,14 +68,14 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 			result.WriteRune('.')
 		}
 
-		if byteIndex == len(bytes)-1 {
+		if byteIndex == c.size-1 {
 			high := (byteVal & highNibbleMask) >> nibbleShift
 
-			result.WriteRune(convertNibleToRune(high))
+			if byteIndex*2 < c.intDigits+c.decDigits {
+				result.WriteRune(convertNibleToRune(high))
+			}
 
-			signNibble := byteVal & lowNibbleMask
-
-			sign, err := handleSignNibble(signNibble)
+			sign, err := handleSign(byteVal)
 			if err != nil {
 				return result.String(), err
 			}
@@ -89,7 +92,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 		result.WriteRune(convertNibleToRune(byteVal & lowNibbleMask))
 	}
 
-	panic("unexpected")
+	return result.String(), ErrBufferTooShort // should never happen because handled by buffer interface
 }
 
 func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
@@ -118,7 +121,9 @@ func convertNibleToRune(nible byte) rune {
 	return '?'
 }
 
-func handleSignNibble(signNibble byte) (string, error) {
+func handleSign(byteVal byte) (string, error) {
+	signNibble := byteVal & lowNibbleMask
+
 	if signNibble != signNibblePositive && signNibble != signNibbleNegative && signNibble != signNibbleZero {
 		return "", fmt.Errorf("%w: 0x%X", ErrInvalidComp3Sign, signNibble)
 	}
