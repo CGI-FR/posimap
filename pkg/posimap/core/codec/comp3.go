@@ -30,7 +30,7 @@ var (
 	ErrInvalidComp3Sign    = errors.New("invalid COMP-3 sign nibble")
 	ErrInvalidComp3Nibble  = errors.New("invalid COMP-3 digit")
 	ErrInvalidComp3String  = errors.New("invalid COMP-3 string")
-	ErrMisplacedDecimalSep = errors.New("mislaced decimal separator in COMP-3 encoding")
+	ErrMisplacedDecimalSep = errors.New("misplaced decimal separator in COMP-3 encoding")
 	ErrBufferTooShort      = errors.New("buffer too short for COMP-3 encoding")
 )
 
