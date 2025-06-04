@@ -403,12 +403,6 @@ func (r *Record) PrintGraph(showDependsOn bool) error {
 
 	fmt.Printf("\tnode [shape = box fixedsize=true width=3];\n")
 
-	r.node.compileMarshalingPath()
-
-	if err := r.node.fixMissingFillers(); err != nil {
-		return err
-	}
-
 	r.node.printGraph(showDependsOn)
 
 	fmt.Printf("}\n")
