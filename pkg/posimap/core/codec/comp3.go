@@ -126,6 +126,11 @@ func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
 		str = str[1:] // remove sign character
 	}
 
+	if len(str) < c.length {
+		// add leading zeros if the string is too short
+		str = strings.Repeat("0", c.length-len(str)) + str
+	}
+
 	if len(str) != c.length {
 		return fmt.Errorf("%w: expected %d characters, got %d", ErrInvalidComp3String, c.length, len(str))
 	}

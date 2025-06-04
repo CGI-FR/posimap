@@ -192,6 +192,14 @@ func TestComp3_Encode(t *testing.T) {
 			wantErr:   false,
 		},
 		{
+			name:      "without padding",
+			value:     "+123.45",
+			intDigits: 5,
+			decDigits: 2,
+			expected:  []byte{0x00, 0x12, 0x34, 0x5C},
+			wantErr:   false,
+		},
+		{
 			name:      "short string",
 			value:     "-12345.6",
 			intDigits: 5,
