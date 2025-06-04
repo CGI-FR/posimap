@@ -36,13 +36,17 @@ type String struct {
 	charmap *charmap.Charmap
 	length  int
 	trim    bool
+	zero    byte
 }
 
 func NewString(charmap *charmap.Charmap, length int, trim bool) *String {
+	space, _ := charmap.EncodeRune(' ')
+
 	return &String{
 		charmap: charmap,
 		length:  length,
 		trim:    trim,
+		zero:    space,
 	}
 }
 
@@ -91,9 +95,8 @@ func (s *String) Encode(buffer api.Buffer, offset int, value any) error {
 	}
 
 	if s.length-len(bytes) > 0 {
-		space, _ := s.charmap.EncodeRune(' ')
 		for idx := range s.length - len(bytes) {
-			if err := buffer.Write(offset+len(bytes)+idx, []byte{space}); err != nil {
+			if err := buffer.Write(offset+len(bytes)+idx, []byte{s.zero}); err != nil {
 				return fmt.Errorf("%w", err)
 			}
 		}

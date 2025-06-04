@@ -13,6 +13,7 @@ This tool can transform fixed-width positional files into JSON and convert them 
 - Supports validation and field trimming (optional).
 - Supports text encoding conversion (EBCDIC, Unicode, ...).
 - Supports OCCURS and REDEFINES in schema definition.
+- Supports packed decimal encoding (COMP-3).
 
 ## Why POSIMAP ?
 
@@ -166,6 +167,29 @@ IBM_037             IBM Code Page 037
 $ posimap fold --notrim < person.fixed-width
 {"FIRSTNAME":"JOHN    ","LASTNAME":"DOE     ","ADDRESS":{"LINE-1":"1234 ELM STREET          ","LINE-2":"SPRINGFIELD, IL 62704    "}}
 ```
+
+### Packed decimal (COMP-3)
+
+POSIMAP supports packed decimal (COMP-3) encoding, commonly used in mainframe systems. When working with packed decimal fields, you need to:
+
+1. Specify the `codec: COMP-3` attribute
+2. Define the `picture` clause that describes the field format
+
+Example configuration:
+
+```yaml
+  - name: AMOUNT
+    codec: COMP-3
+    picture: S9(5)V99  # Signed, 5 digits before decimal point, 2 after
+```
+
+The `picture` format follows standard COBOL notation:
+
+- `S` indicates the value is signed
+- `9(n)` represents n numeric digits
+- `V` represents an implied decimal point (no actual character in the data)
+
+Packed decimal fields typically use half the bytes of their displayed value, plus half a byte for the sign.
 
 ## Contributing
 
