@@ -17,6 +17,7 @@ Types of changes
 ## [0.3.0]
 
 - `Added` comp-3 numeric encoding support
+- `Fixed` always validate schema and automatically create missing fillers as non exported fields
 
 ## [0.1.0]
 
