@@ -53,6 +53,8 @@ type Field struct {
 	Length  int     `yaml:"length"`
 	Trim    *bool   `yaml:"trim,omitempty"`    // Trim can be nil if not set in the configuration file
 	Charset *string `yaml:"charset,omitempty"` // Charset can be nil if not set in the configuration file
+	Picture Picture `yaml:"picture,omitempty"` // Picture is an optional string representation of the format
+	Codec   string  `yaml:"codec,omitempty"`   // Codec is the codec to use for this field, default to String
 
 	Schema Either[string, Schema] `yaml:"schema"` // Schema is either a filename (external schema) or an embedded schema
 }
@@ -106,7 +108,17 @@ func (f Field) Compile(record *schema.Record, defaults ...Default) (*schema.Reco
 			return nil, err
 		}
 
-		record = record.WithField(f.Name, codec.NewString(charset, f.Length, *f.Trim), f.CompileOptions()...)
+		switch f.Codec {
+		case "COMP-3":
+			format, err := f.Picture.Compile()
+			if err != nil {
+				return nil, fmt.Errorf("failed to compile picture for field %s: %w", f.Name, err)
+			}
+
+			record = record.WithField(f.Name, codec.NewComp3(format.Length, format.Decimal), f.CompileOptions()...)
+		default:
+			record = record.WithField(f.Name, codec.NewString(charset, f.Length, *f.Trim), f.CompileOptions()...)
+		}
 	}
 
 	return record, nil

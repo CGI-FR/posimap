@@ -70,6 +70,7 @@ func TestFold(t *testing.T) {
 	t.Run("10-charsets", func(t *testing.T) { RunFoldTestFromFile(t, "10-charsets.yaml") })
 	t.Run("11-json", func(t *testing.T) { RunFoldTestFromFile(t, "11-json.yaml") })
 	t.Run("12-flags", func(t *testing.T) { RunFoldTestFromFile(t, "12-flags.yaml") })
+	t.Run("13-comp3", func(t *testing.T) { RunFoldTestFromFile(t, "13-comp3.yaml") })
 	t.Run("99-eof-short", func(t *testing.T) { RunFoldTestFromFile(t, "99-eof-short.yaml") })
 	t.Run("99-feedback", func(t *testing.T) { RunFoldTestFromFile(t, "99-feedback.yaml") })
 }

@@ -1,0 +1,5 @@
+length: 4
+schema:
+  - name: compressed
+    codec: COMP-3
+    picture: S9(5)V99
