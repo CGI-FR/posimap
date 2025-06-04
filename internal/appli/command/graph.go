@@ -18,6 +18,8 @@
 package command
 
 import (
+	"fmt"
+
 	"github.com/cgi-fr/posimap/internal/appli/charsets"
 	"github.com/cgi-fr/posimap/internal/appli/config"
 	"github.com/rs/zerolog/log"
@@ -48,21 +50,33 @@ func NewGraphCommand(rootname string, groupid string) *cobra.Command {
 	graph.cmd.Flags().StringVarP(&graph.configfile, "schema", "s", graph.configfile, "set the schema file")
 	graph.cmd.Flags().BoolVarP(&graph.showDependencies, "dependencies", "d", graph.showDependencies, "show dependencies")
 
-	graph.cmd.Run = graph.execute
+	graph.cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		if err := graph.execute(cmd, args); err != nil {
+			log.Error().Err(err).Msg("Graph command failed")
+
+			return err
+		}
+
+		return nil
+	}
 
 	return graph.cmd
 }
 
-func (g *Graph) execute(_ *cobra.Command, _ []string) {
+func (g *Graph) execute(_ *cobra.Command, _ []string) error {
 	cfg, err := config.LoadConfigFromFile(g.configfile)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load configuration file")
+		return fmt.Errorf("failed to load configuration file : %w", err)
 	}
 
 	schema, err := cfg.Compile(config.Trim(true), config.Charset(charsets.ISO88591))
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compile configuration file")
+		return fmt.Errorf("failed to compile configuration file : %w", err)
 	}
 
-	schema.PrintGraph(g.showDependencies)
+	if err := schema.PrintGraph(g.showDependencies); err != nil {
+		return fmt.Errorf("failed to compute graph : %w", err)
+	}
+
+	return nil
 }

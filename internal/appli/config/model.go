@@ -149,7 +149,16 @@ func (c Config) Compile(defaults ...Default) (*schema.Record, error) {
 		return nil, fmt.Errorf("failed to validate configuration: %w", err)
 	}
 
-	return c.Schema.Compile(defaults...)
+	schema, err := c.Schema.Compile(defaults...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to compile schema: %w", err)
+	}
+
+	if err := schema.Validate(); err != nil {
+		return nil, fmt.Errorf("failed to validate schema: %w", err)
+	}
+
+	return schema, nil
 }
 
 func (c Config) Validate() error {

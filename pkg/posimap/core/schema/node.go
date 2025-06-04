@@ -18,14 +18,18 @@
 package schema
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 
 	"github.com/cgi-fr/posimap/pkg/posimap/api"
 	"github.com/cgi-fr/posimap/pkg/posimap/core/codec"
+	"github.com/cgi-fr/posimap/pkg/posimap/core/predicate"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/encoding/charmap"
 )
+
+var ErrWrongLength = errors.New("wrong length for field")
 
 type node struct {
 	id        string
@@ -64,6 +68,14 @@ func (n *node) addChild(other *node) {
 	}
 }
 
+func (n *node) clearMarshalingPath() {
+	n.dependsOn = []*node{}
+
+	for _, child := range n.children {
+		child.clearMarshalingPath()
+	}
+}
+
 func (n *node) compileMarshalingPath() {
 	for _, child := range n.children {
 		child.id = n.id + "." + child.name
@@ -79,17 +91,19 @@ func (n *node) compileMarshalingPath() {
 	}
 }
 
-func (n *node) fixMissingFillers() {
+func (n *node) fixMissingFillers() error {
 	if len(n.dependsOn) == 0 {
-		return
+		return nil
 	}
 
 	for _, dependent := range n.dependsOn {
-		dependent.fixMissingFillers()
+		if err := dependent.fixMissingFillers(); err != nil {
+			return err
+		}
 	}
 
 	if len(n.dependsOn) == 1 {
-		return
+		return nil
 	}
 
 	offsets := make([]int, len(n.dependsOn))
@@ -103,15 +117,21 @@ func (n *node) fixMissingFillers() {
 		dependentOffset := offsets[idx]
 		if dependentOffset < maxOffset {
 			log.Warn().Msgf("Adding missing filler of len %d for %s", maxOffset-dependentOffset, dependent.name)
-			dependent.insertFiller(maxOffset - dependentOffset)
+
+			if err := dependent.insertFiller(maxOffset - dependentOffset); err != nil {
+				return err
+			}
 		}
 	}
+
+	return nil
 }
 
-func (n *node) insertFiller(size int) {
+func (n *node) insertFiller(size int) error {
 	switch typed := n.element.(type) {
 	case *Field:
-		log.Error().Msgf("Cannot add filler to field %s", typed.name)
+		return fmt.Errorf("%w: %s expected %d, got %d", ErrWrongLength,
+			typed.name, typed.codec.Size()+size, typed.codec.Size())
 	case *Record:
 		filler := &Field{
 			node: &node{
@@ -119,7 +139,7 @@ func (n *node) insertFiller(size int) {
 				name:      "FILLER",
 				redefines: "",
 				occurs:    0,
-				when:      nil,
+				when:      predicate.Never(),
 				feedback:  false,
 				element:   nil,
 				redefined: make(map[string]*node),
@@ -132,6 +152,8 @@ func (n *node) insertFiller(size int) {
 		typed.addChild(filler.node)
 		typed.setDependsOn(filler.node)
 	}
+
+	return nil
 }
 
 func (n *node) printGraph(showDependsOn bool) {
@@ -372,22 +394,31 @@ func (r *Record) AddRecord(record *Record) {
 // It verifies that all field offsets are correct.
 // If fillers are missing, it attempts to add them.
 // Any unfixable issues will be logged at the error level.
-func (r *Record) Validate() {
+func (r *Record) Validate() error {
 	r.node.compileMarshalingPath()
-	r.node.fixMissingFillers()
-	r.Offset() // will trigger error logs far any unfixable issues
+
+	if err := r.node.fixMissingFillers(); err != nil {
+		return err
+	}
+
+	r.Offset() // will trigger error logs for any unfixable issues
+
+	return nil
 }
 
-func (r *Record) PrintGraph(showDependsOn bool) {
+func (r *Record) PrintGraph(showDependsOn bool) error {
+	r.clearMarshalingPath()
+	r.compileMarshalingPath()
+
 	fmt.Printf("digraph \"%s\" {\n", r.id)
 
 	fmt.Printf("\tnode [shape = box fixedsize=true width=3];\n")
 
-	r.node.compileMarshalingPath()
-	r.node.fixMissingFillers()
 	r.node.printGraph(showDependsOn)
 
 	fmt.Printf("}\n")
+
+	return nil
 }
 
 func (r *Record) IsCodec() bool {
