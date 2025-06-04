@@ -14,6 +14,10 @@ Types of changes
 - `Fixed` for any bug fixes.
 - `Security` in case of vulnerabilities.
 
+## [0.3.0]
+
+- `Added` comp-3 numeric encoding support
+
 ## [0.1.0]
 
 - `Added` fold to jsonline and unfold back to fixed-width file.
