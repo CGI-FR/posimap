@@ -68,6 +68,14 @@ func (n *node) addChild(other *node) {
 	}
 }
 
+func (n *node) clearMarshalingPath() {
+	n.dependsOn = []*node{}
+
+	for _, child := range n.children {
+		child.clearMarshalingPath()
+	}
+}
+
 func (n *node) compileMarshalingPath() {
 	for _, child := range n.children {
 		child.id = n.id + "." + child.name
@@ -399,6 +407,9 @@ func (r *Record) Validate() error {
 }
 
 func (r *Record) PrintGraph(showDependsOn bool) error {
+	r.clearMarshalingPath()
+	r.compileMarshalingPath()
+
 	fmt.Printf("digraph \"%s\" {\n", r.id)
 
 	fmt.Printf("\tnode [shape = box fixedsize=true width=3];\n")
