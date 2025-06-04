@@ -27,32 +27,42 @@ import (
 )
 
 var (
-	ErrInvalidComp3Sign = errors.New("invalid COMP-3 sign nibble")
-	ErrBufferTooShort   = errors.New("buffer too short for COMP-3 encoding")
+	ErrInvalidComp3Sign    = errors.New("invalid COMP-3 sign nibble")
+	ErrInvalidComp3Nibble  = errors.New("invalid COMP-3 digit")
+	ErrInvalidComp3String  = errors.New("invalid COMP-3 string")
+	ErrMisplacedDecimalSep = errors.New("mislaced decimal separator in COMP-3 encoding")
+	ErrBufferTooShort      = errors.New("buffer too short for COMP-3 encoding")
 )
 
 type Comp3 struct {
 	intDigits int
 	decDigits int
-	size      int
+	size      int // number of bytes needed to store the COMP-3 value
+	length    int // number of characters in the string representation (not counting the sign)
 }
 
 func NewComp3(intDigits, decDigits int) *Comp3 {
+	length := intDigits + decDigits
+	if decDigits > 0 {
+		length++
+	}
+
 	return &Comp3{
 		intDigits: intDigits,
 		decDigits: decDigits,
 		size:      (intDigits + decDigits + 2) / 2, //nolint:mnd
+		length:    length,
 	}
 }
 
 const (
 	nibbleShift    = 4
-	highNibbleMask = 0xF0
-	lowNibbleMask  = 0x0F
+	highNibbleMask = byte(0xF0)
+	lowNibbleMask  = byte(0x0F)
 
-	signNibblePositive = 0xC
-	signNibbleNegative = 0xD
-	signNibbleZero     = 0xF
+	signNibblePositive = byte(0xC)
+	signNibbleNegative = byte(0xD)
+	signNibbleZero     = byte(0xF)
 )
 
 func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
@@ -72,7 +82,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 			high := (byteVal & highNibbleMask) >> nibbleShift
 
 			if byteIndex*2 < c.intDigits+c.decDigits {
-				result.WriteRune(convertNibleToRune(high))
+				result.WriteRune(convertNibbleToRune(high))
 			}
 
 			sign, err := handleSign(byteVal)
@@ -83,20 +93,104 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 			return sign + result.String(), nil
 		}
 
-		result.WriteRune(convertNibleToRune((byteVal & highNibbleMask) >> nibbleShift))
+		result.WriteRune(convertNibbleToRune((byteVal & highNibbleMask) >> nibbleShift))
 
 		if byteIndex*2+1 == c.intDigits {
 			result.WriteRune('.')
 		}
 
-		result.WriteRune(convertNibleToRune(byteVal & lowNibbleMask))
+		result.WriteRune(convertNibbleToRune(byteVal & lowNibbleMask))
 	}
 
-	return result.String(), ErrBufferTooShort // should never happen because handled by buffer interface
+	return result.String(), ErrBufferTooShort // should never happen because short buffer is handled by buffer interface
 }
 
 func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
-	panic("Comp3 encoding not implemented yet") // Placeholder for actual implementation
+	str, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("%w: got %T", ErrExpectedString, value)
+	}
+
+	if len(str) == 0 {
+		return fmt.Errorf("%w: empty string cannot be encoded in COMP-3", ErrInvalidComp3String)
+	}
+
+	nibbleSign := signNibbleZero
+
+	switch str[0] {
+	case '+':
+		nibbleSign = signNibblePositive
+		str = str[1:] // remove sign character
+	case '-':
+		nibbleSign = signNibbleNegative
+		str = str[1:] // remove sign character
+	}
+
+	if len(str) != c.length {
+		return fmt.Errorf("%w: expected %d characters, got %d", ErrInvalidComp3String, c.length, len(str))
+	}
+
+	if c.decDigits > 0 && str[c.intDigits] != '.' {
+		return fmt.Errorf("%w: expected decimal separator at position %d, got %q",
+			ErrMisplacedDecimalSep, c.intDigits, str[c.intDigits])
+	}
+
+	// ensure that there is only one decimal separator
+	if strings.Count(str, ".") > 1 {
+		return fmt.Errorf("%w: too many decimal separators in COMP-3 encoding", ErrMisplacedDecimalSep)
+	}
+
+	return c.encode(buffer, offset, str, nibbleSign)
+}
+
+func (c *Comp3) encode(buffer api.Buffer, offset int, str string, nibbleSign byte) error {
+	var byteVal byte
+
+	ignoreCount := 0
+
+	for charIndex, char := range str {
+		if charIndex-ignoreCount >= c.intDigits+c.decDigits+1 {
+			return fmt.Errorf("%w: too many characters in COMP-3 encoding", ErrBufferTooShort)
+		}
+
+		if char == '.' {
+			if charIndex-ignoreCount != c.intDigits {
+				return fmt.Errorf("%w", ErrMisplacedDecimalSep)
+			}
+
+			ignoreCount++
+
+			continue
+		}
+
+		nibble, err := convertRuneToNibble(char)
+		if err != nil {
+			return err
+		}
+
+		if (charIndex-ignoreCount)%2 == 0 {
+			byteVal |= (nibble << nibbleShift) // high nibble
+		} else {
+			byteVal |= nibble // low nibble
+			if (charIndex - ignoreCount) == c.intDigits+c.decDigits {
+				// if we are at the last nibble, set the sign nibble
+				byteVal |= nibbleSign
+			}
+
+			if err := buffer.Write(offset+(charIndex-ignoreCount)/2, []byte{byteVal}); err != nil {
+				return fmt.Errorf("%w", err)
+			}
+
+			byteVal = 0 // reset for next byte
+		}
+	}
+
+	// if we have an odd number of nibbles, we need to write the last byte
+	if err := buffer.Write(offset+c.size-1, []byte{byteVal | nibbleSign}); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	return nil
 }
 
 func (c *Comp3) Size() int {
@@ -104,21 +198,34 @@ func (c *Comp3) Size() int {
 }
 
 const (
-	maxDecimalNibble = 9
-	minAlphaNibble   = 10
-	maxAlphaNibble   = 15
+	maxDecimalNibble  = 9
+	minAlphaNibble    = 10
+	maxAlphaNibble    = 15
+	alphaNibbleOffset = 10
 )
 
-func convertNibleToRune(nible byte) rune {
-	if nible <= maxDecimalNibble {
-		return rune('0' + nible)
+func convertNibbleToRune(nibble byte) rune {
+	if nibble <= maxDecimalNibble {
+		return rune('0' + nibble)
 	}
 
-	if nible >= minAlphaNibble && nible <= maxAlphaNibble {
-		return rune('A' + (nible - minAlphaNibble))
+	if nibble >= minAlphaNibble && nibble <= maxAlphaNibble {
+		return rune('A' + (nibble - minAlphaNibble))
 	}
 
 	return '?'
+}
+
+func convertRuneToNibble(runeVal rune) (byte, error) {
+	if runeVal >= '0' && runeVal <= '9' {
+		return byte(runeVal - '0'), nil
+	}
+
+	if runeVal >= 'A' && runeVal <= 'F' {
+		return byte(runeVal - 'A' + alphaNibbleOffset), nil
+	}
+
+	return 0, fmt.Errorf("%w: invalid rune %q", ErrInvalidComp3Nibble, runeVal)
 }
 
 func handleSign(byteVal byte) (string, error) {
