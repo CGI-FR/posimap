@@ -37,11 +37,12 @@ var (
 type Comp3 struct {
 	intDigits int
 	decDigits int
+	signed    bool
 	size      int // number of bytes needed to store the COMP-3 value
 	length    int // number of characters in the string representation (not counting the sign)
 }
 
-func NewComp3(intDigits, decDigits int) *Comp3 {
+func NewComp3(intDigits, decDigits int, signed bool) *Comp3 {
 	length := intDigits + decDigits
 	if decDigits > 0 {
 		length++
@@ -50,6 +51,7 @@ func NewComp3(intDigits, decDigits int) *Comp3 {
 	return &Comp3{
 		intDigits: intDigits,
 		decDigits: decDigits,
+		signed:    signed,
 		size:      (intDigits + decDigits + 2) / 2, //nolint:mnd
 		length:    length,
 	}
@@ -106,33 +108,9 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 }
 
 func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
-	str, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("%w: got %T", ErrExpectedString, value)
-	}
-
-	if len(str) == 0 {
-		return fmt.Errorf("%w: empty string cannot be encoded in COMP-3", ErrInvalidComp3String)
-	}
-
-	nibbleSign := signNibbleZero
-
-	switch str[0] {
-	case '+':
-		nibbleSign = signNibblePositive
-		str = str[1:] // remove sign character
-	case '-':
-		nibbleSign = signNibbleNegative
-		str = str[1:] // remove sign character
-	}
-
-	if len(str) < c.length {
-		// add leading zeros if the string is too short
-		str = strings.Repeat("0", c.length-len(str)) + str
-	}
-
-	if len(str) != c.length {
-		return fmt.Errorf("%w: expected %d characters, got %d", ErrInvalidComp3String, c.length, len(str))
+	nibbleSign, str, err := c.detectSignAndAddLeadingZeroes(value)
+	if err != nil {
+		return err
 	}
 
 	if c.decDigits > 0 && str[c.intDigits] != '.' {
@@ -146,6 +124,41 @@ func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
 	}
 
 	return c.encode(buffer, offset, str, nibbleSign)
+}
+
+func (c *Comp3) detectSignAndAddLeadingZeroes(value any) (byte, string, error) {
+	str, ok := value.(string)
+	if !ok {
+		return signNibbleZero, "", fmt.Errorf("%w: got %T", ErrExpectedString, value)
+	}
+
+	if len(str) == 0 {
+		return signNibbleZero, "", fmt.Errorf("%w: empty string cannot be encoded in COMP-3", ErrInvalidComp3String)
+	}
+
+	nibbleSign := signNibbleZero
+
+	if c.signed {
+		nibbleSign = signNibblePositive // default to positive sign
+	}
+
+	switch str[0] {
+	case '+':
+		nibbleSign = signNibblePositive
+		str = str[1:] // remove sign character
+	case '-':
+		nibbleSign = signNibbleNegative
+		str = str[1:] // remove sign character
+	}
+
+	if len(str) < c.length {
+		// add leading zeros if the string is too short
+		str = strings.Repeat("0", c.length-len(str)) + str
+	} else if len(str) != c.length {
+		return 0, "", fmt.Errorf("%w: expected %d characters, got %d", ErrInvalidComp3String, c.length, len(str))
+	}
+
+	return nibbleSign, str, nil
 }
 
 func (c *Comp3) encode(buffer api.Buffer, offset int, str string, nibbleSign byte) error {

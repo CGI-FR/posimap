@@ -30,11 +30,13 @@ import (
 func TestComp3_Decode(t *testing.T) {
 	t.Parallel()
 
+	//nolint:exhaustruct
 	tests := []struct {
 		name      string
 		data      []byte
 		intDigits int
 		decDigits int
+		signed    bool
 		expected  any
 		wantErr   bool
 	}{
@@ -44,7 +46,6 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			expected:  "+12345.67",
-			wantErr:   false,
 		},
 		{
 			name:      "negative value",
@@ -52,7 +53,6 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			expected:  "-12345.67",
-			wantErr:   false,
 		},
 		{
 			name:      "zero sign",
@@ -60,7 +60,6 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			expected:  "00000.00",
-			wantErr:   false,
 		},
 		{
 			name:      "invalid sign nibble",
@@ -75,7 +74,6 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34},
 			intDigits: 3,
 			decDigits: 1,
-			expected:  nil,
 			wantErr:   true,
 		},
 		{
@@ -84,7 +82,6 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 2,
 			decDigits: 2,
 			expected:  "+12.34",
-			wantErr:   false,
 		},
 		{
 			name:      "only decimal digits",
@@ -92,7 +89,6 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 0,
 			decDigits: 5,
 			expected:  "+.12345",
-			wantErr:   false,
 		},
 		{
 			name:      "decimal after 1 digit",
@@ -100,7 +96,6 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 1,
 			decDigits: 4,
 			expected:  "+1.2345",
-			wantErr:   false,
 		},
 		{
 			name:      "decimal after 2 digits",
@@ -108,7 +103,6 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 2,
 			decDigits: 3,
 			expected:  "+12.345",
-			wantErr:   false,
 		},
 	}
 
@@ -117,7 +111,7 @@ func TestComp3_Decode(t *testing.T) {
 			t.Parallel()
 
 			buf := buffer.NewBufferReader(bytes.NewReader(testcase.data))
-			comp3 := codec.NewComp3(testcase.intDigits, testcase.decDigits)
+			comp3 := codec.NewComp3(testcase.intDigits, testcase.decDigits, testcase.signed)
 
 			value, err := comp3.Decode(buf, 0)
 			if (err != nil) != testcase.wantErr {
@@ -135,11 +129,13 @@ func TestComp3_Decode(t *testing.T) {
 func TestComp3_Encode(t *testing.T) {
 	t.Parallel()
 
+	//nolint:exhaustruct
 	tests := []struct {
 		name      string
 		value     any
 		intDigits int
 		decDigits int
+		signed    bool
 		expected  []byte
 		wantErr   bool
 	}{
@@ -149,7 +145,6 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
-			wantErr:   false,
 		},
 		{
 			name:      "negative value",
@@ -157,7 +152,6 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			expected:  []byte{0x12, 0x34, 0x56, 0x7D},
-			wantErr:   false,
 		},
 		{
 			name:      "zero sign",
@@ -165,7 +159,6 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			expected:  []byte{0x12, 0x34, 0x56, 0x7F},
-			wantErr:   false,
 		},
 		{
 			name:      "even number of digits",
@@ -173,7 +166,6 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 4,
 			decDigits: 2,
 			expected:  []byte{0x12, 0x34, 0x56, 0x0C},
-			wantErr:   false,
 		},
 		{
 			name:      "only decimal digits",
@@ -181,7 +173,6 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 0,
 			decDigits: 5,
 			expected:  []byte{0x12, 0x34, 0x5F},
-			wantErr:   false,
 		},
 		{
 			name:      "no decimal digits",
@@ -189,7 +180,6 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 0,
 			expected:  []byte{0x12, 0x34, 0x5F},
-			wantErr:   false,
 		},
 		{
 			name:      "without padding",
@@ -197,7 +187,6 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			expected:  []byte{0x00, 0x12, 0x34, 0x5C},
-			wantErr:   false,
 		},
 		{
 			name:      "short string",
@@ -254,7 +243,7 @@ func TestComp3_Encode(t *testing.T) {
 			t.Parallel()
 
 			buf := buffer.NewBufferWriter(io.Discard)
-			comp3 := codec.NewComp3(testcase.intDigits, testcase.decDigits)
+			comp3 := codec.NewComp3(testcase.intDigits, testcase.decDigits, testcase.signed)
 
 			err := comp3.Encode(buf, 0, testcase.value)
 			if (err != nil) != testcase.wantErr {

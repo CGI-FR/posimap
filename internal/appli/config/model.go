@@ -115,7 +115,8 @@ func (f Field) Compile(record *schema.Record, defaults ...Default) (*schema.Reco
 				return nil, fmt.Errorf("failed to compile picture for field %s: %w", f.Name, err)
 			}
 
-			record = record.WithField(f.Name, codec.NewComp3(format.Length, format.Decimal), f.CompileOptions()...)
+			record = record.WithField(f.Name, codec.NewComp3(format.Length, format.Decimal, format.Signed),
+				f.CompileOptions()...)
 		default:
 			record = record.WithField(f.Name, codec.NewString(charset, f.Length, *f.Trim), f.CompileOptions()...)
 		}
