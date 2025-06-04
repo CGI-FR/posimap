@@ -75,7 +75,7 @@ func (g *Graph) execute(_ *cobra.Command, _ []string) error {
 	}
 
 	if err := schema.PrintGraph(g.showDependencies); err != nil {
-		return fmt.Errorf("failed to load configuration file : %w", err)
+		return fmt.Errorf("failed to compute graph : %w", err)
 	}
 
 	return nil
