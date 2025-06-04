@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1747314857511,
+  "lastUpdate": 1749039774360,
   "repoUrl": "https://github.com/CGI-FR/posimap",
   "entries": {
     "Benchmark": [
@@ -1320,6 +1320,78 @@ window.BENCHMARK_DATA = {
             "value": 4916,
             "unit": "allocs/op",
             "extra": "13536 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "44274230+adrienaury@users.noreply.github.com",
+            "name": "Adrien Aury",
+            "username": "adrienaury"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d0318ec93ca1fc15167f8350405758f4c03f121a",
+          "message": "feat: comp-3 codec (#37)\n\n* feat: optimize string encoding by storing zero byte in struct\n\n* feat: wip! comp-3 decoding\n\n* feat: wip! comp-3 decoding\n\n* feat: comp-3 encoding\n\n* feat: wip! add picture pattern\n\n* feat: wip! add picture pattern tests\n\n* feat: wip! add picture pattern tests\n\n* feat: add codec and picture to config\n\n* feat: comp3 string without lead zeroes\n\n* feat: signed comp3\n\n* feat: add test for explicit signed\n\n* feat: comp3 unfold test\n\n* docs(comp3): update changelog and readme\n\n* fix: typo in error message\n\nCo-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>\n\n---------\n\nCo-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>",
+          "timestamp": "2025-06-04T14:20:52+02:00",
+          "tree_id": "6fc1e0ead28c2582b47430e39832305db46fec02",
+          "url": "https://github.com/CGI-FR/posimap/commit/d0318ec93ca1fc15167f8350405758f4c03f121a"
+        },
+        "date": 1749039774092,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkFold",
+            "value": 1400566,
+            "unit": "ns/op\t 1070817 B/op\t    6641 allocs/op",
+            "extra": "8312 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - ns/op",
+            "value": 1400566,
+            "unit": "ns/op",
+            "extra": "8312 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - B/op",
+            "value": 1070817,
+            "unit": "B/op",
+            "extra": "8312 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFold - allocs/op",
+            "value": 6641,
+            "unit": "allocs/op",
+            "extra": "8312 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold",
+            "value": 948330,
+            "unit": "ns/op\t  688374 B/op\t    4916 allocs/op",
+            "extra": "12690 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - ns/op",
+            "value": 948330,
+            "unit": "ns/op",
+            "extra": "12690 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - B/op",
+            "value": 688374,
+            "unit": "B/op",
+            "extra": "12690 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkUnfold - allocs/op",
+            "value": 4916,
+            "unit": "allocs/op",
+            "extra": "12690 times\n4 procs"
           }
         ]
       }
