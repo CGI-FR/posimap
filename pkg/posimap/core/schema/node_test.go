@@ -57,7 +57,9 @@ func Example() {
 	root.AddField(rootTitles)
 	root.AddField(rootFiller)
 
-	root.PrintGraph(true)
+	if err := root.PrintGraph(true); err != nil {
+		panic(err)
+	}
 
 	// Output:
 	// digraph "ROOT" {

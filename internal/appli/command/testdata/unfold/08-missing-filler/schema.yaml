@@ -3,6 +3,7 @@ schema:
   - name: iddc # international direct dialing code
     length: 4
   - name: phone
+    length: 12
     when: !!str false
   - name: phone-us
     redefine: phone
