@@ -6,6 +6,7 @@ import (
 	"github.com/cgi-fr/posimap/internal/appli/config"
 )
 
+//nolint:funlen
 func TestPicture_Compile(t *testing.T) {
 	t.Parallel()
 
@@ -40,6 +41,11 @@ func TestPicture_Compile(t *testing.T) {
 			name:     "alpha picture",
 			pic:      "AAA",
 			expected: "A(3)",
+		},
+		{
+			name:     "numeric picture",
+			pic:      "9V99",
+			expected: "9V(2)",
 		},
 		{
 			name:    "invalid picture type",
