@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type Picture string
@@ -54,12 +55,17 @@ func (pf PictureFormat) String() string {
 		signed = "S"
 	}
 
+	length := ""
+	if pf.Length > 0 {
+		length = fmt.Sprintf("(%d)", pf.Length)
+	}
+
 	decimal := ""
 	if pf.Decimal > 0 {
 		decimal = fmt.Sprintf("V(%d)", pf.Decimal)
 	}
 
-	return fmt.Sprintf("%s%s(%d)%s", signed, string(pf.Type), pf.Length, decimal)
+	return fmt.Sprintf("%s%s%s%s", signed, string(pf.Type), length, decimal)
 }
 
 // picturePattern is a regex pattern to match the picture format.
@@ -67,12 +73,12 @@ func (pf PictureFormat) String() string {
 // Captures:
 // 1. Signed indicator (S)
 // 2. Type (X, A, 9)
-// 3. Optional length
-// 4. Optional length (9+ format)
-// 5. Optional decimal length
-// 6. Optional decimal length (9+ format)
+// 3. Optional length (parenthesed format, e.g. "X(10)" or "9(5)")
+// 4. Optional length (type repetition format, e.g. "XXXXXXXXXX" or "99999")
+// 5. Optional decimal length (parenthesed format, e.g. "V(2)")
+// 6. Optional decimal length (repetition format, e.g. "V99")
 // The pattern allows for whitespace around the components.
-const picturePattern = `^\s*(S?)\s*([X9A])\s*(?:\(\s*(\d+)\s*\)|(9+))?\s*(?:V\s*(?:\(\s*(\d+)\s*\)|(9+)))?\s*$`
+const picturePattern = `^\s*(S?)\s*([X9A])\s*(?:\(\s*(\d+)\s*\)|([X9A]+))?\s*(?:V\s*(?:\(\s*(\d+)\s*\)|(9+)))?\s*$`
 
 var pictureRegex = regexp.MustCompile(picturePattern)
 
@@ -107,14 +113,14 @@ func (p Picture) Compile() (PictureFormat, error) {
 		return PictureFormat{}, fmt.Errorf("%w: %s", ErrInvalidPictureFormat, p)
 	}
 
-	length, err := extractLength(matches[3], matches[4])
+	length, err := extractLength(matches[2], matches[3], matches[4], false)
 	if err != nil {
 		return PictureFormat{}, fmt.Errorf("%w: %s (%w)", ErrInvalidPictureFormat, p, err)
 	}
 
 	picture.Length = length
 
-	length, err = extractLength(matches[5], matches[6])
+	length, err = extractLength(matches[2], matches[5], matches[6], true)
 	if err != nil {
 		return PictureFormat{}, fmt.Errorf("%w: %s (%w)", ErrInvalidPictureFormat, p, err)
 	}
@@ -141,7 +147,7 @@ func (p Picture) Type() PictureType {
 	}
 }
 
-func extractLength(directDefinition, indirectDefinition string) (int, error) {
+func extractLength(pictype, directDefinition, indirectDefinition string, decimals bool) (int, error) {
 	if directDefinition != "" {
 		length, err := strconv.Atoi(directDefinition)
 		if err != nil {
@@ -149,7 +155,15 @@ func extractLength(directDefinition, indirectDefinition string) (int, error) {
 		}
 
 		return length, nil
-	} else {
-		return len(indirectDefinition), nil
 	}
+
+	if strings.Repeat(pictype, len(indirectDefinition)) != indirectDefinition {
+		return 0, fmt.Errorf("%w: %s", ErrInvalidPictureLength, indirectDefinition)
+	}
+
+	if !decimals && len(indirectDefinition) > 0 {
+		return len(indirectDefinition) + 1, nil
+	}
+
+	return len(indirectDefinition), nil
 }
