@@ -119,7 +119,7 @@ func TestComp3_Decode(t *testing.T) {
 			}
 
 			if value != testcase.expected {
-				t.Errorf("[%s] expected %s, got %s", testcase.name, testcase.expected, value)
+				t.Errorf("[%s] expected [% 02X], got [% 02X]", testcase.name, testcase.expected, buf.Bytes())
 			}
 		})
 	}
@@ -189,6 +189,14 @@ func TestComp3_Encode(t *testing.T) {
 			expected:  []byte{0x00, 0x12, 0x34, 0x5C},
 		},
 		{
+			name:      "explicit signed",
+			value:     "12345.67",
+			intDigits: 5,
+			decDigits: 2,
+			signed:    true,
+			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
+		},
+		{
 			name:      "short string",
 			value:     "-12345.6",
 			intDigits: 5,
@@ -251,7 +259,7 @@ func TestComp3_Encode(t *testing.T) {
 			}
 
 			if !bytes.Equal(buf.Bytes(), testcase.expected) {
-				t.Errorf("[%s] expected %v, got %v", testcase.name, testcase.expected, buf.Bytes())
+				t.Errorf("[%s] expected [% 02X], got [% 02X]", testcase.name, testcase.expected, buf.Bytes())
 			}
 		})
 	}
