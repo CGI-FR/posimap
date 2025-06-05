@@ -14,7 +14,7 @@ Types of changes
 - `Fixed` for any bug fixes.
 - `Security` in case of vulnerabilities.
 
-## [0.3.0]
+## [0.2.0]
 
 - `Added` comp-3 numeric encoding support
 - `Fixed` always validate schema and automatically create missing fillers as non exported fields
