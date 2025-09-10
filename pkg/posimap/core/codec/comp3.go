@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 
 	"github.com/cgi-fr/posimap/pkg/posimap/api"
@@ -115,7 +116,7 @@ func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
 		return err
 	}
 
-	// accept both '.' and ',' as valid decimal separator while encoding ensure robustness when dealing with heterogeneous datasets from different locales.
+	// accept both '.' and ',' as valid decimal separator while encoding ensure robustness
 	if c.decDigits > 0 && str[c.intDigits] != '.' && str[c.intDigits] != ',' {
 		return fmt.Errorf("%w: expected decimal separator at position %d, got %q",
 			ErrMisplacedDecimalSep, c.intDigits, str[c.intDigits])
@@ -174,7 +175,7 @@ func (c *Comp3) encode(buffer api.Buffer, offset int, str string, nibbleSign byt
 			return fmt.Errorf("%w: too many characters in COMP-3 encoding", ErrBufferTooShort)
 		}
 
-		if char == '.' || char == ',' {
+		if slices.Contains([]rune{'.', ','}, char) {
 			if charIndex-ignoreCount != c.intDigits {
 				return fmt.Errorf("%w", ErrMisplacedDecimalSep)
 			}
