@@ -170,7 +170,10 @@ $ posimap fold --notrim < person.fixed-width
 
 ### Packed decimal (COMP-3)
 
-POSIMAP supports packed decimal (COMP-3) encoding, commonly used in mainframe systems. When working with packed decimal fields, you need to:
+POSIMAP supports packed decimal (COMP-3) encoding, commonly used in mainframe systems.
+Packed decimal fields typically use half the bytes of their displayed value, plus half a byte for the sign.
+
+When working with packed decimal fields, you need to:
 
 1. Specify the `codec: COMP-3` attribute
 2. Define the `picture` clause that describes the field format
@@ -189,7 +192,8 @@ The `picture` format follows standard COBOL notation:
 - `9(n)` represents n numeric digits
 - `V` represents an implied decimal point (no actual character in the data)
 
-Packed decimal fields typically use half the bytes of their displayed value, plus half a byte for the sign.
+The COMP-3 codec accepts both `.` and `,` as decimal separators from JSON input and outputs JSON using `.` as the default decimal separator.
+When the `usecomma` flag is enabled, the COMP-3 codec will encode the decimal separator as `,` in JSON output.
 
 ## Contributing
 

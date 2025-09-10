@@ -55,6 +55,7 @@ type Field struct {
 	Charset *string `yaml:"charset,omitempty"` // Charset can be nil if not set in the configuration file
 	Picture Picture `yaml:"picture,omitempty"` // Picture is an optional string representation of the format
 	Codec   string  `yaml:"codec,omitempty"`   // Codec is the codec to use for this field, default to String
+	Decimal rune    `yaml:"decimal,omitempty"` // Decimal is the decimal separator to use for this field, default to '.'
 
 	Schema Either[string, Schema] `yaml:"schema"` // Schema is either a filename (external schema) or an embedded schema
 }
@@ -115,7 +116,7 @@ func (f Field) Compile(record *schema.Record, defaults ...Default) (*schema.Reco
 				return nil, fmt.Errorf("failed to compile picture for field %s: %w", f.Name, err)
 			}
 
-			record = record.WithField(f.Name, codec.NewComp3(format.Length, format.Decimal, format.Signed),
+			record = record.WithField(f.Name, codec.NewComp3(format.Length, format.Decimal, format.Signed, f.Decimal),
 				f.CompileOptions()...)
 		default:
 			record = record.WithField(f.Name, codec.NewString(charset, f.Length, *f.Trim), f.CompileOptions()...)
@@ -189,6 +190,22 @@ func Charset(name string) Default {
 		if field.Charset == nil {
 			field.Charset = &name
 		}
+
+		return field
+	}
+}
+
+func Comp3Dot() Default {
+	return func(field Field) Field {
+		field.Decimal = '.'
+
+		return field
+	}
+}
+
+func Comp3Comma() Default {
+	return func(field Field) Field {
+		field.Decimal = ','
 
 		return field
 	}

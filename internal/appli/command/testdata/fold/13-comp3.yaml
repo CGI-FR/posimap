@@ -5,6 +5,7 @@ description: >-
 stdin: testdata/fold/13-comp3/stdin.fixed-width
 flags:
   -s: testdata/fold/13-comp3/schema.yaml
+  -u: true # use comma as decimal separator
 loglevel: error
 expected:
   stdout: testdata/fold/13-comp3/stdout.jsonl

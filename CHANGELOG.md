@@ -14,10 +14,15 @@ Types of changes
 - `Fixed` for any bug fixes.
 - `Security` in case of vulnerabilities.
 
+## [0.3.0]
+
+- `Added` COMP-3 codec now accepts both `.` and `,` as decimal separators from JSON input.
+- `Added` `usecomma` flag: when enabled, the COMP-3 codec encodes the decimal separator as `,` in JSON output.
+
 ## [0.2.0]
 
-- `Added` comp-3 numeric encoding support
-- `Fixed` always validate schema and automatically create missing fillers as non exported fields
+- `Added` COMP-3 numeric encoding support.
+- `Fixed` always validate schema and automatically create missing fillers as non exported fields.
 
 ## [0.1.0]
 

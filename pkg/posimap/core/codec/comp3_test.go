@@ -37,6 +37,7 @@ func TestComp3_Decode(t *testing.T) {
 		intDigits int
 		decDigits int
 		signed    bool
+		sep       rune
 		expected  any
 		wantErr   bool
 	}{
@@ -45,6 +46,7 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34, 0x56, 0x7C},
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  "+12345.67",
 		},
 		{
@@ -52,6 +54,7 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34, 0x56, 0x7D},
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  "-12345.67",
 		},
 		{
@@ -59,6 +62,7 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x00, 0x00, 0x00, 0x0F},
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  "00000.00",
 		},
 		{
@@ -66,6 +70,7 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34, 0x56, 0x7A},
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  "12345.67",
 			wantErr:   true,
 		},
@@ -74,6 +79,7 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34},
 			intDigits: 3,
 			decDigits: 1,
+			sep:       '.',
 			wantErr:   true,
 		},
 		{
@@ -81,6 +87,7 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34, 0x0C},
 			intDigits: 2,
 			decDigits: 2,
+			sep:       '.',
 			expected:  "+12.34",
 		},
 		{
@@ -88,6 +95,7 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34, 0x5C},
 			intDigits: 0,
 			decDigits: 5,
+			sep:       '.',
 			expected:  "+.12345",
 		},
 		{
@@ -95,6 +103,7 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34, 0x5C},
 			intDigits: 1,
 			decDigits: 4,
+			sep:       '.',
 			expected:  "+1.2345",
 		},
 		{
@@ -102,7 +111,16 @@ func TestComp3_Decode(t *testing.T) {
 			data:      []byte{0x12, 0x34, 0x5C},
 			intDigits: 2,
 			decDigits: 3,
+			sep:       '.',
 			expected:  "+12.345",
+		},
+		{
+			name:      "different separator",
+			data:      []byte{0x12, 0x34, 0x56, 0x7C},
+			intDigits: 5,
+			decDigits: 2,
+			sep:       ',',
+			expected:  "+12345,67",
 		},
 	}
 
@@ -111,7 +129,7 @@ func TestComp3_Decode(t *testing.T) {
 			t.Parallel()
 
 			buf := buffer.NewBufferReader(bytes.NewReader(testcase.data))
-			comp3 := codec.NewComp3(testcase.intDigits, testcase.decDigits, testcase.signed)
+			comp3 := codec.NewComp3(testcase.intDigits, testcase.decDigits, testcase.signed, testcase.sep)
 
 			value, err := comp3.Decode(buf, 0)
 			if (err != nil) != testcase.wantErr {
@@ -136,6 +154,7 @@ func TestComp3_Encode(t *testing.T) {
 		intDigits int
 		decDigits int
 		signed    bool
+		sep       rune
 		expected  []byte
 		wantErr   bool
 	}{
@@ -144,6 +163,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "+12345.67",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
 		},
 		{
@@ -151,6 +171,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "-12345.67",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{0x12, 0x34, 0x56, 0x7D},
 		},
 		{
@@ -158,6 +179,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "12345.67",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{0x12, 0x34, 0x56, 0x7F},
 		},
 		{
@@ -165,6 +187,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "+1234.56",
 			intDigits: 4,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{0x12, 0x34, 0x56, 0x0C},
 		},
 		{
@@ -172,6 +195,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     ".12345",
 			intDigits: 0,
 			decDigits: 5,
+			sep:       '.',
 			expected:  []byte{0x12, 0x34, 0x5F},
 		},
 		{
@@ -179,6 +203,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "12345",
 			intDigits: 5,
 			decDigits: 0,
+			sep:       '.',
 			expected:  []byte{0x12, 0x34, 0x5F},
 		},
 		{
@@ -186,6 +211,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "+123.45",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{0x00, 0x12, 0x34, 0x5C},
 		},
 		{
@@ -194,6 +220,7 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			signed:    true,
+			sep:       '.',
 			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
 		},
 		{
@@ -201,6 +228,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "-12345.6",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{},
 			wantErr:   true,
 		},
@@ -209,6 +237,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "-12345.678",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{},
 			wantErr:   true,
 		},
@@ -217,6 +246,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{},
 			wantErr:   true,
 		},
@@ -225,6 +255,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "-1234.567",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{},
 			wantErr:   true,
 		},
@@ -233,6 +264,7 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "-1234.5.67",
 			intDigits: 5,
 			decDigits: 2,
+			sep:       '.',
 			expected:  []byte{},
 			wantErr:   true,
 		},
@@ -241,8 +273,17 @@ func TestComp3_Encode(t *testing.T) {
 			value:     "1234.",
 			intDigits: 4,
 			decDigits: 0,
+			sep:       '.',
 			expected:  []byte{},
 			wantErr:   true,
+		},
+		{
+			name:      "accept different separator in input",
+			value:     "+12345,67",
+			intDigits: 5,
+			decDigits: 2,
+			sep:       '.', // even if the expected separator is '.', accept ',' in input
+			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
 		},
 	}
 
@@ -251,7 +292,7 @@ func TestComp3_Encode(t *testing.T) {
 			t.Parallel()
 
 			buf := buffer.NewBufferWriter(io.Discard)
-			comp3 := codec.NewComp3(testcase.intDigits, testcase.decDigits, testcase.signed)
+			comp3 := codec.NewComp3(testcase.intDigits, testcase.decDigits, testcase.signed, testcase.sep)
 
 			err := comp3.Encode(buf, 0, testcase.value)
 			if (err != nil) != testcase.wantErr {
