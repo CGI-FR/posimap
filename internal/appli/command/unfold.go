@@ -37,6 +37,7 @@ type Unfold struct {
 
 	configfile string
 	charset    string
+	usecomma   bool
 }
 
 func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
@@ -51,10 +52,13 @@ func NewUnfoldCommand(rootname string, groupid string) *cobra.Command {
 		},
 		configfile: "schema.yaml",
 		charset:    charsets.ISO88591,
+		usecomma:   false,
 	}
 
 	unfold.cmd.Flags().StringVarP(&unfold.configfile, "schema", "s", unfold.configfile, "set the schema file")
 	unfold.cmd.Flags().StringVarP(&unfold.charset, "charset", "c", unfold.charset, "set the charset for output records") //nolint:lll
+	unfold.cmd.Flags().BoolVarP(&unfold.usecomma, "usecomma", "u", unfold.usecomma,
+		"use comma as decimal separator instead of dot")
 
 	unfold.cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		if err := unfold.execute(cmd, args); err != nil {
@@ -81,7 +85,12 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to load configuration file : %w", err)
 	}
 
-	schema, err := cfg.Compile(config.Trim(true), config.Charset(u.charset))
+	decimal := config.Comp3Dot()
+	if u.usecomma {
+		decimal = config.Comp3Comma()
+	}
+
+	schema, err := cfg.Compile(config.Trim(true), config.Charset(u.charset), decimal)
 	if err != nil {
 		return fmt.Errorf("failed to compile configuration file : %w", err)
 	}

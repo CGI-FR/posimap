@@ -38,6 +38,7 @@ type Fold struct {
 	configfile string
 	notrim     bool
 	charset    string
+	usecomma   bool
 }
 
 func NewFoldCommand(rootname string, groupid string) *cobra.Command {
@@ -53,11 +54,14 @@ func NewFoldCommand(rootname string, groupid string) *cobra.Command {
 		configfile: "schema.yaml",
 		notrim:     false,
 		charset:    charsets.ISO88591,
+		usecomma:   false,
 	}
 
 	fold.cmd.Flags().StringVarP(&fold.configfile, "schema", "s", fold.configfile, "set the schema file")
 	fold.cmd.Flags().BoolVarP(&fold.notrim, "notrim", "t", fold.notrim, "don't trim input  by default")
 	fold.cmd.Flags().StringVarP(&fold.charset, "charset", "c", fold.charset, "set the charset for input records")
+	fold.cmd.Flags().BoolVarP(&fold.usecomma, "usecomma", "u", fold.usecomma,
+		"use comma as decimal separator instead of dot")
 
 	fold.cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		if err := fold.execute(cmd, args); err != nil {
@@ -84,7 +88,12 @@ func (f *Fold) execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to load configuration file : %w", err)
 	}
 
-	schema, err := cfg.Compile(config.Trim(!f.notrim), config.Charset(f.charset))
+	decimal := config.Comp3Dot()
+	if f.usecomma {
+		decimal = config.Comp3Comma()
+	}
+
+	schema, err := cfg.Compile(config.Trim(!f.notrim), config.Charset(f.charset), decimal)
 	if err != nil {
 		return fmt.Errorf("failed to compile configuration file : %w", err)
 	}

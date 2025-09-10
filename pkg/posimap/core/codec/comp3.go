@@ -38,11 +38,12 @@ type Comp3 struct {
 	intDigits int
 	decDigits int
 	signed    bool
-	size      int // number of bytes needed to store the COMP-3 value
-	length    int // number of characters in the string representation (not counting the sign)
+	size      int  // number of bytes needed to store the COMP-3 value
+	length    int  // number of characters in the string representation (not counting the sign)
+	sep       rune // decimal separator to use in the string representation while decoding comp-3
 }
 
-func NewComp3(intDigits, decDigits int, signed bool) *Comp3 {
+func NewComp3(intDigits, decDigits int, signed bool, sep rune) *Comp3 {
 	length := intDigits + decDigits
 	if decDigits > 0 {
 		length++
@@ -54,6 +55,7 @@ func NewComp3(intDigits, decDigits int, signed bool) *Comp3 {
 		signed:    signed,
 		size:      (intDigits + decDigits + 2) / 2, //nolint:mnd
 		length:    length,
+		sep:       sep,
 	}
 }
 
@@ -77,7 +79,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 
 	for byteIndex, byteVal := range bytes {
 		if byteIndex*2 == c.intDigits {
-			result.WriteRune('.')
+			result.WriteRune(c.sep)
 		}
 
 		if byteIndex == c.size-1 {
@@ -98,7 +100,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 		result.WriteRune(convertNibbleToRune((byteVal & highNibbleMask) >> nibbleShift))
 
 		if byteIndex*2+1 == c.intDigits {
-			result.WriteRune('.')
+			result.WriteRune(c.sep)
 		}
 
 		result.WriteRune(convertNibbleToRune(byteVal & lowNibbleMask))
@@ -113,13 +115,14 @@ func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
 		return err
 	}
 
-	if c.decDigits > 0 && str[c.intDigits] != '.' {
+	// accept both '.' and ',' as valid decimal separator while encoding ensure robustness when dealing with heterogeneous datasets from different locales.
+	if c.decDigits > 0 && str[c.intDigits] != '.' && str[c.intDigits] != ',' {
 		return fmt.Errorf("%w: expected decimal separator at position %d, got %q",
 			ErrMisplacedDecimalSep, c.intDigits, str[c.intDigits])
 	}
 
 	// ensure that there is only one decimal separator
-	if strings.Count(str, ".") > 1 {
+	if strings.Count(str, ".")+strings.Count(str, ",") > 1 {
 		return fmt.Errorf("%w: too many decimal separators in COMP-3 encoding", ErrMisplacedDecimalSep)
 	}
 
@@ -171,7 +174,7 @@ func (c *Comp3) encode(buffer api.Buffer, offset int, str string, nibbleSign byt
 			return fmt.Errorf("%w: too many characters in COMP-3 encoding", ErrBufferTooShort)
 		}
 
-		if char == '.' {
+		if char == '.' || char == ',' {
 			if charIndex-ignoreCount != c.intDigits {
 				return fmt.Errorf("%w", ErrMisplacedDecimalSep)
 			}
