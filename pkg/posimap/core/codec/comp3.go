@@ -79,7 +79,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 	}
 
 	if isNull(bytes) {
-		return nil, nil //nolint:nilnil
+		return "", nil
 	}
 
 	for byteIndex, byteVal := range bytes {
@@ -115,7 +115,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 }
 
 func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
-	if value == nil {
+	if value == "" {
 		// write null value (all bytes set to zero)
 		if err := buffer.Write(offset, make([]byte, c.size)); err != nil {
 			return fmt.Errorf("%w", err)

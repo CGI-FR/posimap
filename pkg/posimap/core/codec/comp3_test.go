@@ -128,7 +128,7 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			sep:       ',',
-			expected:  nil,
+			expected:  "", // null value is decoded as empty string
 		},
 	}
 
@@ -255,8 +255,7 @@ func TestComp3_Encode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			sep:       '.',
-			expected:  []byte{},
-			wantErr:   true,
+			expected:  []byte{0x00, 0x00, 0x00, 0x00},
 		},
 		{
 			name:      "misplaced decimal",
@@ -292,14 +291,6 @@ func TestComp3_Encode(t *testing.T) {
 			decDigits: 2,
 			sep:       '.', // even if the expected separator is '.', accept ',' in input
 			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
-		},
-		{
-			name:      "null value",
-			value:     nil,
-			intDigits: 5,
-			decDigits: 2,
-			sep:       '.',
-			expected:  []byte{0x00, 0x00, 0x00, 0x00},
 		},
 	}
 
