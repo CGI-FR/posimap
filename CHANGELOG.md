@@ -14,6 +14,10 @@ Types of changes
 - `Fixed` for any bug fixes.
 - `Security` in case of vulnerabilities.
 
+## [0.3.1]
+
+- `Fixed` accept null values and buffers in the COMP-3 codec.
+
 ## [0.3.0]
 
 - `Added` COMP-3 codec now accepts both `.` and `,` as decimal separators from JSON input.

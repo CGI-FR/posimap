@@ -122,6 +122,14 @@ func TestComp3_Decode(t *testing.T) {
 			sep:       ',',
 			expected:  "+12345,67",
 		},
+		{
+			name:      "null buffer",
+			data:      []byte{0x00, 0x00, 0x00, 0x00},
+			intDigits: 5,
+			decDigits: 2,
+			sep:       ',',
+			expected:  nil,
+		},
 	}
 
 	for _, testcase := range tests {
@@ -284,6 +292,14 @@ func TestComp3_Encode(t *testing.T) {
 			decDigits: 2,
 			sep:       '.', // even if the expected separator is '.', accept ',' in input
 			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
+		},
+		{
+			name:      "null value",
+			value:     nil,
+			intDigits: 5,
+			decDigits: 2,
+			sep:       '.',
+			expected:  []byte{0x00, 0x00, 0x00, 0x00},
 		},
 	}
 

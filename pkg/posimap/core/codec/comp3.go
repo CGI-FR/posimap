@@ -78,6 +78,10 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 		return nil, fmt.Errorf("%w", err) // return error if buffer is too short
 	}
 
+	if isNull(bytes) {
+		return nil, nil //nolint:nilnil
+	}
+
 	for byteIndex, byteVal := range bytes {
 		if byteIndex*2 == c.intDigits {
 			result.WriteRune(c.sep)
@@ -111,6 +115,15 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 }
 
 func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
+	if value == nil {
+		// write null value (all bytes set to zero)
+		if err := buffer.Write(offset, make([]byte, c.size)); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		return nil
+	}
+
 	nibbleSign, str, err := c.detectSignAndAddLeadingZeroes(value)
 	if err != nil {
 		return err
@@ -265,4 +278,14 @@ func handleSign(byteVal byte) (string, error) {
 	}
 
 	return "", nil
+}
+
+func isNull(bytes []byte) bool {
+	for _, b := range bytes {
+		if b != 0 {
+			return false
+		}
+	}
+
+	return true
 }
