@@ -94,10 +94,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 				result.WriteRune(convertNibbleToRune(high))
 			}
 
-			sign, err := handleSign(byteVal)
-			if err != nil {
-				return result.String(), err
-			}
+			sign := handleSign(byteVal)
 
 			return sign + result.String(), nil
 		}
@@ -263,21 +260,21 @@ func convertRuneToNibble(runeVal rune) (byte, error) {
 	return 0, fmt.Errorf("%w: invalid rune %q", ErrInvalidComp3Nibble, runeVal)
 }
 
-func handleSign(byteVal byte) (string, error) {
+func handleSign(byteVal byte) string {
 	signNibble := byteVal & lowNibbleMask
 
 	if signNibble != signNibblePositive && signNibble != signNibbleNegative && signNibble != signNibbleZero {
-		return "", fmt.Errorf("%w: 0x%X", ErrInvalidComp3Sign, signNibble)
+		return "#"
 	}
 
 	switch signNibble {
 	case signNibbleNegative:
-		return "-", nil
+		return "-"
 	case signNibblePositive:
-		return "+", nil
+		return "+"
 	}
 
-	return "", nil
+	return ""
 }
 
 func isNull(bytes []byte) bool {
