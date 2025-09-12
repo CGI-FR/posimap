@@ -71,8 +71,15 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			sep:       '.',
-			expected:  "12345.67",
-			wantErr:   true,
+			expected:  "#12345.67",
+		},
+		{
+			name:      "invalid digit nibble",
+			data:      []byte{0x12, 0x3A, 0x5C},
+			intDigits: 2,
+			decDigits: 3,
+			sep:       '.',
+			expected:  "+12.3?5",
 		},
 		{
 			name:      "short buffer",
