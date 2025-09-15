@@ -229,11 +229,20 @@ func (c *Comp3) Size() int {
 	return c.size
 }
 
-const maxDecimalNibble = 9
+const (
+	maxDecimalNibble  = 9
+	minAlphaNibble    = 10
+	maxAlphaNibble    = 15
+	alphaNibbleOffset = 10
+)
 
 func convertNibbleToRune(nibble byte) rune {
 	if nibble <= maxDecimalNibble {
 		return rune('0' + nibble)
+	}
+
+	if nibble >= minAlphaNibble && nibble <= maxAlphaNibble {
+		return rune('A' + (nibble - minAlphaNibble))
 	}
 
 	return '?'
@@ -242,6 +251,10 @@ func convertNibbleToRune(nibble byte) rune {
 func convertRuneToNibble(runeVal rune) (byte, error) {
 	if runeVal >= '0' && runeVal <= '9' {
 		return byte(runeVal - '0'), nil
+	}
+
+	if runeVal >= 'A' && runeVal <= 'F' {
+		return byte(runeVal - 'A' + alphaNibbleOffset), nil
 	}
 
 	return 0, fmt.Errorf("%w: invalid rune %q", ErrInvalidComp3Nibble, runeVal)

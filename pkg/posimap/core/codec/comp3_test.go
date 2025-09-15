@@ -79,7 +79,7 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 2,
 			decDigits: 3,
 			sep:       '.',
-			expected:  "+12.3?5",
+			expected:  "+12.3A5",
 		},
 		{
 			name:      "short buffer",
