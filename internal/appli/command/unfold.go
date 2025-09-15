@@ -110,18 +110,13 @@ func (u *Unfold) execute(cmd *cobra.Command, _ []string) error {
 }
 
 func (u *Unfold) execUntilEOF(cfg config.Config, buffer api.Buffer, reader document.Reader, record api.Record) error {
-	space, err := charsets.GetByteInCharset(u.charset, ' ')
-	if err != nil {
-		return fmt.Errorf("failed to get space in charset : %w", err)
-	}
-
 	sep, err := charsets.GetBytesInCharset(u.charset, cfg.Separator)
 	if err != nil {
 		return fmt.Errorf("failed to get separator in charset : %w", err)
 	}
 
 	for {
-		if err := buffer.Reset(space, cfg.Length, sep...); err != nil {
+		if err := buffer.Reset(0, cfg.Length, sep...); err != nil {
 			return fmt.Errorf("failed to dump buffer : %w", err)
 		}
 
