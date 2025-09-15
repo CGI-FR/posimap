@@ -16,7 +16,7 @@ Types of changes
 
 ## [0.3.1]
 
-- `Fixed` accept null values and buffers in the COMP-3 codec.
+- `Fixed` accept empty values and buffers in the COMP-3 codec.
 
 ## [0.3.0]
 
