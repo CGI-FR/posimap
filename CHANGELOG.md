@@ -17,6 +17,7 @@ Types of changes
 ## [0.3.2]
 
 - `Fixed` trailing separator when decoding integer with COMP-3 codec.
+- `Fixed` invalid COMP-3 buffers can be decoded as hex string.
 
 ## [0.3.1]
 

@@ -159,8 +159,8 @@ func (c *Comp3) detectInvalidBuffer(value any) []byte {
 		return nil
 	}
 
-	if str[0] == '\\' && len(str) >= 4 && str[1] == 'x' {
-		bytes, err := hex.DecodeString(strings.ReplaceAll(str, "\\x", ""))
+	if str[0] == '!' {
+		bytes, err := hex.DecodeString(str[1:])
 		if err != nil {
 			return nil
 		}
@@ -311,8 +311,8 @@ func handleSign(result string, byteVal byte, buffer []byte) string {
 		return result
 	}
 
-	// return escaped buffer value in case of invalid sign nibble
-	return bytesToHexString(buffer)
+	// return buffer value as hex string in case of invalid sign nibble
+	return "!" + hex.EncodeToString(buffer)
 }
 
 func isNull(bytes []byte) bool {
@@ -323,13 +323,4 @@ func isNull(bytes []byte) bool {
 	}
 
 	return true
-}
-
-func bytesToHexString(b []byte) string {
-	var sb strings.Builder
-	for _, v := range b {
-		fmt.Fprintf(&sb, "\\x%02x", v)
-	}
-
-	return sb.String()
 }

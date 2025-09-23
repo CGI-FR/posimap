@@ -71,7 +71,7 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			sep:       '.',
-			expected:  "\\x12\\x34\\x56\\x7a", // invalid sign nibble leads to escaped byte sequence
+			expected:  "!1234567a", // invalid sign nibble leads to byte sequence as hex string
 		},
 		{
 			name:      "invalid digit nibble",
@@ -325,7 +325,7 @@ func TestComp3_Encode(t *testing.T) {
 		},
 		{
 			name:      "invalid buffer",
-			value:     "\\x12\\x34\\x56\\x7a", // invalid sign nibble leads to escaped byte sequence
+			value:     "!1234567a", // invalid sign nibble leads to byte sequence as hex string
 			intDigits: 5,
 			decDigits: 2,
 			sep:       '.',
