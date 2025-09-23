@@ -18,6 +18,7 @@
 package codec
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -71,8 +72,6 @@ const (
 )
 
 func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
-	result := &strings.Builder{}
-
 	bytes, err := buffer.Slice(offset, c.size)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, fmt.Errorf("%w", err) // return error if buffer is too short
@@ -82,39 +81,49 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 		return "", nil
 	}
 
+	return c.decode(bytes)
+}
+
+func (c *Comp3) decode(bytes []byte) (string, error) {
+	result := make([]rune, 0, c.length)
+
 	for byteIndex, byteVal := range bytes {
-		if byteIndex*2 == c.intDigits {
-			result.WriteRune(c.sep)
+		if byteIndex*2 == c.intDigits && c.decDigits > 0 {
+			result = append(result, c.sep)
 		}
 
 		if byteIndex == c.size-1 {
-			high := (byteVal & highNibbleMask) >> nibbleShift
-
 			if byteIndex*2 < c.intDigits+c.decDigits {
-				result.WriteRune(convertNibbleToRune(high))
+				result = append(result, convertHighNibbleToRune(byteVal))
 			}
 
-			sign := handleSign(byteVal)
-
-			return sign + result.String(), nil
+			return handleSign(string(result), byteVal, bytes), nil
 		}
 
-		result.WriteRune(convertNibbleToRune((byteVal & highNibbleMask) >> nibbleShift))
+		result = append(result, convertHighNibbleToRune(byteVal))
 
-		if byteIndex*2+1 == c.intDigits {
-			result.WriteRune(c.sep)
+		if byteIndex*2+1 == c.intDigits && c.decDigits > 0 {
+			result = append(result, c.sep)
 		}
 
-		result.WriteRune(convertNibbleToRune(byteVal & lowNibbleMask))
+		result = append(result, convertLowNibbleToRune(byteVal))
 	}
 
-	return result.String(), ErrBufferTooShort // should never happen because short buffer is handled by buffer interface
+	return string(result), ErrBufferTooShort // should never happen because short buffer is handled by buffer interface
 }
 
 func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
 	if value == "" {
 		// write null value (all bytes set to zero)
 		if err := buffer.Write(offset, make([]byte, c.size)); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+
+		return nil
+	}
+
+	if bytes := c.detectInvalidBuffer(value); bytes != nil {
+		if err := buffer.Write(offset, bytes); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
@@ -138,6 +147,28 @@ func (c *Comp3) Encode(buffer api.Buffer, offset int, value any) error {
 	}
 
 	return c.encode(buffer, offset, str, nibbleSign)
+}
+
+func (c *Comp3) detectInvalidBuffer(value any) []byte {
+	str, ok := value.(string)
+	if !ok {
+		return nil
+	}
+
+	if len(str) == 0 {
+		return nil
+	}
+
+	if str[0] == '!' {
+		bytes, err := hex.DecodeString(str[1:])
+		if err != nil {
+			return nil
+		}
+
+		return bytes
+	}
+
+	return nil
 }
 
 func (c *Comp3) detectSignAndAddLeadingZeroes(value any) (byte, string, error) {
@@ -236,6 +267,14 @@ const (
 	alphaNibbleOffset = 10
 )
 
+func convertHighNibbleToRune(byteVal byte) rune {
+	return convertNibbleToRune((byteVal & highNibbleMask) >> nibbleShift)
+}
+
+func convertLowNibbleToRune(byteVal byte) rune {
+	return convertNibbleToRune(byteVal & lowNibbleMask)
+}
+
 func convertNibbleToRune(nibble byte) rune {
 	if nibble <= maxDecimalNibble {
 		return rune('0' + nibble)
@@ -260,21 +299,20 @@ func convertRuneToNibble(runeVal rune) (byte, error) {
 	return 0, fmt.Errorf("%w: invalid rune %q", ErrInvalidComp3Nibble, runeVal)
 }
 
-func handleSign(byteVal byte) string {
+func handleSign(result string, byteVal byte, buffer []byte) string {
 	signNibble := byteVal & lowNibbleMask
-
-	if signNibble != signNibblePositive && signNibble != signNibbleNegative && signNibble != signNibbleZero {
-		return "#"
-	}
 
 	switch signNibble {
 	case signNibbleNegative:
-		return "-"
+		return "-" + result
 	case signNibblePositive:
-		return "+"
+		return "+" + result
+	case signNibbleZero:
+		return result
 	}
 
-	return ""
+	// return buffer value as hex string in case of invalid sign nibble
+	return "!" + hex.EncodeToString(buffer)
 }
 
 func isNull(bytes []byte) bool {

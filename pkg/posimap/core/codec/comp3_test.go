@@ -71,7 +71,7 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			sep:       '.',
-			expected:  "#12345.67",
+			expected:  "!1234567a", // invalid sign nibble leads to byte sequence as hex string
 		},
 		{
 			name:      "invalid digit nibble",
@@ -137,6 +137,30 @@ func TestComp3_Decode(t *testing.T) {
 			sep:       ',',
 			expected:  "", // null value is decoded as empty string
 		},
+		{
+			name:      "only integer part",
+			data:      []byte{0x12, 0x34, 0x56, 0x0C},
+			intDigits: 6,
+			decDigits: 0,
+			sep:       '.',
+			expected:  "+123456", // no trailing separator
+		},
+		{
+			name:      "only integer part odd digits",
+			data:      []byte{0x12, 0x34, 0x5C},
+			intDigits: 5,
+			decDigits: 0,
+			sep:       '.',
+			expected:  "+12345", // no trailing separator
+		},
+		{
+			name:      "no sign",
+			data:      []byte{0x12, 0x34, 0x5F},
+			intDigits: 5,
+			decDigits: 0,
+			sep:       '.',
+			expected:  "12345", // no trailing separator
+		},
 	}
 
 	for _, testcase := range tests {
@@ -152,7 +176,7 @@ func TestComp3_Decode(t *testing.T) {
 			}
 
 			if value != testcase.expected {
-				t.Errorf("[%s] expected [% 02X], got [% 02X]", testcase.name, testcase.expected, buf.Bytes())
+				t.Errorf("[%s] expected [%s], got [%s]", testcase.name, testcase.expected, value)
 			}
 		})
 	}
@@ -298,6 +322,14 @@ func TestComp3_Encode(t *testing.T) {
 			decDigits: 2,
 			sep:       '.', // even if the expected separator is '.', accept ',' in input
 			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
+		},
+		{
+			name:      "invalid buffer",
+			value:     "!1234567a", // invalid sign nibble leads to byte sequence as hex string
+			intDigits: 5,
+			decDigits: 2,
+			sep:       '.',
+			expected:  []byte{0x12, 0x34, 0x56, 0x7A},
 		},
 	}
 
