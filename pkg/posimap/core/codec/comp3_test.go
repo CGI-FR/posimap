@@ -71,7 +71,7 @@ func TestComp3_Decode(t *testing.T) {
 			intDigits: 5,
 			decDigits: 2,
 			sep:       '.',
-			expected:  "#12345.67",
+			expected:  "\\x12\\x34\\x56\\x7a", // invalid sign nibble leads to escaped byte sequence
 		},
 		{
 			name:      "invalid digit nibble",
@@ -322,6 +322,14 @@ func TestComp3_Encode(t *testing.T) {
 			decDigits: 2,
 			sep:       '.', // even if the expected separator is '.', accept ',' in input
 			expected:  []byte{0x12, 0x34, 0x56, 0x7C},
+		},
+		{
+			name:      "invalid buffer",
+			value:     "\\x12\\x34\\x56\\x7a", // invalid sign nibble leads to escaped byte sequence
+			intDigits: 5,
+			decDigits: 2,
+			sep:       '.',
+			expected:  []byte{0x12, 0x34, 0x56, 0x7A},
 		},
 	}
 
