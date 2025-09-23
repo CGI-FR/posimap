@@ -14,6 +14,10 @@ Types of changes
 - `Fixed` for any bug fixes.
 - `Security` in case of vulnerabilities.
 
+## [0.3.2]
+
+- `Fixed` trailing separator when decoding integer with COMP-3 codec.
+
 ## [0.3.1]
 
 - `Fixed` accept empty values and buffers in the COMP-3 codec.

@@ -83,15 +83,13 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 	}
 
 	for byteIndex, byteVal := range bytes {
-		if byteIndex*2 == c.intDigits {
+		if byteIndex*2 == c.intDigits && c.decDigits > 0 {
 			result.WriteRune(c.sep)
 		}
 
 		if byteIndex == c.size-1 {
-			high := (byteVal & highNibbleMask) >> nibbleShift
-
 			if byteIndex*2 < c.intDigits+c.decDigits {
-				result.WriteRune(convertNibbleToRune(high))
+				result.WriteRune(convertNibbleToRune((byteVal & highNibbleMask) >> nibbleShift))
 			}
 
 			sign := handleSign(byteVal)
@@ -101,7 +99,7 @@ func (c *Comp3) Decode(buffer api.Buffer, offset int) (any, error) {
 
 		result.WriteRune(convertNibbleToRune((byteVal & highNibbleMask) >> nibbleShift))
 
-		if byteIndex*2+1 == c.intDigits {
+		if byteIndex*2+1 == c.intDigits && c.decDigits > 0 {
 			result.WriteRune(c.sep)
 		}
 
